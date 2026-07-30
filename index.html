@@ -28,6 +28,12 @@
             平移
           </button>
           <span class="toolbar-divider" aria-hidden="true"></span>
+          <button class="secondary-button compact" type="button" data-action="import-svg">
+            ＋ 匯入 SVG
+          </button>
+          <button class="icon-button" type="button" data-action="undo" aria-label="復原" disabled>↶</button>
+          <button class="icon-button" type="button" data-action="redo" aria-label="重做" disabled>↷</button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
           <button class="icon-button" type="button" data-action="zoom-out" aria-label="縮小">−</button>
           <output class="zoom-readout" id="zoomReadout" aria-live="polite">100%</output>
           <button class="icon-button" type="button" data-action="zoom-in" aria-label="放大">＋</button>
@@ -36,7 +42,7 @@
 
         <div class="topbar-actions">
           <button class="secondary-button" type="button" disabled title="Phase 8 開放">匯出</button>
-          <button class="primary-button" type="button" disabled title="Phase 2 開放">儲存</button>
+          <button class="primary-button" type="button" disabled title="Phase 8 開放">儲存</button>
         </div>
       </header>
 
@@ -71,21 +77,21 @@
               <span>›</span>
             </button>
           </div>
-          <p class="panel-note">器材庫將在 Phase 3 開放。</p>
+          <p class="panel-note">器材庫將在 Phase 3 開放。<br />目前可先匯入 SVG 進行編輯。</p>
         </aside>
 
         <section class="canvas-panel" aria-label="無限畫布區域">
           <div class="canvas-toolbar-note">
             <span class="live-dot" aria-hidden="true"></span>
-            <span id="canvasHint">拖曳空白處以平移 · 滾輪縮放</span>
+            <span id="canvasHint">點擊 SVG 選取 · Shift 多選 · 拖曳移動</span>
           </div>
           <div class="canvas-viewport" id="canvasViewport" tabindex="0" aria-label="Infinite Canvas，可平移與縮放">
-            <div class="canvas-scene" id="canvasScene" aria-hidden="true">
+            <div class="canvas-scene" id="canvasScene">
               <div class="canvas-origin-marker"></div>
               <div class="empty-canvas-message">
                 <span class="empty-canvas-icon">＋</span>
                 <strong>畫布已準備就緒</strong>
-                <span>下一階段將可從器材庫放置元件</span>
+                <span>點擊「匯入 SVG」開始編輯</span>
               </div>
             </div>
             <div class="canvas-crosshair" aria-hidden="true"></div>
@@ -105,11 +111,25 @@
             </div>
             <span class="panel-kebab" aria-hidden="true">•••</span>
           </div>
-          <div class="empty-panel-state">
+          <div class="empty-panel-state" id="propertyEmptyState">
             <span class="empty-panel-icon" aria-hidden="true">◇</span>
             <strong>尚未選取物件</strong>
             <p>選取畫布中的物件後，
               <br />可在此調整屬性。</p>
+          </div>
+          <div class="property-selection-state" id="propertySelectionState" hidden>
+            <span class="selection-state-icon" aria-hidden="true">◇</span>
+            <strong id="selectionCount">已選取 1 個 SVG 物件</strong>
+            <div class="property-stat">
+              <span>尺寸</span>
+              <output id="selectionDimensions">0 × 0 px</output>
+            </div>
+            <div class="property-stat">
+              <span>旋轉</span>
+              <output id="selectionRotation">0°</output>
+            </div>
+            <p>拖曳右下角控制點縮放，
+              <br />拖曳上方控制點旋轉。</p>
           </div>
         </aside>
       </main>
@@ -132,11 +152,13 @@
           <span class="layer-visibility" aria-hidden="true">◉</span>
           <span class="layer-swatch" aria-hidden="true"></span>
           <span class="layer-name">畫布</span>
-          <span class="layer-meta">背景</span>
+          <span class="layer-meta" id="objectLayerCount">0 個物件</span>
           <span class="layer-lock" aria-hidden="true">⌑</span>
         </div>
       </section>
     </div>
+
+    <input id="svgFileInput" type="file" accept="image/svg+xml,.svg" hidden />
 
     <script type="module" src="/src/main.js"></script>
   </body>
