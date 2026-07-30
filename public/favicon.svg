@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Chem Lab Editor">
+  <rect width="64" height="64" rx="16" fill="#247b6e"/>
+  <path d="M24 13h16M28 13v15l-9 20a4 4 0 0 0 3.7 5.6h18.6A4 4 0 0 0 45 48L36 28V13" fill="none" stroke="#f8fbf9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M23 43h18" stroke="#f8fbf9" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Chemistry Lab Diagram Editor" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Chemistry Lab Diagram Editor</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="brand-mark" aria-hidden="true">⚗</span>
+          <div>
+            <h1>Chem Lab Editor</h1>
+            <p>化學實驗示意圖編輯器</p>
+          </div>
+        </div>
+
+        <nav class="toolbar" aria-label="主要工具">
+          <button class="tool-button is-active" type="button" data-tool="select" aria-pressed="true">
+            <span aria-hidden="true">↖</span>
+            選取
+          </button>
+          <button class="tool-button" type="button" data-tool="pan" aria-pressed="false">
+            <span aria-hidden="true">✋</span>
+            平移
+          </button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
+          <button class="icon-button" type="button" data-action="zoom-out" aria-label="縮小">−</button>
+          <output class="zoom-readout" id="zoomReadout" aria-live="polite">100%</output>
+          <button class="icon-button" type="button" data-action="zoom-in" aria-label="放大">＋</button>
+          <button class="text-button" type="button" data-action="reset-view">重設視圖</button>
+        </nav>
+
+        <div class="topbar-actions">
+          <button class="secondary-button" type="button" disabled title="Phase 8 開放">匯出</button>
+          <button class="primary-button" type="button" disabled title="Phase 2 開放">儲存</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="side-panel equipment-panel" aria-label="器材面板">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">LIBRARY</p>
+              <h2>器材</h2>
+            </div>
+            <span class="phase-badge">Phase 3</span>
+          </div>
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" placeholder="搜尋器材" disabled />
+          </label>
+          <div class="equipment-groups" aria-label="器材分類">
+            <button type="button" class="category-row" disabled>
+              <span><span class="category-icon">◇</span>玻璃器材</span>
+              <span>›</span>
+            </button>
+            <button type="button" class="category-row" disabled>
+              <span><span class="category-icon">⊥</span>支架</span>
+              <span>›</span>
+            </button>
+            <button type="button" class="category-row" disabled>
+              <span><span class="category-icon">♨</span>加熱</span>
+              <span>›</span>
+            </button>
+            <button type="button" class="category-row" disabled>
+              <span><span class="category-icon">＋</span>配件</span>
+              <span>›</span>
+            </button>
+          </div>
+          <p class="panel-note">器材庫將在 Phase 3 開放。</p>
+        </aside>
+
+        <section class="canvas-panel" aria-label="無限畫布區域">
+          <div class="canvas-toolbar-note">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="canvasHint">拖曳空白處以平移 · 滾輪縮放</span>
+          </div>
+          <div class="canvas-viewport" id="canvasViewport" tabindex="0" aria-label="Infinite Canvas，可平移與縮放">
+            <div class="canvas-scene" id="canvasScene" aria-hidden="true">
+              <div class="canvas-origin-marker"></div>
+              <div class="empty-canvas-message">
+                <span class="empty-canvas-icon">＋</span>
+                <strong>畫布已準備就緒</strong>
+                <span>下一階段將可從器材庫放置元件</span>
+              </div>
+            </div>
+            <div class="canvas-crosshair" aria-hidden="true"></div>
+          </div>
+          <div class="canvas-statusbar" aria-label="畫布狀態">
+            <span id="coordinatesReadout">X 0 · Y 0</span>
+            <span class="status-separator" aria-hidden="true"></span>
+            <span>格線 20 px</span>
+          </div>
+        </section>
+
+        <aside class="side-panel properties-panel" aria-label="屬性面板">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">INSPECTOR</p>
+              <h2>屬性</h2>
+            </div>
+            <span class="panel-kebab" aria-hidden="true">•••</span>
+          </div>
+          <div class="empty-panel-state">
+            <span class="empty-panel-icon" aria-hidden="true">◇</span>
+            <strong>尚未選取物件</strong>
+            <p>選取畫布中的物件後，
+              <br />可在此調整屬性。</p>
+          </div>
+        </aside>
+      </main>
+
+      <section class="layers-panel" aria-label="圖層面板">
+        <div class="layers-heading">
+          <div class="layers-title-group">
+            <span class="layers-handle" aria-hidden="true">⠿</span>
+            <div>
+              <p class="eyebrow">LAYERS</p>
+              <h2>圖層</h2>
+            </div>
+          </div>
+          <div class="layers-actions">
+            <button class="icon-button small" type="button" disabled aria-label="新增圖層">＋</button>
+            <button class="icon-button small" type="button" disabled aria-label="圖層選單">•••</button>
+          </div>
+        </div>
+        <div class="layer-row is-current">
+          <span class="layer-visibility" aria-hidden="true">◉</span>
+          <span class="layer-swatch" aria-hidden="true"></span>
+          <span class="layer-name">畫布</span>
+          <span class="layer-meta">背景</span>
+          <span class="layer-lock" aria-hidden="true">⌑</span>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
