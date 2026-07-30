@@ -1,6 +1,11 @@
 import './styles.css';
 import { CanvasController } from './canvas/canvas-controller.js';
 import { SceneStore } from './canvas/scene-store.js';
+import {
+  equipmentCatalog,
+  equipmentCategories,
+  getEquipmentById,
+} from './equipment/equipment-catalog.js';
 
 const viewport = document.querySelector('#canvasViewport');
 const scene = document.querySelector('#canvasScene');
@@ -17,6 +22,9 @@ const selectionCount = document.querySelector('#selectionCount');
 const selectionDimensions = document.querySelector('#selectionDimensions');
 const selectionRotation = document.querySelector('#selectionRotation');
 const objectLayerCount = document.querySelector('#objectLayerCount');
+const equipmentSearch = document.querySelector('#equipmentSearch');
+const equipmentCategoriesElement = document.querySelector('#equipmentCategories');
+const equipmentList = document.querySelector('#equipmentList');
 
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
@@ -59,6 +67,82 @@ const updateHistoryButtons = ({ canUndo, canRedo }) => {
   redoButton.disabled = !canRedo;
 };
 
+const equipmentMetadata = (item) => ({
+  sourceId: item.id,
+  name: item.name,
+  category: item.category,
+});
+
+let activeEquipmentCategory = 'all';
+
+const renderEquipmentCategories = () => {
+  equipmentCategoriesElement.replaceChildren();
+
+  equipmentCategories.forEach((category) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'equipment-category-button';
+    button.classList.toggle('is-active', category.id === activeEquipmentCategory);
+    button.textContent = category.label;
+    button.addEventListener('click', () => {
+      activeEquipmentCategory = category.id;
+      renderEquipmentCategories();
+      renderEquipmentList();
+    });
+    equipmentCategoriesElement.appendChild(button);
+  });
+};
+
+const renderEquipmentList = () => {
+  const query = equipmentSearch.value.trim().toLowerCase();
+  const filtered = equipmentCatalog.filter((item) => {
+    const matchesCategory = activeEquipmentCategory === 'all'
+      || item.category === activeEquipmentCategory;
+    const matchesQuery = !query
+      || item.name.toLowerCase().includes(query)
+      || item.description.toLowerCase().includes(query);
+    return matchesCategory && matchesQuery;
+  });
+
+  equipmentList.replaceChildren();
+
+  if (!filtered.length) {
+    const empty = document.createElement('p');
+    empty.className = 'equipment-list-empty';
+    empty.textContent = '找不到符合的器材';
+    equipmentList.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach((item) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'equipment-card';
+    card.draggable = true;
+    card.dataset.equipmentId = item.id;
+    card.innerHTML = `
+      <span class="equipment-preview" aria-hidden="true">${item.svg}</span>
+      <span class="equipment-card-copy">
+        <strong>${item.name}</strong>
+        <small>${item.description}</small>
+      </span>
+      <span class="equipment-add-icon" aria-hidden="true">＋</span>
+    `;
+
+    card.addEventListener('click', () => {
+      canvasController.addSvgMarkup(item.svg, equipmentMetadata(item));
+      canvasHint.textContent = `${item.name} 已加入畫布 · 拖曳物件調整位置`;
+    });
+
+    card.addEventListener('dragstart', (event) => {
+      event.dataTransfer.effectAllowed = 'copy';
+      event.dataTransfer.setData('application/x-chem-lab-equipment', item.id);
+    });
+
+    equipmentList.appendChild(card);
+  });
+};
+
 canvasController.addEventListener('viewchange', (event) => {
   updateViewReadouts(event.detail);
 });
@@ -97,6 +181,34 @@ fileInput.addEventListener('change', async () => {
   } finally {
     fileInput.value = '';
   }
+});
+
+equipmentSearch.addEventListener('input', renderEquipmentList);
+
+viewport.addEventListener('dragover', (event) => {
+  if (!event.dataTransfer.types.includes('application/x-chem-lab-equipment')) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'copy';
+  viewport.classList.add('is-drop-target');
+});
+
+viewport.addEventListener('dragleave', () => {
+  viewport.classList.remove('is-drop-target');
+});
+
+viewport.addEventListener('drop', (event) => {
+  event.preventDefault();
+  viewport.classList.remove('is-drop-target');
+
+  const equipmentId = event.dataTransfer.getData('application/x-chem-lab-equipment');
+  const item = getEquipmentById(equipmentId);
+  if (!item) return;
+
+  canvasController.addSvgMarkup(item.svg, equipmentMetadata(item), {
+    x: event.clientX,
+    y: event.clientY,
+  });
+  canvasHint.textContent = `${item.name} 已放置 · 拖曳物件調整位置`;
 });
 
 undoButton.addEventListener('click', () => canvasController.undo());
@@ -142,3 +254,5 @@ window.addEventListener('keydown', (event) => {
 updateViewReadouts(canvasController.view);
 updateSelectionPanel({ selectedObjects: [] });
 updateHistoryButtons({ canUndo: false, canRedo: false });
+renderEquipmentCategories();
+renderEquipmentList();

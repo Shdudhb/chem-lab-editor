@@ -57,27 +57,11 @@
           </div>
           <label class="search-field">
             <span aria-hidden="true">⌕</span>
-            <input type="search" placeholder="搜尋器材" disabled />
+            <input id="equipmentSearch" type="search" placeholder="搜尋器材" autocomplete="off" />
           </label>
-          <div class="equipment-groups" aria-label="器材分類">
-            <button type="button" class="category-row" disabled>
-              <span><span class="category-icon">◇</span>玻璃器材</span>
-              <span>›</span>
-            </button>
-            <button type="button" class="category-row" disabled>
-              <span><span class="category-icon">⊥</span>支架</span>
-              <span>›</span>
-            </button>
-            <button type="button" class="category-row" disabled>
-              <span><span class="category-icon">♨</span>加熱</span>
-              <span>›</span>
-            </button>
-            <button type="button" class="category-row" disabled>
-              <span><span class="category-icon">＋</span>配件</span>
-              <span>›</span>
-            </button>
-          </div>
-          <p class="panel-note">器材庫將在 Phase 3 開放。<br />目前可先匯入 SVG 進行編輯。</p>
+          <div class="equipment-categories" id="equipmentCategories" aria-label="器材分類"></div>
+          <div class="equipment-list" id="equipmentList" aria-label="器材清單"></div>
+          <p class="panel-note">點擊器材可放到畫布，也可拖曳器材卡片到指定位置。</p>
         </aside>
 
         <section class="canvas-panel" aria-label="無限畫布區域">

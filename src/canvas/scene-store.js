@@ -104,10 +104,11 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
-  addSvg(asset, position) {
+  addSvg(asset, position, metadata = {}) {
     const object = {
       id: makeId(),
       type: 'svg',
+      ...metadata,
       svgMarkup: asset.markup,
       x: position.x,
       y: position.y,
@@ -176,7 +177,7 @@ export class SceneStore extends EventTarget {
       wrapper.className = 'canvas-object';
       wrapper.dataset.objectId = object.id;
       wrapper.setAttribute('role', 'img');
-      wrapper.setAttribute('aria-label', '匯入的 SVG 物件');
+      wrapper.setAttribute('aria-label', object.name ?? '匯入的 SVG 物件');
       wrapper.classList.toggle('is-selected', this.selectedIds.has(object.id));
       wrapper.style.left = `${object.x}px`;
       wrapper.style.top = `${object.y}px`;

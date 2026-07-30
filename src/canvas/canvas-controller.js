@@ -75,14 +75,25 @@ export class CanvasController extends EventTarget {
 
   importSvg(svgText) {
     const asset = parseSvgAsset(svgText);
+    this.addAsset(asset);
+  }
+
+  addSvgMarkup(svgText, metadata = {}, screenPoint = null) {
+    const asset = parseSvgAsset(svgText);
+    this.addAsset(asset, metadata, screenPoint);
+  }
+
+  addAsset(asset, metadata = {}, screenPoint = null) {
     const bounds = this.viewport.getBoundingClientRect();
-    const center = this.screenToWorld(bounds.width / 2, bounds.height / 2);
+    const center = screenPoint
+      ? this.screenToWorld(screenPoint.x, screenPoint.y)
+      : this.screenToWorld(bounds.width / 2, bounds.height / 2);
     const before = this.store.snapshot();
 
     this.store.addSvg(asset, {
       x: center.x - asset.width / 2,
       y: center.y - asset.height / 2,
-    });
+    }, metadata);
 
     this.recordHistory(before);
   }
