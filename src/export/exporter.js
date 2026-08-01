@@ -65,21 +65,28 @@ const svgObjectMarkup = (object) => {
 };
 
 const annotationMarkup = (object) => {
-  const stroke = '#356f66';
+  const stroke = object.stroke ?? '#356f66';
+  const strokeWidth = object.strokeWidth ?? 2;
   if (object.annotationType === 'text') {
-    return `<text x="${object.x}" y="${object.y + 21}" fill="${stroke}" font-family="Inter, sans-serif" font-size="16">${escapeXml(object.text)}</text>`;
+    return `<text x="${object.x}" y="${object.y + (object.fontSize ?? 16)}" fill="${stroke}" font-family="${escapeXml(object.fontFamily ?? 'Inter, sans-serif')}" font-size="${object.fontSize ?? 16}">${escapeXml(object.text)}</text>`;
   }
   if (object.annotationType === 'number') {
-    return `<circle cx="${object.x + 17}" cy="${object.y + 17}" r="15" fill="#e3f1ed" stroke="${stroke}" stroke-width="2"/><text x="${object.x + 17}" y="${object.y + 22}" fill="${stroke}" font-size="14" font-weight="700" text-anchor="middle">${escapeXml(object.text)}</text>`;
+    const fontSize = object.fontSize ?? 14;
+    return `<circle cx="${object.x + 17}" cy="${object.y + 17}" r="15" fill="#e3f1ed" stroke="${stroke}" stroke-width="${strokeWidth}"/><text x="${object.x + 17}" y="${object.y + 17 + fontSize / 3}" fill="${stroke}" font-family="${escapeXml(object.fontFamily ?? 'Inter, sans-serif')}" font-size="${fontSize}" font-weight="700" text-anchor="middle">${escapeXml(object.text)}</text>`;
   }
   if (object.annotationType === 'arrow' || object.annotationType === 'line') {
-    const marker = object.annotationType === 'arrow' ? ' marker-end="url(#export-arrow)"' : '';
-    return `<line x1="${object.start.x}" y1="${object.start.y}" x2="${object.end.x}" y2="${object.end.y}" stroke="${stroke}" stroke-width="2" stroke-linecap="round"${marker}/>`;
+    const marker = object.annotationType === 'arrow' && object.arrowStyle !== 'none' ? ` marker-end="url(#export-arrow-${object.arrowStyle ?? 'filled'})"` : '';
+    return `<line x1="${object.start.x}" y1="${object.start.y}" x2="${object.end.x}" y2="${object.end.y}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round"${marker}/>`;
+  }
+  if (object.annotationType === 'freehand') {
+    const points = object.points ?? [object.start, object.end];
+    const path = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+    return `<path d="${path}" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
   if (object.annotationType === 'rectangle') {
-    return `<rect x="${object.x}" y="${object.y}" width="${object.width}" height="${object.height}" fill="rgba(83,170,139,.08)" stroke="${stroke}" stroke-width="2"/>`;
+    return `<rect x="${object.x}" y="${object.y}" width="${object.width}" height="${object.height}" fill="rgba(83,170,139,.08)" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
   }
-  return `<ellipse cx="${object.x + object.width / 2}" cy="${object.y + object.height / 2}" rx="${object.width / 2}" ry="${object.height / 2}" fill="rgba(83,170,139,.08)" stroke="${stroke}" stroke-width="2"/>`;
+  return `<ellipse cx="${object.x + object.width / 2}" cy="${object.y + object.height / 2}" rx="${object.width / 2}" ry="${object.height / 2}" fill="rgba(83,170,139,.08)" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
 };
 
 export const buildSceneSvg = (objects, { transparent = false } = {}) => {
@@ -93,7 +100,7 @@ export const buildSceneSvg = (objects, { transparent = false } = {}) => {
     })
     .join('');
   const background = transparent ? '' : `<rect x="${bounds.x}" y="${bounds.y}" width="${bounds.width}" height="${bounds.height}" fill="#ffffff"/>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${bounds.width}" height="${bounds.height}" viewBox="${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}"><defs><marker id="export-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#356f66"/></marker></defs>${background}${content}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${bounds.width}" height="${bounds.height}" viewBox="${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}"><defs><marker id="export-arrow-filled" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="context-stroke"/></marker><marker id="export-arrow-open" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="none" stroke="context-stroke"/></marker></defs>${background}${content}</svg>`;
 };
 
 const downloadBlob = (blob, filename) => {

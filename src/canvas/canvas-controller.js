@@ -143,7 +143,7 @@ export class CanvasController extends EventTarget {
       return;
     }
 
-    if (event.button === 0 && ['text', 'arrow', 'line', 'rectangle', 'circle', 'number'].includes(this.tool) && !objectElement) {
+    if (event.button === 0 && ['text', 'arrow', 'line', 'rectangle', 'circle', 'number', 'freehand'].includes(this.tool) && !objectElement) {
       this.startAnnotationDraw(event, this.tool);
       return;
     }
@@ -153,11 +153,21 @@ export class CanvasController extends EventTarget {
       return;
     }
 
+    if (event.button === 0 && handle && this.isGroupSelection()) {
+      this.startHandleDrag(event, handle.dataset.handle, handle.dataset.corner);
+      return;
+    }
+
     if (event.button === 0 && objectElement && this.tool === 'select') {
       const id = objectElement.dataset.objectId;
       if (this.store.getObject(id)?.locked) return;
+      const object = this.store.getObject(id);
       const wasSelected = this.store.selectedIds.has(id);
-      this.store.select(id, event.shiftKey);
+      if (object?.groupId) {
+        this.store.selectGroup(object.groupId, event.shiftKey);
+      } else {
+        this.store.select(id, event.shiftKey);
+      }
 
       if (event.shiftKey && wasSelected) return;
       this.startObjectDrag(event);
@@ -238,6 +248,7 @@ export class CanvasController extends EventTarget {
       before: this.store.snapshot(),
       start: point,
       end: { ...point },
+      points: [point],
     };
     this.viewport.setPointerCapture(event.pointerId);
     this.viewport.classList.add('is-drawing-annotation');
@@ -263,9 +274,59 @@ export class CanvasController extends EventTarget {
     event.preventDefault();
   }
 
+  isGroupSelection() {
+    const selected = this.store.selectedObjects;
+    const groupId = selected[0]?.groupId;
+    return selected.length > 1 && Boolean(groupId) && selected.every((object) => object.groupId === groupId);
+  }
+
   startHandleDrag(event, handle, corner) {
-    const object = this.store.selectedObjects[0];
     const pointer = this.screenToWorld(event.clientX, event.clientY);
+
+    if (this.isGroupSelection()) {
+      const bounds = this.store.getSelectionBounds();
+      const selected = this.store.selectedObjects;
+      const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+      const groupState = {
+        pointerId: event.pointerId,
+        before: this.store.snapshot(),
+        bounds,
+        center,
+        objects: selected.map((object) => ({
+          id: object.id,
+          x: object.x,
+          y: object.y,
+          width: object.width,
+          height: object.height,
+          rotation: object.rotation,
+          points: object.points?.map((point) => ({ ...point })),
+        })),
+      };
+      if (handle === 'group-rotate') {
+        this.dragState = {
+          ...groupState,
+          type: 'group-rotate',
+          startAngle: angleBetween(pointer, center),
+        };
+      } else {
+        const fixedPoint = {
+          x: corner.includes('e') ? bounds.x : bounds.x + bounds.width,
+          y: corner.includes('s') ? bounds.y : bounds.y + bounds.height,
+        };
+        this.dragState = {
+          ...groupState,
+          type: 'group-resize',
+          corner,
+          fixedPoint,
+        };
+      }
+      this.viewport.setPointerCapture(event.pointerId);
+      this.viewport.classList.add('is-transforming');
+      event.preventDefault();
+      return;
+    }
+
+    const object = this.store.selectedObjects[0];
 
     if (handle === 'rotate') {
       this.dragState = {
@@ -290,7 +351,7 @@ export class CanvasController extends EventTarget {
         objectId: object.id,
         corner,
         before: this.store.snapshot(),
-        startObject: { ...object },
+        startObject: { ...object, points: object.points?.map((point) => ({ ...point })) },
         fixedPoint: getRotatedCornerWorldPoint(object, oppositeCorner[corner]),
       };
     }
@@ -349,10 +410,18 @@ export class CanvasController extends EventTarget {
 
     if (this.dragState.type === 'annotation-draw') {
       this.dragState.end = this.screenToWorld(event.clientX, event.clientY);
+      if (this.dragState.annotationType === 'freehand') {
+        const point = this.dragState.end;
+        const previous = this.dragState.points.at(-1);
+        if (!previous || Math.hypot(point.x - previous.x, point.y - previous.y) >= 2) {
+          this.dragState.points.push(point);
+        }
+      }
       this.renderAnnotationPreview(
         this.dragState.annotationType,
         this.dragState.start,
         this.dragState.end,
+        this.dragState.points,
       );
       return;
     }
@@ -391,6 +460,16 @@ export class CanvasController extends EventTarget {
 
     if (this.dragState.type === 'rotate') {
       this.rotateObject(pointer, event.shiftKey);
+      return;
+    }
+
+    if (this.dragState.type === 'group-resize') {
+      this.resizeGroup(pointer);
+      return;
+    }
+
+    if (this.dragState.type === 'group-rotate') {
+      this.rotateGroup(pointer);
     }
   }
 
@@ -419,6 +498,14 @@ export class CanvasController extends EventTarget {
       object.height = height;
       object.x = nextCenter.x - width / 2;
       object.y = nextCenter.y - height / 2;
+      if (object.annotationType === 'freehand' && startObject.points?.length) {
+        const scaleX = width / Math.max(1, startObject.width);
+        const scaleY = height / Math.max(1, startObject.height);
+        object.points = startObject.points.map((point) => ({
+          x: object.x + (point.x - startObject.x) * scaleX,
+          y: object.y + (point.y - startObject.y) * scaleY,
+        }));
+      }
     });
   }
 
@@ -433,6 +520,56 @@ export class CanvasController extends EventTarget {
 
     this.store.updateObjects([state.objectId], (object) => {
       object.rotation = rotation;
+    });
+  }
+
+  resizeGroup(pointer) {
+    const state = this.dragState;
+    const { bounds, fixedPoint, corner } = state;
+    const nextBounds = {
+      x: corner.includes('e') ? fixedPoint.x : pointer.x,
+      y: corner.includes('s') ? fixedPoint.y : pointer.y,
+      width: Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.x - fixedPoint.x)),
+      height: Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.y - fixedPoint.y)),
+    };
+    if (!corner.includes('e')) nextBounds.x = fixedPoint.x - nextBounds.width;
+    if (!corner.includes('s')) nextBounds.y = fixedPoint.y - nextBounds.height;
+    const scaleX = nextBounds.width / Math.max(1, bounds.width);
+    const scaleY = nextBounds.height / Math.max(1, bounds.height);
+    const ids = new Set(state.objects.map((object) => object.id));
+
+    this.store.updateObjects(ids, (object) => {
+      const original = state.objects.find((candidate) => candidate.id === object.id);
+      object.x = nextBounds.x + (original.x - bounds.x) * scaleX;
+      object.y = nextBounds.y + (original.y - bounds.y) * scaleY;
+      object.width = Math.max(MIN_OBJECT_SIZE, original.width * scaleX);
+      object.height = Math.max(MIN_OBJECT_SIZE, original.height * scaleY);
+      if (object.annotationType === 'freehand' && original.points?.length) {
+        object.points = original.points.map((point) => ({
+          x: object.x + (point.x - original.x) * scaleX,
+          y: object.y + (point.y - original.y) * scaleY,
+        }));
+      }
+    });
+  }
+
+  rotateGroup(pointer) {
+    const state = this.dragState;
+    const delta = angleDifference(angleBetween(pointer, state.center), state.startAngle) * 180 / Math.PI;
+    const radians = delta * Math.PI / 180;
+    const ids = new Set(state.objects.map((object) => object.id));
+    this.store.updateObjects(ids, (object) => {
+      const original = state.objects.find((candidate) => candidate.id === object.id);
+      const originalCenter = { x: original.x + original.width / 2, y: original.y + original.height / 2 };
+      const offsetX = originalCenter.x - state.center.x;
+      const offsetY = originalCenter.y - state.center.y;
+      const rotatedCenter = {
+        x: state.center.x + offsetX * Math.cos(radians) - offsetY * Math.sin(radians),
+        y: state.center.y + offsetX * Math.sin(radians) + offsetY * Math.cos(radians),
+      };
+      object.x = rotatedCenter.x - original.width / 2;
+      object.y = rotatedCenter.y - original.height / 2;
+      object.rotation = original.rotation + delta;
     });
   }
 
@@ -488,11 +625,14 @@ export class CanvasController extends EventTarget {
 
     if (state.type === 'annotation-draw') {
       const distance = Math.hypot(state.end.x - state.start.x, state.end.y - state.start.y);
-      if (['text', 'number'].includes(state.annotationType) || distance > 6) {
+      if (['text', 'number'].includes(state.annotationType) || distance > 6 || state.points.length > 1) {
         this.store.addAnnotation(state.annotationType, state.start, state.end, {
           text: state.annotationType === 'text'
             ? '文字標註'
-            : String(this.store.objects.filter((object) => object.annotationType === 'number').length + 1),
+            : state.annotationType === 'number'
+              ? String(this.store.objects.filter((object) => object.annotationType === 'number').length + 1)
+              : '',
+          points: state.annotationType === 'freehand' ? state.points : undefined,
         });
       }
       this.clearAnnotationPreview();
@@ -532,7 +672,7 @@ export class CanvasController extends EventTarget {
     }
   }
 
-  renderAnnotationPreview(annotationType, start, end) {
+  renderAnnotationPreview(annotationType, start, end, points = [start, end]) {
     this.clearAnnotationPreview();
     const preview = document.createElement('div');
     preview.className = 'annotation-preview';
@@ -543,6 +683,14 @@ export class CanvasController extends EventTarget {
       width: Math.max(1, Math.abs(end.x - start.x)),
       height: Math.max(1, Math.abs(end.y - start.y)),
     };
+    if (annotationType === 'freehand' && points.length) {
+      const xs = points.map((point) => point.x);
+      const ys = points.map((point) => point.y);
+      bounds.x = Math.min(...xs);
+      bounds.y = Math.min(...ys);
+      bounds.width = Math.max(1, Math.max(...xs) - bounds.x);
+      bounds.height = Math.max(1, Math.max(...ys) - bounds.y);
+    }
     if (['text', 'number'].includes(annotationType)) {
       bounds.x = start.x;
       bounds.y = start.y;
@@ -560,7 +708,9 @@ export class CanvasController extends EventTarget {
     const y1 = start.y - bounds.y;
     const x2 = end.x - bounds.x;
     const y2 = end.y - bounds.y;
-    if (annotationType === 'arrow' || annotationType === 'line') {
+    if (annotationType === 'freehand') {
+      path.setAttribute('d', points.map((point, index) => `${index ? 'L' : 'M'} ${point.x - bounds.x} ${point.y - bounds.y}`).join(' '));
+    } else if (annotationType === 'arrow' || annotationType === 'line') {
       path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
     } else if (annotationType === 'rectangle') {
       path.setAttribute('d', `M 0 0 H ${bounds.width} V ${bounds.height} H 0 Z`);

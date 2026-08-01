@@ -31,6 +31,10 @@
             <span aria-hidden="true">⌁</span>
             軟管
           </button>
+          <button class="tool-button" type="button" data-tool="freehand" aria-pressed="false">
+            <span aria-hidden="true">✎</span>
+            自由線
+          </button>
           <button class="tool-button" type="button" data-tool="text" aria-pressed="false">
             <span aria-hidden="true">T</span>
             文字
@@ -176,7 +180,36 @@
             <div class="annotation-controls" id="annotationControls" hidden>
               <label class="property-control">
                 <span>標註內容</span>
-                <input id="annotationText" type="text" value="" />
+                <textarea id="annotationText" rows="3"></textarea>
+              </label>
+              <label class="property-control">
+                <span>線條顏色</span>
+                <input id="annotationColor" type="color" value="#356f66" />
+              </label>
+              <label class="property-control">
+                <span>線寬 <output id="annotationWidthValue">2 px</output></span>
+                <input id="annotationWidth" type="range" min="1" max="20" step="1" value="2" />
+              </label>
+              <label class="property-control" id="annotationFontSizeControl">
+                <span>字級 <output id="annotationFontSizeValue">16 px</output></span>
+                <input id="annotationFontSize" type="range" min="8" max="72" step="1" value="16" />
+              </label>
+              <label class="property-control" id="annotationFontFamilyControl">
+                <span>字型</span>
+                <select id="annotationFontFamily">
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="monospace">等寬字型</option>
+                </select>
+              </label>
+              <label class="property-control" id="annotationArrowStyleControl">
+                <span>箭頭樣式</span>
+                <select id="annotationArrowStyle">
+                  <option value="filled">實心箭頭</option>
+                  <option value="open">空心箭頭</option>
+                  <option value="none">無箭頭</option>
+                </select>
               </label>
             </div>
             <p>拖曳右下角控制點縮放，

@@ -30,6 +30,16 @@ const liquidLayers = document.querySelector('#liquidLayers');
 const addLiquidLayerButton = document.querySelector('#addLiquidLayer');
 const annotationControls = document.querySelector('#annotationControls');
 const annotationText = document.querySelector('#annotationText');
+const annotationColor = document.querySelector('#annotationColor');
+const annotationWidth = document.querySelector('#annotationWidth');
+const annotationWidthValue = document.querySelector('#annotationWidthValue');
+const annotationFontSize = document.querySelector('#annotationFontSize');
+const annotationFontSizeValue = document.querySelector('#annotationFontSizeValue');
+const annotationFontFamily = document.querySelector('#annotationFontFamily');
+const annotationArrowStyle = document.querySelector('#annotationArrowStyle');
+const annotationFontSizeControl = document.querySelector('#annotationFontSizeControl');
+const annotationFontFamilyControl = document.querySelector('#annotationFontFamilyControl');
+const annotationArrowStyleControl = document.querySelector('#annotationArrowStyleControl');
 const selectionCount = document.querySelector('#selectionCount');
 const selectionDimensions = document.querySelector('#selectionDimensions');
 const selectionRotation = document.querySelector('#selectionRotation');
@@ -154,7 +164,9 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   if (!hasSelection) return;
 
   const selectedType = selectedCount === 1
-    ? ({ hose: '橡膠軟管', annotation: '標註', svg: 'SVG 物件' }[selectedObjects[0].type] ?? '物件')
+    ? (selectedObjects[0].type === 'annotation' && selectedObjects[0].annotationType === 'freehand'
+      ? '自由線'
+      : ({ hose: '橡膠軟管', annotation: '標註', svg: 'SVG 物件' }[selectedObjects[0].type] ?? '物件'))
     : '物件';
   selectionCount.textContent = selectedCount === 1
     ? `已選取 1 個${selectedType}`
@@ -168,6 +180,19 @@ const updateSelectionPanel = ({ selectedObjects }) => {
     hoseWidth.value = object.type === 'hose' ? String(object.strokeWidth) : '8';
     hoseWidthValue.textContent = `${hoseWidth.value} px`;
     annotationText.value = object.type === 'annotation' ? object.text : '';
+    if (object.type === 'annotation') {
+      annotationColor.value = object.stroke ?? '#356f66';
+      annotationWidth.value = String(object.strokeWidth ?? 2);
+      annotationWidthValue.textContent = `${annotationWidth.value} px`;
+      annotationFontSize.value = String(object.fontSize ?? 16);
+      annotationFontSizeValue.textContent = `${annotationFontSize.value} px`;
+      annotationFontFamily.value = object.fontFamily ?? 'Inter, sans-serif';
+      annotationArrowStyle.value = object.arrowStyle ?? 'filled';
+      const isTextLike = ['text', 'number'].includes(object.annotationType);
+      annotationFontSizeControl.hidden = !isTextLike;
+      annotationFontFamilyControl.hidden = !isTextLike;
+      annotationArrowStyleControl.hidden = object.annotationType !== 'arrow';
+    }
   } else {
     const bounds = sceneStore.getSelectionBounds();
     selectionDimensions.textContent = `${Math.round(bounds.width)} × ${Math.round(bounds.height)} px`;
@@ -191,7 +216,11 @@ let layerQuery = '';
 
 const layerTypeLabel = (object) => {
   if (object.type === 'hose') return '軟管';
-  if (object.type === 'annotation') return object.annotationType === 'number' ? '編號' : '標註';
+  if (object.type === 'annotation') {
+    if (object.annotationType === 'number') return '編號';
+    if (object.annotationType === 'freehand') return '自由線';
+    return '標註';
+  }
   return object.name ?? '器材';
 };
 
@@ -203,9 +232,15 @@ const withLayerHistory = (callback) => {
 
 const renderLayers = () => {
   const query = layerQuery.trim().toLowerCase();
+  const collapsedGroups = new Set();
   const objects = [...sceneStore.objects].reverse().filter((object) => {
     const label = `${object.name ?? ''} ${layerTypeLabel(object)}`.toLowerCase();
-    return !query || label.includes(query);
+    if (query && !label.includes(query)) return false;
+    if (object.groupId && sceneStore.isGroupCollapsed(object.groupId)) {
+      if (collapsedGroups.has(object.groupId)) return false;
+      collapsedGroups.add(object.groupId);
+    }
+    return true;
   });
   layerList.replaceChildren();
 
@@ -226,8 +261,27 @@ const renderLayers = () => {
     row.dataset.objectId = object.id;
     row.addEventListener('click', (event) => {
       if (event.target.closest('button, input')) return;
-      sceneStore.select(object.id, event.shiftKey);
+      if (object.groupId) {
+        sceneStore.selectGroup(object.groupId, event.shiftKey);
+      } else {
+        sceneStore.select(object.id, event.shiftKey);
+      }
     });
+
+    const isGroupFirst = object.groupId
+      && objects.findIndex((candidate) => candidate.groupId === object.groupId) === objects.indexOf(object);
+    if (isGroupFirst) {
+      const groupToggle = document.createElement('button');
+      groupToggle.className = 'layer-action group-toggle';
+      groupToggle.type = 'button';
+      groupToggle.textContent = sceneStore.isGroupCollapsed(object.groupId) ? '▸' : '▾';
+      groupToggle.setAttribute('aria-label', sceneStore.isGroupCollapsed(object.groupId) ? '展開群組' : '收合群組');
+      groupToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        withLayerHistory(() => sceneStore.setGroupCollapsed(object.groupId, !sceneStore.isGroupCollapsed(object.groupId)));
+      });
+      row.appendChild(groupToggle);
+    }
 
     const visibility = document.createElement('button');
     visibility.className = 'layer-action';
@@ -252,7 +306,9 @@ const renderLayers = () => {
 
     const meta = document.createElement('span');
     meta.className = 'layer-meta';
-    meta.textContent = object.groupId ? '群組' : layerTypeLabel(object);
+    meta.textContent = object.groupId
+      ? `${sceneStore.objects.filter((candidate) => candidate.groupId === object.groupId).length} 個物件`
+      : layerTypeLabel(object);
 
     const up = document.createElement('button');
     up.className = 'layer-action';
@@ -497,6 +553,30 @@ annotationText.addEventListener('input', () => {
   canvasController.recordHistory(before);
 });
 
+const updateSelectedAnnotationStyle = (patch) => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'annotation') return;
+  const before = sceneStore.snapshot();
+  sceneStore.updateAnnotationStyle(object.id, patch);
+  canvasController.recordHistory(before);
+};
+
+annotationColor.addEventListener('input', () => updateSelectedAnnotationStyle({ stroke: annotationColor.value }));
+annotationWidth.addEventListener('input', () => {
+  annotationWidthValue.textContent = `${annotationWidth.value} px`;
+  updateSelectedAnnotationStyle({ strokeWidth: Number(annotationWidth.value) });
+});
+annotationFontSize.addEventListener('input', () => {
+  annotationFontSizeValue.textContent = `${annotationFontSize.value} px`;
+  updateSelectedAnnotationStyle({ fontSize: Number(annotationFontSize.value) });
+});
+annotationFontFamily.addEventListener('change', () => {
+  updateSelectedAnnotationStyle({ fontFamily: annotationFontFamily.value });
+});
+annotationArrowStyle.addEventListener('change', () => {
+  updateSelectedAnnotationStyle({ arrowStyle: annotationArrowStyle.value });
+});
+
 importButton.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', async () => {
@@ -558,6 +638,8 @@ document.querySelectorAll('[data-tool]').forEach((button) => {
       ? '拖曳畫布以平移 · 滾輪縮放'
       : tool === 'hose'
         ? '拖曳建立橡膠軟管，端點靠近器材接點時會自動吸附。'
+        : tool === 'freehand'
+          ? '拖曳繪製自由線，放開滑鼠完成。'
         : '點擊 SVG 選取 · Shift 多選 · 拖曳移動';
   });
 });

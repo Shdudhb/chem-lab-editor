@@ -74,9 +74,22 @@ const getHosePath = (points, bounds) => {
   return path;
 };
 
-const getAnnotationBounds = (start, end, type) => {
+const getAnnotationBounds = (start, end, type, points = []) => {
   if (type === 'text' || type === 'number') {
     return { x: start.x, y: start.y, width: type === 'number' ? 34 : 150, height: type === 'number' ? 34 : 32 };
+  }
+
+  if (type === 'freehand' && points.length) {
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    return {
+      x,
+      y,
+      width: Math.max(1, Math.max(...xs) - x),
+      height: Math.max(1, Math.max(...ys) - y),
+    };
   }
 
   const x = Math.min(start.x, end.x);
@@ -96,15 +109,23 @@ const createAnnotationSvg = (object) => {
   svg.setAttribute('height', '100%');
   svg.setAttribute('overflow', 'visible');
 
-  const stroke = '#356f66';
+  const stroke = object.stroke ?? '#356f66';
+  const strokeWidth = object.strokeWidth ?? 2;
   if (object.annotationType === 'text') {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', '0');
-    text.setAttribute('y', '21');
+    const fontSize = object.fontSize ?? 16;
+    text.setAttribute('y', String(fontSize));
     text.setAttribute('fill', stroke);
-    text.setAttribute('font-size', '16');
-    text.setAttribute('font-family', 'Inter, sans-serif');
-    text.textContent = object.text;
+    text.setAttribute('font-size', String(fontSize));
+    text.setAttribute('font-family', object.fontFamily ?? 'Inter, sans-serif');
+    String(object.text ?? '').split(/\r?\n/).forEach((line, index) => {
+      const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      tspan.setAttribute('x', '0');
+      tspan.setAttribute('dy', index === 0 ? '0' : String(fontSize * 1.2));
+      tspan.textContent = line;
+      text.appendChild(tspan);
+    });
     svg.appendChild(text);
   } else if (object.annotationType === 'number') {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -113,12 +134,13 @@ const createAnnotationSvg = (object) => {
     circle.setAttribute('r', '15');
     circle.setAttribute('fill', '#e3f1ed');
     circle.setAttribute('stroke', stroke);
-    circle.setAttribute('stroke-width', '2');
+    circle.setAttribute('stroke-width', String(strokeWidth));
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', '17');
     text.setAttribute('y', '22');
     text.setAttribute('fill', stroke);
-    text.setAttribute('font-size', '14');
+    text.setAttribute('font-size', String(object.fontSize ?? 14));
+    text.setAttribute('font-family', object.fontFamily ?? 'Inter, sans-serif');
     text.setAttribute('font-weight', '700');
     text.setAttribute('text-anchor', 'middle');
     text.textContent = object.text;
@@ -130,12 +152,13 @@ const createAnnotationSvg = (object) => {
     line.setAttribute('x2', object.end.x - object.x);
     line.setAttribute('y2', object.end.y - object.y);
     line.setAttribute('stroke', stroke);
-    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-width', String(strokeWidth));
     line.setAttribute('stroke-linecap', 'round');
-    if (object.annotationType === 'arrow') {
-      line.setAttribute('marker-end', 'url(#annotation-arrow)');
+    if (object.annotationType === 'arrow' && object.arrowStyle !== 'none') {
+      const markerId = `annotation-arrow-${object.id}`;
+      line.setAttribute('marker-end', `url(#${markerId})`);
       const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-      marker.setAttribute('id', 'annotation-arrow');
+      marker.setAttribute('id', markerId);
       marker.setAttribute('markerWidth', '8');
       marker.setAttribute('markerHeight', '8');
       marker.setAttribute('refX', '7');
@@ -143,11 +166,23 @@ const createAnnotationSvg = (object) => {
       marker.setAttribute('orient', 'auto');
       const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       head.setAttribute('d', 'M0 0L8 4L0 8z');
-      head.setAttribute('fill', stroke);
+      head.setAttribute('fill', object.arrowStyle === 'open' ? 'none' : stroke);
+      head.setAttribute('stroke', stroke);
+      head.setAttribute('stroke-width', String(Math.max(1, strokeWidth / 2)));
       marker.appendChild(head);
       svg.appendChild(marker);
     }
     svg.appendChild(line);
+  } else if (object.annotationType === 'freehand') {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const points = object.points ?? [object.start, object.end];
+    path.setAttribute('d', points.map((point, index) => `${index ? 'L' : 'M'} ${point.x - object.x} ${point.y - object.y}`).join(' '));
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', String(strokeWidth));
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(path);
   } else if (object.annotationType === 'rectangle') {
     const rectangle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rectangle.setAttribute('x', '0');
@@ -156,7 +191,7 @@ const createAnnotationSvg = (object) => {
     rectangle.setAttribute('height', object.height);
     rectangle.setAttribute('fill', 'rgba(83, 170, 139, .08)');
     rectangle.setAttribute('stroke', stroke);
-    rectangle.setAttribute('stroke-width', '2');
+    rectangle.setAttribute('stroke-width', String(strokeWidth));
     svg.appendChild(rectangle);
   } else if (object.annotationType === 'circle') {
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
@@ -166,7 +201,7 @@ const createAnnotationSvg = (object) => {
     circle.setAttribute('ry', object.height / 2);
     circle.setAttribute('fill', 'rgba(83, 170, 139, .08)');
     circle.setAttribute('stroke', stroke);
-    circle.setAttribute('stroke-width', '2');
+    circle.setAttribute('stroke-width', String(strokeWidth));
     svg.appendChild(circle);
   }
 
@@ -344,15 +379,25 @@ export class SceneStore extends EventTarget {
   }
 
   addAnnotation(annotationType, start, end = start, metadata = {}) {
-    const bounds = getAnnotationBounds(start, end, annotationType);
+    const bounds = getAnnotationBounds(start, end, annotationType, metadata.points ?? []);
+    if (annotationType === 'text') {
+      const lines = String(metadata.text ?? '').split(/\r?\n/).length;
+      const fontSize = Number(metadata.fontSize) || 16;
+      bounds.height = Math.max(bounds.height, fontSize * 1.2 * lines);
+    }
     const object = {
       id: makeId(),
       type: 'annotation',
       annotationType,
-      name: annotationType === 'text' ? '文字標註' : `${annotationType} 標註`,
+      name: annotationType === 'text'
+        ? '文字標註'
+        : annotationType === 'freehand'
+          ? '自由線'
+          : `${annotationType} 標註`,
       ...metadata,
       start: { ...start },
       end: { ...end },
+      points: metadata.points?.map((point) => ({ ...point })),
       ...bounds,
       width: Math.max(bounds.width, 1),
       height: Math.max(bounds.height, 1),
@@ -360,6 +405,11 @@ export class SceneStore extends EventTarget {
       visible: true,
       locked: false,
       groupId: null,
+      stroke: metadata.stroke ?? '#356f66',
+      strokeWidth: metadata.strokeWidth ?? 2,
+      fontSize: metadata.fontSize ?? (annotationType === 'number' ? 14 : 16),
+      fontFamily: metadata.fontFamily ?? 'Inter, sans-serif',
+      arrowStyle: metadata.arrowStyle ?? 'filled',
     };
 
     this.objects.push(object);
@@ -380,10 +430,38 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
+  updateAnnotationStyle(id, style) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'annotation') return;
+    if (typeof style.stroke === 'string' && /^#[0-9a-f]{6}$/i.test(style.stroke)) {
+      object.stroke = style.stroke;
+    }
+    if (style.strokeWidth !== undefined && Number.isFinite(Number(style.strokeWidth))) {
+      object.strokeWidth = Math.min(20, Math.max(1, Number(style.strokeWidth)));
+    }
+    if (style.fontSize !== undefined && Number.isFinite(Number(style.fontSize))) {
+      object.fontSize = Math.min(72, Math.max(8, Number(style.fontSize)));
+      if (object.annotationType === 'text') {
+        object.height = Math.max(32, object.fontSize * 1.2 * String(object.text ?? '').split(/\r?\n/).length);
+      }
+    }
+    if (typeof style.fontFamily === 'string' && style.fontFamily) {
+      object.fontFamily = style.fontFamily;
+    }
+    if (['filled', 'open', 'none'].includes(style.arrowStyle)) {
+      object.arrowStyle = style.arrowStyle;
+    }
+    this.render();
+    this.notify();
+  }
+
   updateAnnotationText(id, text) {
     const object = this.getObject(id);
     if (!object || object.type !== 'annotation') return;
     object.text = text;
+    if (object.annotationType === 'text') {
+      object.height = Math.max(32, (object.fontSize ?? 16) * 1.2 * String(text).split(/\r?\n/).length);
+    }
     this.render();
     this.notify();
   }
@@ -426,7 +504,10 @@ export class SceneStore extends EventTarget {
     const selected = this.selectedObjects;
     if (selected.length < 2) return;
     const groupId = makeId();
-    selected.forEach((object) => { object.groupId = groupId; });
+    selected.forEach((object) => {
+      object.groupId = groupId;
+      object.groupCollapsed = false;
+    });
     this.render();
     this.notify();
   }
@@ -435,10 +516,38 @@ export class SceneStore extends EventTarget {
     const groupIds = new Set(this.selectedObjects.map((object) => object.groupId).filter(Boolean));
     if (!groupIds.size) return;
     this.objects.forEach((object) => {
-      if (groupIds.has(object.groupId)) object.groupId = null;
+      if (groupIds.has(object.groupId)) {
+        object.groupId = null;
+        delete object.groupCollapsed;
+      }
     });
     this.render();
     this.notify();
+  }
+
+  selectGroup(groupId, additive = false) {
+    const ids = this.objects.filter((object) => object.groupId === groupId).map((object) => object.id);
+    if (!ids.length) return;
+    if (additive) {
+      const allSelected = ids.every((id) => this.selectedIds.has(id));
+      ids.forEach((id) => (allSelected ? this.selectedIds.delete(id) : this.selectedIds.add(id)));
+    } else {
+      this.selectedIds = new Set(ids);
+    }
+    this.render();
+    this.notify();
+  }
+
+  setGroupCollapsed(groupId, collapsed) {
+    const members = this.objects.filter((object) => object.groupId === groupId);
+    if (members.length < 2) return;
+    members.forEach((object) => { object.groupCollapsed = collapsed; });
+    this.render();
+    this.notify();
+  }
+
+  isGroupCollapsed(groupId) {
+    return this.objects.some((object) => object.groupId === groupId && object.groupCollapsed === true);
   }
 
   updateLiquid(id, liquid, layerIndex = 0) {
@@ -706,6 +815,25 @@ export class SceneStore extends EventTarget {
       overlay.appendChild(rotateHandle);
     } else {
       overlay.classList.add('is-multiple');
+      const groupId = selected[0].groupId;
+      const isGroupSelection = Boolean(groupId) && selected.every((object) => object.groupId === groupId);
+      if (isGroupSelection) {
+        overlay.classList.add('is-group');
+        overlay.dataset.groupId = groupId;
+        ['nw', 'ne', 'sw', 'se'].forEach((corner) => {
+          const handle = document.createElement('span');
+          handle.className = `scale-handle scale-handle-${corner}`;
+          handle.dataset.handle = 'group-scale';
+          handle.dataset.corner = corner;
+          handle.setAttribute('aria-label', `群組縮放 ${corner}`);
+          overlay.appendChild(handle);
+        });
+        const rotateHandle = document.createElement('span');
+        rotateHandle.className = 'rotate-handle';
+        rotateHandle.dataset.handle = 'group-rotate';
+        rotateHandle.setAttribute('aria-label', '旋轉群組');
+        overlay.appendChild(rotateHandle);
+      }
     }
 
     this.scene.appendChild(overlay);
