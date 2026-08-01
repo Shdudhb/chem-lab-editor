@@ -98,6 +98,7 @@ const renderEquipmentCategories = () => {
     `;
     button.addEventListener('click', () => {
       activeEquipmentCategory = category.id;
+      if (category.id === 'all') equipmentSearch.value = '';
       renderEquipmentCategories();
       renderEquipmentList();
     });
