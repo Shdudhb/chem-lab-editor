@@ -21,6 +21,10 @@ const redoButton = document.querySelector('[data-action="redo"]');
 const propertyEmptyState = document.querySelector('#propertyEmptyState');
 const propertySelectionState = document.querySelector('#propertySelectionState');
 const hoseControls = document.querySelector('#hoseControls');
+const hoseStyleControls = document.querySelector('#hoseStyleControls');
+const hoseColor = document.querySelector('#hoseColor');
+const hoseWidth = document.querySelector('#hoseWidth');
+const hoseWidthValue = document.querySelector('#hoseWidthValue');
 const liquidControls = document.querySelector('#liquidControls');
 const liquidLevel = document.querySelector('#liquidLevel');
 const liquidLevelValue = document.querySelector('#liquidLevelValue');
@@ -65,6 +69,7 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
   hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
+  hoseStyleControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
   liquidControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'svg');
   annotationControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'annotation');
   objectLayerCount.textContent = `${sceneStore.objects.length} 個物件`;
@@ -82,6 +87,9 @@ const updateSelectionPanel = ({ selectedObjects }) => {
     const [object] = selectedObjects;
     selectionDimensions.textContent = `${Math.round(object.width)} × ${Math.round(object.height)} px`;
     selectionRotation.textContent = `${Math.round(object.rotation)}°`;
+    hoseColor.value = object.type === 'hose' ? object.color : '#8b5e3c';
+    hoseWidth.value = object.type === 'hose' ? String(object.strokeWidth) : '8';
+    hoseWidthValue.textContent = `${hoseWidth.value} px`;
     const liquid = object.liquid ?? { level: 0, color: '#67aee8', opacity: 0 };
     liquidLevel.value = String(liquid.level);
     liquidLevelValue.textContent = `${liquid.level}%`;
@@ -330,6 +338,27 @@ document.querySelector('[data-action="add-hose-point"]').addEventListener('click
 
 document.querySelector('[data-action="remove-hose-point"]').addEventListener('click', () => {
   canvasController.removeHoseControlPoint();
+});
+
+const updateSelectedHoseStyle = (patch) => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'hose') return;
+  const before = sceneStore.snapshot();
+  sceneStore.updateHoseStyle(object.id, {
+    color: object.color,
+    strokeWidth: object.strokeWidth,
+    ...patch,
+  });
+  canvasController.recordHistory(before);
+};
+
+hoseColor.addEventListener('input', () => {
+  updateSelectedHoseStyle({ color: hoseColor.value });
+});
+
+hoseWidth.addEventListener('input', () => {
+  hoseWidthValue.textContent = `${hoseWidth.value} px`;
+  updateSelectedHoseStyle({ strokeWidth: Number(hoseWidth.value) });
 });
 
 document.querySelector('[data-action="group-selection"]').addEventListener('click', () => {

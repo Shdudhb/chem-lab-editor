@@ -248,6 +248,8 @@ export class CanvasController extends EventTarget {
   startHosePointDrag(event, pointIndex) {
     const object = this.store.selectedObjects[0];
     if (object?.type !== 'hose') return;
+    object.activePointIndex = pointIndex;
+    this.store.render();
     this.dragState = {
       type: 'hose-point',
       pointerId: event.pointerId,
@@ -438,17 +440,12 @@ export class CanvasController extends EventTarget {
     const object = this.store.selectedObjects[0];
     if (object?.type !== 'hose') return;
     const before = this.store.snapshot();
-    let segmentIndex = 0;
-    let longest = -1;
-
-    object.points.slice(0, -1).forEach((point, index) => {
-      const next = object.points[index + 1];
-      const length = Math.hypot(next.x - point.x, next.y - point.y);
-      if (length > longest) {
-        longest = length;
-        segmentIndex = index;
-      }
-    });
+    const activePointIndex = Number.isInteger(object.activePointIndex)
+      ? object.activePointIndex
+      : -1;
+    const segmentIndex = activePointIndex >= 0 && activePointIndex < object.points.length - 1
+      ? activePointIndex
+      : Math.max(0, object.points.length - 2);
 
     const start = object.points[segmentIndex];
     const end = object.points[segmentIndex + 1];
@@ -458,6 +455,8 @@ export class CanvasController extends EventTarget {
       y: (start.y + end.y) / 2,
     });
     this.store.updateHose(object.id, points);
+    object.activePointIndex = segmentIndex + 1;
+    this.store.render();
     this.recordHistory(before);
   }
 
@@ -465,10 +464,16 @@ export class CanvasController extends EventTarget {
     const object = this.store.selectedObjects[0];
     if (object?.type !== 'hose' || object.points.length <= 2) return;
     const before = this.store.snapshot();
-    const points = object.points.slice(0, -1).map((point) => ({ ...point }));
-    points.pop();
-    points.push({ ...object.points.at(-1) });
+    const activePointIndex = Number.isInteger(object.activePointIndex)
+      ? object.activePointIndex
+      : object.points.length - 2;
+    if (activePointIndex <= 0 || activePointIndex >= object.points.length - 1) return;
+    const points = object.points
+      .filter((_, index) => index !== activePointIndex)
+      .map((point) => ({ ...point }));
     this.store.updateHose(object.id, points);
+    object.activePointIndex = Math.min(activePointIndex - 1, points.length - 2);
+    this.store.render();
     this.recordHistory(before);
   }
 

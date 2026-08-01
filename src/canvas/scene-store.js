@@ -448,6 +448,22 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
+  updateHoseStyle(id, style) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'hose') return;
+    if (typeof style.color === 'string' && /^#[0-9a-f]{6}$/i.test(style.color)) {
+      object.color = style.color;
+    }
+    if (style.strokeWidth !== undefined) {
+      const strokeWidth = Number(style.strokeWidth);
+      if (Number.isFinite(strokeWidth)) {
+        object.strokeWidth = Math.min(20, Math.max(2, strokeWidth));
+      }
+    }
+    this.render();
+    this.notify();
+  }
+
   select(id, additive = false) {
     if (!id) {
       this.selectedIds.clear();
@@ -552,6 +568,7 @@ export class SceneStore extends EventTarget {
           object.points.forEach((point, index) => {
             const controlPoint = document.createElement('span');
             controlPoint.className = 'hose-control-point';
+            controlPoint.classList.toggle('is-active', object.activePointIndex === index);
             controlPoint.dataset.hosePoint = String(index);
             controlPoint.style.left = `${point.x - object.x}px`;
             controlPoint.style.top = `${point.y - object.y}px`;

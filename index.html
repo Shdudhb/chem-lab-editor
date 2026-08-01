@@ -156,6 +156,16 @@
               <button class="secondary-button compact" type="button" data-action="add-hose-point">新增控制點</button>
               <button class="secondary-button compact" type="button" data-action="remove-hose-point">刪除控制點</button>
             </div>
+            <div class="hose-style-controls" id="hoseStyleControls" hidden>
+              <label class="property-control">
+                <span>軟管顏色</span>
+                <input id="hoseColor" type="color" value="#8b5e3c" />
+              </label>
+              <label class="property-control">
+                <span>粗細 <output id="hoseWidthValue">8 px</output></span>
+                <input id="hoseWidth" type="range" min="2" max="20" step="1" value="8" />
+              </label>
+            </div>
             <div class="liquid-controls" id="liquidControls" hidden>
               <label class="property-control">
                 <span>液面高度 <output id="liquidLevelValue">0%</output></span>
