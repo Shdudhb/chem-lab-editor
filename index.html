@@ -167,18 +167,11 @@
               </label>
             </div>
             <div class="liquid-controls" id="liquidControls" hidden>
-              <label class="property-control">
-                <span>液面高度 <output id="liquidLevelValue">0%</output></span>
-                <input id="liquidLevel" type="range" min="0" max="100" step="1" value="0" />
-              </label>
-              <label class="property-control">
-                <span>液體顏色</span>
-                <input id="liquidColor" type="color" value="#67aee8" />
-              </label>
-              <label class="property-control">
-                <span>透明度 <output id="liquidOpacityValue">0%</output></span>
-                <input id="liquidOpacity" type="range" min="0" max="100" step="1" value="0" />
-              </label>
+              <div class="liquid-controls-heading">
+                <span>液體分層</span>
+                <button class="secondary-button compact" id="addLiquidLayer" type="button">新增液層</button>
+              </div>
+              <div id="liquidLayers" class="liquid-layer-list"></div>
             </div>
             <div class="annotation-controls" id="annotationControls" hidden>
               <label class="property-control">

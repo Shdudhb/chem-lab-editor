@@ -26,11 +26,8 @@ const hoseColor = document.querySelector('#hoseColor');
 const hoseWidth = document.querySelector('#hoseWidth');
 const hoseWidthValue = document.querySelector('#hoseWidthValue');
 const liquidControls = document.querySelector('#liquidControls');
-const liquidLevel = document.querySelector('#liquidLevel');
-const liquidLevelValue = document.querySelector('#liquidLevelValue');
-const liquidColor = document.querySelector('#liquidColor');
-const liquidOpacity = document.querySelector('#liquidOpacity');
-const liquidOpacityValue = document.querySelector('#liquidOpacityValue');
+const liquidLayers = document.querySelector('#liquidLayers');
+const addLiquidLayerButton = document.querySelector('#addLiquidLayer');
 const annotationControls = document.querySelector('#annotationControls');
 const annotationText = document.querySelector('#annotationText');
 const selectionCount = document.querySelector('#selectionCount');
@@ -54,6 +51,85 @@ const exportScaleControl = document.querySelector('#exportScaleControl');
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
 
+const DEFAULT_LIQUID_LAYER = { level: 0, color: '#67aee8', opacity: 0 };
+
+const getLiquidLayers = (object) => {
+  const layers = Array.isArray(object?.liquid?.layers)
+    ? object.liquid.layers
+    : object?.liquid
+      ? [object.liquid]
+      : [DEFAULT_LIQUID_LAYER];
+  return layers.length ? layers : [DEFAULT_LIQUID_LAYER];
+};
+
+const createLiquidLayerCard = (index) => {
+  const card = document.createElement('div');
+  card.className = 'liquid-layer-card';
+  card.dataset.liquidIndex = String(index);
+  card.innerHTML = `
+    <div class="liquid-layer-heading">
+      <strong>液層 ${index + 1}</strong>
+      <button class="layer-action" type="button" data-action="remove-liquid-layer" aria-label="移除液層">×</button>
+    </div>
+    <label class="property-control">
+      <span>液層高度 <output data-liquid-level-value>0%</output></span>
+      <input data-liquid-level type="range" min="0" max="100" step="1" value="0" />
+    </label>
+    <label class="property-control">
+      <span>液體顏色</span>
+      <input data-liquid-color type="color" value="#67aee8" />
+    </label>
+    <label class="property-control">
+      <span>透明度 <output data-liquid-opacity-value>0%</output></span>
+      <input data-liquid-opacity type="range" min="0" max="100" step="1" value="0" />
+    </label>
+  `;
+
+  card.querySelector('[data-liquid-level]').addEventListener('input', (event) => {
+    card.querySelector('[data-liquid-level-value]').textContent = `${event.target.value}%`;
+    updateSelectedLiquidLayer(index, { level: Number(event.target.value) });
+  });
+  card.querySelector('[data-liquid-color]').addEventListener('input', (event) => {
+    updateSelectedLiquidLayer(index, { color: event.target.value });
+  });
+  card.querySelector('[data-liquid-opacity]').addEventListener('input', (event) => {
+    card.querySelector('[data-liquid-opacity-value]').textContent = `${event.target.value}%`;
+    updateSelectedLiquidLayer(index, { opacity: Number(event.target.value) / 100 });
+  });
+  card.querySelector('[data-action="remove-liquid-layer"]').addEventListener('click', () => {
+    const object = sceneStore.selectedObjects[0];
+    if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
+    const before = sceneStore.snapshot();
+    sceneStore.removeLiquidLayer(object.id, index);
+    canvasController.recordHistory(before);
+  });
+  return card;
+};
+
+const renderLiquidLayerControls = (object) => {
+  if (object?.type !== 'svg') {
+    liquidLayers.replaceChildren();
+    return;
+  }
+
+  const layers = getLiquidLayers(object);
+  if (liquidLayers.children.length !== layers.length) {
+    liquidLayers.replaceChildren(...layers.map((_, index) => createLiquidLayerCard(index)));
+  }
+
+  layers.forEach((layer, index) => {
+    const card = liquidLayers.children[index];
+    card.dataset.liquidIndex = String(index);
+    card.querySelector('strong').textContent = `液層 ${index + 1}`;
+    card.querySelector('[data-liquid-level]').value = String(layer.level);
+    card.querySelector('[data-liquid-level-value]').textContent = `${layer.level}%`;
+    card.querySelector('[data-liquid-color]').value = layer.color;
+    card.querySelector('[data-liquid-opacity]').value = String(Math.round(layer.opacity * 100));
+    card.querySelector('[data-liquid-opacity-value]').textContent = `${Math.round(layer.opacity * 100)}%`;
+    card.querySelector('[data-action="remove-liquid-layer"]').disabled = layers.length <= 1;
+  });
+};
+
 const updateViewReadouts = ({ zoom, panX, panY }) => {
   zoomReadout.textContent = `${Math.round(zoom * 100)}%`;
   const viewportCenterX = viewport.clientWidth / 2;
@@ -73,6 +149,7 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   liquidControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'svg');
   annotationControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'annotation');
   objectLayerCount.textContent = `${sceneStore.objects.length} 個物件`;
+  renderLiquidLayerControls(selectedObjects[0]);
 
   if (!hasSelection) return;
 
@@ -90,12 +167,6 @@ const updateSelectionPanel = ({ selectedObjects }) => {
     hoseColor.value = object.type === 'hose' ? object.color : '#8b5e3c';
     hoseWidth.value = object.type === 'hose' ? String(object.strokeWidth) : '8';
     hoseWidthValue.textContent = `${hoseWidth.value} px`;
-    const liquid = object.liquid ?? { level: 0, color: '#67aee8', opacity: 0 };
-    liquidLevel.value = String(liquid.level);
-    liquidLevelValue.textContent = `${liquid.level}%`;
-    liquidColor.value = liquid.color;
-    liquidOpacity.value = String(Math.round(liquid.opacity * 100));
-    liquidOpacityValue.textContent = `${Math.round(liquid.opacity * 100)}%`;
     annotationText.value = object.type === 'annotation' ? object.text : '';
   } else {
     const bounds = sceneStore.getSelectionBounds();
@@ -402,31 +473,20 @@ exportForm.addEventListener('submit', async (event) => {
   }
 });
 
-const updateSelectedLiquid = (patch) => {
+const updateSelectedLiquidLayer = (layerIndex, patch) => {
   const object = sceneStore.selectedObjects[0];
   if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
   const before = sceneStore.snapshot();
-  sceneStore.updateLiquid(object.id, {
-    level: object.liquid?.level ?? 0,
-    color: object.liquid?.color ?? '#67aee8',
-    opacity: object.liquid?.opacity ?? 0,
-    ...patch,
-  });
+  sceneStore.updateLiquid(object.id, patch, layerIndex);
   canvasController.recordHistory(before);
 };
 
-liquidLevel.addEventListener('input', () => {
-  liquidLevelValue.textContent = `${liquidLevel.value}%`;
-  updateSelectedLiquid({ level: Number(liquidLevel.value) });
-});
-
-liquidColor.addEventListener('input', () => {
-  updateSelectedLiquid({ color: liquidColor.value });
-});
-
-liquidOpacity.addEventListener('input', () => {
-  liquidOpacityValue.textContent = `${liquidOpacity.value}%`;
-  updateSelectedLiquid({ opacity: Number(liquidOpacity.value) / 100 });
+addLiquidLayerButton.addEventListener('click', () => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
+  const before = sceneStore.snapshot();
+  sceneStore.addLiquidLayer(object.id);
+  canvasController.recordHistory(before);
 });
 
 annotationText.addEventListener('input', () => {

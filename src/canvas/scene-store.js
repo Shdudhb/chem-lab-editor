@@ -19,6 +19,27 @@ const liquidClipPaths = {
   'crystallizing-dish': 'ellipse(50% 50% at 50% 50%)',
 };
 
+const DEFAULT_LIQUID_LAYER = {
+  level: 0,
+  color: '#67aee8',
+  opacity: 0,
+};
+
+const normalizeLiquidLayer = (layer = {}) => ({
+  level: Math.min(100, Math.max(0, Number(layer.level) || 0)),
+  color: /^#[0-9a-f]{6}$/i.test(layer.color ?? '') ? layer.color : DEFAULT_LIQUID_LAYER.color,
+  opacity: Math.min(1, Math.max(0, Number(layer.opacity) || 0)),
+});
+
+const getLiquidLayers = (liquid) => {
+  const layers = Array.isArray(liquid?.layers)
+    ? liquid.layers
+    : liquid
+      ? [liquid]
+      : [DEFAULT_LIQUID_LAYER];
+  return layers.length ? layers.map(normalizeLiquidLayer) : [{ ...DEFAULT_LIQUID_LAYER }];
+};
+
 const getHoseBounds = (points) => {
   const xs = points.map((point) => point.x);
   const ys = points.map((point) => point.y);
@@ -247,7 +268,12 @@ export class SceneStore extends EventTarget {
         points: object.points?.map((point) => ({ ...point })),
         start: object.start ? { ...object.start } : undefined,
         end: object.end ? { ...object.end } : undefined,
-        liquid: object.liquid ? { ...object.liquid } : undefined,
+        liquid: object.liquid
+          ? {
+            ...object.liquid,
+            layers: object.liquid.layers?.map((layer) => ({ ...layer })),
+          }
+          : undefined,
         connections: object.connections
           ? {
             start: object.connections.start ? { ...object.connections.start } : null,
@@ -415,14 +441,41 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
-  updateLiquid(id, liquid) {
+  updateLiquid(id, liquid, layerIndex = 0) {
     const object = this.getObject(id);
     if (!object || object.type !== 'svg') return;
-    object.liquid = {
-      level: Math.min(100, Math.max(0, Number(liquid.level) || 0)),
-      color: liquid.color || '#67aee8',
-      opacity: Math.min(1, Math.max(0, Number(liquid.opacity) || 0)),
-    };
+    const layers = getLiquidLayers(object.liquid);
+    const index = Math.min(layers.length - 1, Math.max(0, Number(layerIndex) || 0));
+    layers[index] = normalizeLiquidLayer({ ...layers[index], ...liquid });
+    object.liquid = { layers };
+    this.render();
+    this.notify();
+  }
+
+  addLiquidLayer(id, layer = {}) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'svg') return;
+    const layers = getLiquidLayers(object.liquid);
+    layers.push(normalizeLiquidLayer({
+      level: 20,
+      color: '#f2a65a',
+      opacity: 0.7,
+      ...layer,
+    }));
+    object.liquid = { layers };
+    this.render();
+    this.notify();
+  }
+
+  removeLiquidLayer(id, layerIndex) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'svg') return;
+    const layers = getLiquidLayers(object.liquid);
+    if (layers.length <= 1) return;
+    const index = Number(layerIndex);
+    if (!Number.isInteger(index) || index < 0 || index >= layers.length) return;
+    layers.splice(index, 1);
+    object.liquid = { layers };
     this.render();
     this.notify();
   }
@@ -590,17 +643,23 @@ export class SceneStore extends EventTarget {
         if (svg?.nodeName.toLowerCase() === 'svg') {
           wrapper.appendChild(document.importNode(svg, true));
         }
-        if (object.liquid?.level > 0) {
+        let liquidOffset = 0;
+        getLiquidLayers(object.liquid).forEach((layer, layerIndex) => {
+          const layerHeight = Math.min(layer.level, 100 - liquidOffset);
+          if (layerHeight <= 0) return;
           const liquid = document.createElement('span');
           liquid.className = 'liquid-overlay';
-          liquid.style.height = `${object.liquid.level}%`;
-          liquid.style.background = object.liquid.color;
-          liquid.style.opacity = String(object.liquid.opacity);
+          liquid.style.height = `${layerHeight}%`;
+          liquid.style.bottom = `calc(8% + ${liquidOffset}%)`;
+          liquid.style.background = layer.color;
+          liquid.style.opacity = String(layer.opacity);
+          liquid.style.zIndex = String(layerIndex + 1);
           const clipPath = liquidClipPaths[object.sourceId] ?? 'inset(0 4% 0 4% round 8px)';
           liquid.style.clipPath = clipPath;
           liquid.style.webkitClipPath = clipPath;
           wrapper.appendChild(liquid);
-        }
+          liquidOffset += layerHeight;
+        });
       }
 
       this.scene.appendChild(wrapper);

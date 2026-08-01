@@ -5,6 +5,19 @@ const escapeXml = (value) => String(value)
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&apos;');
 
+const getLiquidLayers = (object) => {
+  const layers = Array.isArray(object.liquid?.layers)
+    ? object.liquid.layers
+    : object.liquid
+      ? [object.liquid]
+      : [];
+  return layers.map((layer) => ({
+    level: Math.min(100, Math.max(0, Number(layer.level) || 0)),
+    color: /^#[0-9a-f]{6}$/i.test(layer.color ?? '') ? layer.color : '#67aee8',
+    opacity: Math.min(1, Math.max(0, Number(layer.opacity) || 0)),
+  }));
+};
+
 const hosePath = (points) => {
   if (points.length < 2) return '';
   let path = `M ${points[0].x} ${points[0].y}`;
@@ -40,9 +53,14 @@ const svgObjectMarkup = (object) => {
   const svg = object.svgMarkup
     .replace('width="100%"', `width="${object.width}"`)
     .replace('height="100%"', `height="${object.height}"`);
-  const liquid = object.liquid?.level > 0
-    ? `<rect x="${object.width * .18}" y="${object.height * (1 - object.liquid.level / 100)}" width="${object.width * .64}" height="${object.height * object.liquid.level / 100}" rx="8" fill="${escapeXml(object.liquid.color)}" opacity="${object.liquid.opacity}"/>`
-    : '';
+  let liquidOffset = 0;
+  const liquid = getLiquidLayers(object).map((layer) => {
+    const layerHeight = Math.min(layer.level, 100 - liquidOffset);
+    if (layerHeight <= 0) return '';
+    const markup = `<rect x="${object.width * .18}" y="${object.height * (1 - (liquidOffset + layerHeight) / 100)}" width="${object.width * .64}" height="${object.height * layerHeight / 100}" rx="8" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}"/>`;
+    liquidOffset += layerHeight;
+    return markup;
+  }).join('');
   return `<g transform="translate(${object.x} ${object.y}) rotate(${object.rotation} ${object.width / 2} ${object.height / 2})">${svg}${liquid}</g>`;
 };
 
