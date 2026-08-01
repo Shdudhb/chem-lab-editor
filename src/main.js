@@ -165,6 +165,12 @@ canvasController.addEventListener('viewchange', (event) => {
   updateViewReadouts(event.detail);
 });
 
+canvasController.addEventListener('snapchange', ({ detail }) => {
+  if (detail.active) {
+    canvasHint.textContent = '已偵測到吸附接點，放開滑鼠即可完成對位。';
+  }
+});
+
 sceneStore.addEventListener('change', (event) => {
   updateSelectionPanel(event.detail);
 });

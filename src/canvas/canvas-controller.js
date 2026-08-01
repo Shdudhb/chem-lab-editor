@@ -5,6 +5,7 @@ import {
   parseSvgAsset,
   rotateVector,
 } from './scene-store.js';
+import { findSnapCandidate } from './snap-system.js';
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 3;
@@ -183,6 +184,7 @@ export class CanvasController extends EventTarget {
         x: object.x,
         y: object.y,
       })),
+      snapCandidate: null,
     };
 
     this.viewport.setPointerCapture(event.pointerId);
@@ -240,15 +242,24 @@ export class CanvasController extends EventTarget {
     if (this.dragState.type === 'objects') {
       const deltaX = (event.clientX - this.dragState.startX) / this.view.zoom;
       const deltaY = (event.clientY - this.dragState.startY) / this.view.zoom;
+      const selectedIds = new Set(this.dragState.positions.map((position) => position.id));
+      const movingObjects = this.dragState.positions
+        .map((position) => ({
+          ...this.store.getObject(position.id),
+          x: position.x + deltaX,
+          y: position.y + deltaY,
+        }));
+      const targetObjects = this.store.objects.filter((object) => !selectedIds.has(object.id));
+      const snapCandidate = findSnapCandidate(movingObjects, targetObjects);
+      const snapDelta = snapCandidate?.delta ?? { x: 0, y: 0 };
+      this.dragState.snapCandidate = snapCandidate;
 
-      this.store.updateObjects(
-        this.dragState.positions.map((position) => position.id),
-        (object) => {
-          const original = this.dragState.positions.find((position) => position.id === object.id);
-          object.x = original.x + deltaX;
-          object.y = original.y + deltaY;
-        },
-      );
+      this.store.updateObjects(selectedIds, (object) => {
+        const original = this.dragState.positions.find((position) => position.id === object.id);
+        object.x = original.x + deltaX + snapDelta.x;
+        object.y = original.y + deltaY + snapDelta.y;
+      });
+      this.renderSnapPreview(snapCandidate);
       return;
     }
 
@@ -311,6 +322,7 @@ export class CanvasController extends EventTarget {
     const state = this.dragState;
     this.dragState = null;
     this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming');
+    this.clearSnapPreview();
 
     if (state.before) {
       this.recordHistory(state.before);
@@ -318,6 +330,50 @@ export class CanvasController extends EventTarget {
 
     if (this.viewport.hasPointerCapture(event.pointerId)) {
       this.viewport.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  renderSnapPreview(candidate) {
+    this.clearSnapPreview(false);
+    if (!candidate) return;
+
+    const preview = document.createElement('div');
+    preview.className = 'snap-preview';
+    preview.setAttribute('aria-hidden', 'true');
+
+    const line = document.createElement('span');
+    line.className = 'snap-preview-line';
+    const distance = Math.hypot(
+      candidate.targetPoint.x - candidate.sourcePoint.x,
+      candidate.targetPoint.y - candidate.sourcePoint.y,
+    );
+    line.style.left = `${candidate.sourcePoint.x}px`;
+    line.style.top = `${candidate.sourcePoint.y}px`;
+    line.style.width = `${distance}px`;
+    line.style.transform = `rotate(${Math.atan2(
+      candidate.targetPoint.y - candidate.sourcePoint.y,
+      candidate.targetPoint.x - candidate.sourcePoint.x,
+    ) * 180 / Math.PI}deg)`;
+
+    const sourceDot = document.createElement('span');
+    sourceDot.className = 'snap-preview-dot snap-preview-source';
+    sourceDot.style.left = `${candidate.sourcePoint.x}px`;
+    sourceDot.style.top = `${candidate.sourcePoint.y}px`;
+
+    const targetDot = document.createElement('span');
+    targetDot.className = 'snap-preview-dot snap-preview-target';
+    targetDot.style.left = `${candidate.targetPoint.x}px`;
+    targetDot.style.top = `${candidate.targetPoint.y}px`;
+
+    preview.append(line, sourceDot, targetDot);
+    this.scene.appendChild(preview);
+    this.dispatchEvent(new CustomEvent('snapchange', { detail: { active: true, candidate } }));
+  }
+
+  clearSnapPreview(emit = true) {
+    this.scene.querySelector('.snap-preview')?.remove();
+    if (emit) {
+      this.dispatchEvent(new CustomEvent('snapchange', { detail: { active: false } }));
     }
   }
 
