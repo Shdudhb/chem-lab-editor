@@ -36,6 +36,105 @@ const getHosePath = (points, bounds) => {
   return path;
 };
 
+const getAnnotationBounds = (start, end, type) => {
+  if (type === 'text' || type === 'number') {
+    return { x: start.x, y: start.y, width: type === 'number' ? 34 : 150, height: type === 'number' ? 34 : 32 };
+  }
+
+  const x = Math.min(start.x, end.x);
+  const y = Math.min(start.y, end.y);
+  return {
+    x,
+    y,
+    width: Math.max(1, Math.abs(end.x - start.x)),
+    height: Math.max(1, Math.abs(end.y - start.y)),
+  };
+};
+
+const createAnnotationSvg = (object) => {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${object.width} ${object.height}`);
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '100%');
+  svg.setAttribute('overflow', 'visible');
+
+  const stroke = '#356f66';
+  if (object.annotationType === 'text') {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '0');
+    text.setAttribute('y', '21');
+    text.setAttribute('fill', stroke);
+    text.setAttribute('font-size', '16');
+    text.setAttribute('font-family', 'Inter, sans-serif');
+    text.textContent = object.text;
+    svg.appendChild(text);
+  } else if (object.annotationType === 'number') {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '17');
+    circle.setAttribute('cy', '17');
+    circle.setAttribute('r', '15');
+    circle.setAttribute('fill', '#e3f1ed');
+    circle.setAttribute('stroke', stroke);
+    circle.setAttribute('stroke-width', '2');
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '17');
+    text.setAttribute('y', '22');
+    text.setAttribute('fill', stroke);
+    text.setAttribute('font-size', '14');
+    text.setAttribute('font-weight', '700');
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = object.text;
+    svg.append(circle, text);
+  } else if (object.annotationType === 'arrow' || object.annotationType === 'line') {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', object.start.x - object.x);
+    line.setAttribute('y1', object.start.y - object.y);
+    line.setAttribute('x2', object.end.x - object.x);
+    line.setAttribute('y2', object.end.y - object.y);
+    line.setAttribute('stroke', stroke);
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-linecap', 'round');
+    if (object.annotationType === 'arrow') {
+      line.setAttribute('marker-end', 'url(#annotation-arrow)');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'annotation-arrow');
+      marker.setAttribute('markerWidth', '8');
+      marker.setAttribute('markerHeight', '8');
+      marker.setAttribute('refX', '7');
+      marker.setAttribute('refY', '4');
+      marker.setAttribute('orient', 'auto');
+      const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      head.setAttribute('d', 'M0 0L8 4L0 8z');
+      head.setAttribute('fill', stroke);
+      marker.appendChild(head);
+      svg.appendChild(marker);
+    }
+    svg.appendChild(line);
+  } else if (object.annotationType === 'rectangle') {
+    const rectangle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rectangle.setAttribute('x', '0');
+    rectangle.setAttribute('y', '0');
+    rectangle.setAttribute('width', object.width);
+    rectangle.setAttribute('height', object.height);
+    rectangle.setAttribute('fill', 'rgba(83, 170, 139, .08)');
+    rectangle.setAttribute('stroke', stroke);
+    rectangle.setAttribute('stroke-width', '2');
+    svg.appendChild(rectangle);
+  } else if (object.annotationType === 'circle') {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    circle.setAttribute('cx', object.width / 2);
+    circle.setAttribute('cy', object.height / 2);
+    circle.setAttribute('rx', object.width / 2);
+    circle.setAttribute('ry', object.height / 2);
+    circle.setAttribute('fill', 'rgba(83, 170, 139, .08)');
+    circle.setAttribute('stroke', stroke);
+    circle.setAttribute('stroke-width', '2');
+    svg.appendChild(circle);
+  }
+
+  return svg;
+};
+
 const makeId = () => (
   globalThis.crypto?.randomUUID?.()
   ?? `svg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -129,6 +228,9 @@ export class SceneStore extends EventTarget {
       objects: this.objects.map((object) => ({
         ...object,
         points: object.points?.map((point) => ({ ...point })),
+        start: object.start ? { ...object.start } : undefined,
+        end: object.end ? { ...object.end } : undefined,
+        liquid: object.liquid ? { ...object.liquid } : undefined,
       })),
       selectedIds: [...this.selectedIds],
     };
@@ -180,6 +282,60 @@ export class SceneStore extends EventTarget {
     this.render();
     this.notify();
     return object.id;
+  }
+
+  addAnnotation(annotationType, start, end = start, metadata = {}) {
+    const bounds = getAnnotationBounds(start, end, annotationType);
+    const object = {
+      id: makeId(),
+      type: 'annotation',
+      annotationType,
+      name: annotationType === 'text' ? '文字標註' : `${annotationType} 標註`,
+      ...metadata,
+      start: { ...start },
+      end: { ...end },
+      ...bounds,
+      width: Math.max(bounds.width, 1),
+      height: Math.max(bounds.height, 1),
+      rotation: 0,
+    };
+
+    this.objects.push(object);
+    this.selectedIds = new Set([object.id]);
+    this.render();
+    this.notify();
+    return object.id;
+  }
+
+  updateAnnotation(id, start, end) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'annotation') return;
+    Object.assign(object, getAnnotationBounds(start, end, object.annotationType), {
+      start: { ...start },
+      end: { ...end },
+    });
+    this.render();
+    this.notify();
+  }
+
+  updateAnnotationText(id, text) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'annotation') return;
+    object.text = text;
+    this.render();
+    this.notify();
+  }
+
+  updateLiquid(id, liquid) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'svg') return;
+    object.liquid = {
+      level: Math.min(100, Math.max(0, Number(liquid.level) || 0)),
+      color: liquid.color || '#67aee8',
+      opacity: Math.min(1, Math.max(0, Number(liquid.opacity) || 0)),
+    };
+    this.render();
+    this.notify();
   }
 
   updateHose(id, points) {
@@ -283,12 +439,25 @@ export class SceneStore extends EventTarget {
         }
       }
 
-      if (object.type !== 'hose') {
+      if (object.type === 'annotation') {
+        wrapper.classList.add('annotation-object');
+        wrapper.appendChild(createAnnotationSvg(object));
+      }
+
+      if (object.type === 'svg') {
         const parser = new DOMParser();
         const parsedDocument = parser.parseFromString(object.svgMarkup, 'image/svg+xml');
         const svg = parsedDocument.documentElement;
         if (svg?.nodeName.toLowerCase() === 'svg') {
           wrapper.appendChild(document.importNode(svg, true));
+        }
+        if (object.liquid?.level > 0) {
+          const liquid = document.createElement('span');
+          liquid.className = 'liquid-overlay';
+          liquid.style.height = `${object.liquid.level}%`;
+          liquid.style.background = object.liquid.color;
+          liquid.style.opacity = String(object.liquid.opacity);
+          wrapper.appendChild(liquid);
         }
       }
 

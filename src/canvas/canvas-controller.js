@@ -143,6 +143,11 @@ export class CanvasController extends EventTarget {
       return;
     }
 
+    if (event.button === 0 && ['text', 'arrow', 'line', 'rectangle', 'circle', 'number'].includes(this.tool) && !objectElement) {
+      this.startAnnotationDraw(event, this.tool);
+      return;
+    }
+
     if (event.button === 0 && handle && this.store.selectedObjects.length === 1) {
       this.startHandleDrag(event, handle.dataset.handle, handle.dataset.corner);
       return;
@@ -220,6 +225,22 @@ export class CanvasController extends EventTarget {
     this.viewport.setPointerCapture(event.pointerId);
     this.viewport.classList.add('is-drawing-hose');
     this.renderHosePreview(this.dragState.points, startSnapCandidate);
+    event.preventDefault();
+  }
+
+  startAnnotationDraw(event, annotationType) {
+    const point = this.screenToWorld(event.clientX, event.clientY);
+    this.dragState = {
+      type: 'annotation-draw',
+      pointerId: event.pointerId,
+      annotationType,
+      before: this.store.snapshot(),
+      start: point,
+      end: { ...point },
+    };
+    this.viewport.setPointerCapture(event.pointerId);
+    this.viewport.classList.add('is-drawing-annotation');
+    this.renderAnnotationPreview(annotationType, point, point);
     event.preventDefault();
   }
 
@@ -320,6 +341,16 @@ export class CanvasController extends EventTarget {
       this.dragState.points[1] = end;
       this.dragState.snapCandidate = snapCandidate;
       this.renderHosePreview(this.dragState.points, snapCandidate);
+      return;
+    }
+
+    if (this.dragState.type === 'annotation-draw') {
+      this.dragState.end = this.screenToWorld(event.clientX, event.clientY);
+      this.renderAnnotationPreview(
+        this.dragState.annotationType,
+        this.dragState.start,
+        this.dragState.end,
+      );
       return;
     }
 
@@ -438,9 +469,23 @@ export class CanvasController extends EventTarget {
 
     const state = this.dragState;
     this.dragState = null;
-    this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose');
+    this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose', 'is-drawing-annotation');
     this.clearSnapPreview();
     this.clearHosePreview();
+
+    if (state.type === 'annotation-draw') {
+      const distance = Math.hypot(state.end.x - state.start.x, state.end.y - state.start.y);
+      if (['text', 'number'].includes(state.annotationType) || distance > 6) {
+        this.store.addAnnotation(state.annotationType, state.start, state.end, {
+          text: state.annotationType === 'text'
+            ? '文字標註'
+            : String(this.store.objects.filter((object) => object.annotationType === 'number').length + 1),
+        });
+      }
+      this.clearAnnotationPreview();
+      this.recordHistory(state.before);
+      return;
+    }
 
     if (state.type === 'hose-draw') {
       const [start, end] = state.points;
@@ -463,6 +508,59 @@ export class CanvasController extends EventTarget {
     if (this.viewport.hasPointerCapture(event.pointerId)) {
       this.viewport.releasePointerCapture(event.pointerId);
     }
+  }
+
+  renderAnnotationPreview(annotationType, start, end) {
+    this.clearAnnotationPreview();
+    const preview = document.createElement('div');
+    preview.className = 'annotation-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    const bounds = {
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      width: Math.max(1, Math.abs(end.x - start.x)),
+      height: Math.max(1, Math.abs(end.y - start.y)),
+    };
+    if (['text', 'number'].includes(annotationType)) {
+      bounds.x = start.x;
+      bounds.y = start.y;
+      bounds.width = annotationType === 'number' ? 34 : 150;
+      bounds.height = annotationType === 'number' ? 34 : 32;
+    }
+    preview.style.left = `${bounds.x}px`;
+    preview.style.top = `${bounds.y}px`;
+    preview.style.width = `${bounds.width}px`;
+    preview.style.height = `${bounds.height}px`;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${bounds.width} ${bounds.height}`);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const x1 = start.x - bounds.x;
+    const y1 = start.y - bounds.y;
+    const x2 = end.x - bounds.x;
+    const y2 = end.y - bounds.y;
+    if (annotationType === 'arrow' || annotationType === 'line') {
+      path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+    } else if (annotationType === 'rectangle') {
+      path.setAttribute('d', `M 0 0 H ${bounds.width} V ${bounds.height} H 0 Z`);
+    } else if (annotationType === 'circle') {
+      path.setAttribute('d', `M ${bounds.width / 2} 0 A ${bounds.width / 2} ${bounds.height / 2} 0 1 1 ${bounds.width / 2} ${bounds.height} A ${bounds.width / 2} ${bounds.height / 2} 0 1 1 ${bounds.width / 2} 0`);
+    }
+    path.setAttribute('fill', 'rgba(83, 170, 139, .08)');
+    path.setAttribute('stroke', '#356f66');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-dasharray', '5 4');
+    if (['text', 'number'].includes(annotationType)) {
+      path.setAttribute('d', annotationType === 'number'
+        ? 'M 17 2 A 15 15 0 1 1 16.9 2'
+        : 'M 0 26 H 150');
+    }
+    svg.appendChild(path);
+    preview.appendChild(svg);
+    this.scene.appendChild(preview);
+  }
+
+  clearAnnotationPreview() {
+    this.scene.querySelector('.annotation-preview')?.remove();
   }
 
   renderHosePreview(points, snapCandidate = null) {

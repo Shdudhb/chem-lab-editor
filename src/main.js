@@ -20,6 +20,14 @@ const redoButton = document.querySelector('[data-action="redo"]');
 const propertyEmptyState = document.querySelector('#propertyEmptyState');
 const propertySelectionState = document.querySelector('#propertySelectionState');
 const hoseControls = document.querySelector('#hoseControls');
+const liquidControls = document.querySelector('#liquidControls');
+const liquidLevel = document.querySelector('#liquidLevel');
+const liquidLevelValue = document.querySelector('#liquidLevelValue');
+const liquidColor = document.querySelector('#liquidColor');
+const liquidOpacity = document.querySelector('#liquidOpacity');
+const liquidOpacityValue = document.querySelector('#liquidOpacityValue');
+const annotationControls = document.querySelector('#annotationControls');
+const annotationText = document.querySelector('#annotationText');
 const selectionCount = document.querySelector('#selectionCount');
 const selectionDimensions = document.querySelector('#selectionDimensions');
 const selectionRotation = document.querySelector('#selectionRotation');
@@ -48,18 +56,30 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
   hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
+  liquidControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'svg');
+  annotationControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'annotation');
   objectLayerCount.textContent = `${sceneStore.objects.length} 個物件`;
 
   if (!hasSelection) return;
 
+  const selectedType = selectedCount === 1
+    ? ({ hose: '橡膠軟管', annotation: '標註', svg: 'SVG 物件' }[selectedObjects[0].type] ?? '物件')
+    : '物件';
   selectionCount.textContent = selectedCount === 1
-    ? '已選取 1 個 SVG 物件'
-    : `已選取 ${selectedCount} 個 SVG 物件`;
+    ? `已選取 1 個${selectedType}`
+    : `已選取 ${selectedCount} 個物件`;
 
   if (selectedCount === 1) {
     const [object] = selectedObjects;
     selectionDimensions.textContent = `${Math.round(object.width)} × ${Math.round(object.height)} px`;
     selectionRotation.textContent = `${Math.round(object.rotation)}°`;
+    const liquid = object.liquid ?? { level: 0, color: '#67aee8', opacity: 0 };
+    liquidLevel.value = String(liquid.level);
+    liquidLevelValue.textContent = `${liquid.level}%`;
+    liquidColor.value = liquid.color;
+    liquidOpacity.value = String(Math.round(liquid.opacity * 100));
+    liquidOpacityValue.textContent = `${Math.round(liquid.opacity * 100)}%`;
+    annotationText.value = object.type === 'annotation' ? object.text : '';
   } else {
     const bounds = sceneStore.getSelectionBounds();
     selectionDimensions.textContent = `${Math.round(bounds.width)} × ${Math.round(bounds.height)} px`;
@@ -199,6 +219,41 @@ document.querySelector('[data-action="add-hose-point"]').addEventListener('click
 
 document.querySelector('[data-action="remove-hose-point"]').addEventListener('click', () => {
   canvasController.removeHoseControlPoint();
+});
+
+const updateSelectedLiquid = (patch) => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
+  const before = sceneStore.snapshot();
+  sceneStore.updateLiquid(object.id, {
+    level: object.liquid?.level ?? 0,
+    color: object.liquid?.color ?? '#67aee8',
+    opacity: object.liquid?.opacity ?? 0,
+    ...patch,
+  });
+  canvasController.recordHistory(before);
+};
+
+liquidLevel.addEventListener('input', () => {
+  liquidLevelValue.textContent = `${liquidLevel.value}%`;
+  updateSelectedLiquid({ level: Number(liquidLevel.value) });
+});
+
+liquidColor.addEventListener('input', () => {
+  updateSelectedLiquid({ color: liquidColor.value });
+});
+
+liquidOpacity.addEventListener('input', () => {
+  liquidOpacityValue.textContent = `${liquidOpacity.value}%`;
+  updateSelectedLiquid({ opacity: Number(liquidOpacity.value) / 100 });
+});
+
+annotationText.addEventListener('input', () => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'annotation') return;
+  const before = sceneStore.snapshot();
+  sceneStore.updateAnnotationText(object.id, annotationText.value);
+  canvasController.recordHistory(before);
 });
 
 importButton.addEventListener('click', () => fileInput.click());

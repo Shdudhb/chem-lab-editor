@@ -31,6 +31,30 @@
             <span aria-hidden="true">⌁</span>
             軟管
           </button>
+          <button class="tool-button" type="button" data-tool="text" aria-pressed="false">
+            <span aria-hidden="true">T</span>
+            文字
+          </button>
+          <button class="tool-button" type="button" data-tool="arrow" aria-pressed="false">
+            <span aria-hidden="true">↗</span>
+            箭頭
+          </button>
+          <button class="tool-button" type="button" data-tool="line" aria-pressed="false">
+            <span aria-hidden="true">╱</span>
+            線段
+          </button>
+          <button class="tool-button" type="button" data-tool="rectangle" aria-pressed="false">
+            <span aria-hidden="true">□</span>
+            矩形
+          </button>
+          <button class="tool-button" type="button" data-tool="circle" aria-pressed="false">
+            <span aria-hidden="true">○</span>
+            圓形
+          </button>
+          <button class="tool-button" type="button" data-tool="number" aria-pressed="false">
+            <span aria-hidden="true">#</span>
+            編號
+          </button>
           <span class="toolbar-divider" aria-hidden="true"></span>
           <button class="secondary-button compact" type="button" data-action="import-svg">
             ＋ 匯入 SVG
@@ -131,6 +155,26 @@
             <div class="hose-controls" id="hoseControls" hidden>
               <button class="secondary-button compact" type="button" data-action="add-hose-point">新增控制點</button>
               <button class="secondary-button compact" type="button" data-action="remove-hose-point">刪除控制點</button>
+            </div>
+            <div class="liquid-controls" id="liquidControls" hidden>
+              <label class="property-control">
+                <span>液面高度 <output id="liquidLevelValue">0%</output></span>
+                <input id="liquidLevel" type="range" min="0" max="100" step="1" value="0" />
+              </label>
+              <label class="property-control">
+                <span>液體顏色</span>
+                <input id="liquidColor" type="color" value="#67aee8" />
+              </label>
+              <label class="property-control">
+                <span>透明度 <output id="liquidOpacityValue">0%</output></span>
+                <input id="liquidOpacity" type="range" min="0" max="100" step="1" value="0" />
+              </label>
+            </div>
+            <div class="annotation-controls" id="annotationControls" hidden>
+              <label class="property-control">
+                <span>標註內容</span>
+                <input id="annotationText" type="text" value="" />
+              </label>
             </div>
             <p>拖曳右下角控制點縮放，
               <br />拖曳上方控制點旋轉。</p>
