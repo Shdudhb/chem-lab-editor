@@ -53,18 +53,21 @@ button:disabled, input:disabled { cursor: not-allowed; }
 .category-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 11px 9px; color: #718078; background: transparent; text-align: left; font-size: 12px; }
 .category-row:disabled { opacity: 1; }
 .category-icon { display: inline-grid; place-items: center; width: 22px; margin-right: 8px; color: #7c8d86; font-size: 17px; }
-.equipment-categories { display: flex; gap: 5px; padding: 0 13px 12px; overflow-x: auto; }
-.equipment-category-button { flex: 0 0 auto; padding: 6px 8px; color: #718078; background: #f1f4f2; border: 1px solid transparent; border-radius: 6px; font-size: 10px; }
+.equipment-categories { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 0 13px 13px; }
+.equipment-category-button { display: grid; justify-items: center; gap: 5px; min-height: 54px; padding: 7px 4px 6px; color: #718078; background: #f1f4f2; border: 1px solid transparent; border-radius: 7px; font-size: 10px; }
 .equipment-category-button:hover, .equipment-category-button.is-active { color: #176b5f; background: #e3f1ed; border-color: #cbe3da; }
-.equipment-list { display: grid; gap: 6px; max-height: calc(100vh - 295px); padding: 0 10px 12px; overflow-y: auto; }
-.equipment-card { display: grid; grid-template-columns: 40px minmax(0, 1fr) 18px; align-items: center; gap: 8px; width: 100%; min-height: 54px; padding: 6px 7px; color: #61706a; background: #fbfcfb; border: 1px solid #e4ebe7; border-radius: 7px; text-align: left; }
+.equipment-category-icon { display: grid; place-items: center; width: 24px; height: 24px; color: #6d8f83; background: rgba(255, 255, 255, .7); border-radius: 6px; }
+.equipment-category-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.equipment-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 6px; max-height: calc(100vh - 345px); padding: 0 10px 12px; overflow-y: auto; }
+.equipment-card { display: grid; grid-template-rows: 52px auto; align-content: start; gap: 6px; width: 100%; min-height: 86px; padding: 7px 6px; color: #61706a; background: #fbfcfb; border: 1px solid #e4ebe7; border-radius: 7px; text-align: left; }
 .equipment-card:hover { background: #f0f6f3; border-color: #cfe3da; }
-.equipment-preview { display: grid; place-items: center; width: 38px; height: 40px; background: #f2f6f4; border-radius: 6px; }
-.equipment-preview svg { width: 34px; height: 34px; }
-.equipment-card-copy { display: grid; gap: 3px; min-width: 0; }
+.equipment-preview { display: grid; place-items: center; width: 100%; height: 52px; background: #f2f6f4; border-radius: 6px; }
+.equipment-preview svg { width: 46px; height: 46px; }
+.equipment-card-copy { display: grid; gap: 3px; min-width: 0; padding: 0 2px; }
 .equipment-card-copy strong { overflow: hidden; color: #52635b; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .equipment-card-copy small { overflow: hidden; color: #99a59f; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.equipment-add-icon { color: #83a197; font-size: 16px; }
+.equipment-add-icon { position: absolute; right: 9px; bottom: 7px; color: #83a197; font-size: 14px; }
+.equipment-card { position: relative; }
 .equipment-list-empty { margin: 15px 8px; color: #9aa59f; font-size: 11px; text-align: center; }
 .panel-note { margin: 19px 18px; color: #9aa59f; font-size: 11px; line-height: 1.6; }
 .empty-panel-state { display: grid; justify-items: center; margin: 115px 22px 0; color: #8d9893; text-align: center; }

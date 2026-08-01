@@ -18,6 +18,35 @@ export const equipmentCategories = [
   { id: 'accessories', label: '配件' },
 ];
 
+export const equipmentCategoryIcons = {
+  all: `
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M6 6h8v8H6zM18 6h8v8h-8zM6 18h8v8H6zM18 18h8v8h-8z"/>
+    </svg>
+  `,
+  glassware: `
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M11 4h10M13 4v9l-6 12a2 2 0 0 0 2 3h14a2 2 0 0 0 2-3l-6-12V4M9 22h14"/>
+    </svg>
+  `,
+  support: `
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M8 26h17M12 26V5M9 5h6M8 10h15M20 10v6M15 15a3 3 0 1 0 0 6"/>
+    </svg>
+  `,
+  heating: `
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M9 15h14v10a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3zM12 15h8M14 11h4v4M16 11V7"/>
+      <path d="M16 7c-4-3 2-5 0-7 6 4 2 7 0 7z"/>
+    </svg>
+  `,
+  accessories: `
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="m7 25 14-18M5 26l4-4M21 7l3-3M21 21h6M24 18v6M7 8h7M10.5 4.5v7"/>
+    </svg>
+  `,
+};
+
 export const equipmentCatalog = [
   {
     id: 'beaker',

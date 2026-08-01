@@ -4,6 +4,7 @@ import { SceneStore } from './canvas/scene-store.js';
 import {
   equipmentCatalog,
   equipmentCategories,
+  equipmentCategoryIcons,
   getEquipmentById,
 } from './equipment/equipment-catalog.js';
 
@@ -83,7 +84,10 @@ const renderEquipmentCategories = () => {
     button.type = 'button';
     button.className = 'equipment-category-button';
     button.classList.toggle('is-active', category.id === activeEquipmentCategory);
-    button.textContent = category.label;
+    button.innerHTML = `
+      <span class="equipment-category-icon">${equipmentCategoryIcons[category.id]}</span>
+      <span>${category.label}</span>
+    `;
     button.addEventListener('click', () => {
       activeEquipmentCategory = category.id;
       renderEquipmentCategories();
