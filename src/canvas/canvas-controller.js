@@ -370,6 +370,13 @@ export class CanvasController extends EventTarget {
       ));
       this.dragState.snapCandidate = snapCandidate;
       this.store.updateHose(object.id, points);
+      const endpoint = this.dragState.pointIndex === 0 ? 'start' : 'end';
+      this.store.updateHoseConnections(object.id, {
+        ...object.connections,
+        [endpoint]: snapCandidate
+          ? { objectId: snapCandidate.targetObjectId, role: snapCandidate.targetPoint.role }
+          : null,
+      });
       this.renderSnapPreview(snapCandidate);
       return;
     }
@@ -496,7 +503,16 @@ export class CanvasController extends EventTarget {
           { x: start.x + (end.x - start.x) / 3, y: start.y + (end.y - start.y) / 3 },
           { x: start.x + (end.x - start.x) * 2 / 3, y: start.y + (end.y - start.y) * 2 / 3 },
           end,
-        ]);
+        ], {
+          connections: {
+            start: state.startSnapCandidate?.targetObjectId
+              ? { objectId: state.startSnapCandidate.targetObjectId, role: state.startSnapCandidate.targetPoint.role }
+              : null,
+            end: state.snapCandidate?.targetObjectId
+              ? { objectId: state.snapCandidate.targetObjectId, role: state.snapCandidate.targetPoint.role }
+              : null,
+          },
+        });
       }
       this.recordHistory(state.before);
       return;

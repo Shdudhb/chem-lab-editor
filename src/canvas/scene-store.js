@@ -1,6 +1,23 @@
+import { getSnapPoints } from './snap-system.js';
+
 const DEFAULT_WIDTH = 180;
 const DEFAULT_HEIGHT = 140;
 const MAX_IMPORT_SIZE = 220;
+const liquidClipPaths = {
+  beaker: 'polygon(8% 0, 92% 0, 86% 100%, 14% 100%)',
+  'erlenmeyer-flask': 'polygon(30% 0, 70% 0, 100% 100%, 0 100%)',
+  'round-bottom-flask': 'ellipse(50% 50% at 50% 50%)',
+  'flat-bottom-flask': 'polygon(25% 0, 75% 0, 92% 100%, 8% 100%)',
+  'volumetric-flask': 'polygon(38% 0, 62% 0, 90% 100%, 10% 100%)',
+  'filter-flask': 'polygon(28% 0, 72% 0, 94% 100%, 6% 100%)',
+  'test-tube': 'inset(0 8% 0 8% round 0 0 22px 22px)',
+  'graduated-cylinder': 'inset(0 5% 0 5% round 0 0 8px 8px)',
+  'petri-dish': 'ellipse(50% 50% at 50% 50%)',
+  'evaporating-dish': 'ellipse(50% 50% at 50% 50%)',
+  'watch-glass': 'ellipse(50% 50% at 50% 50%)',
+  'surface-dish': 'ellipse(50% 50% at 50% 50%)',
+  'crystallizing-dish': 'ellipse(50% 50% at 50% 50%)',
+};
 
 const getHoseBounds = (points) => {
   const xs = points.map((point) => point.x);
@@ -231,6 +248,12 @@ export class SceneStore extends EventTarget {
         start: object.start ? { ...object.start } : undefined,
         end: object.end ? { ...object.end } : undefined,
         liquid: object.liquid ? { ...object.liquid } : undefined,
+        connections: object.connections
+          ? {
+            start: object.connections.start ? { ...object.connections.start } : null,
+            end: object.connections.end ? { ...object.connections.end } : null,
+          }
+          : undefined,
       })),
       selectedIds: [...this.selectedIds],
     };
@@ -281,6 +304,10 @@ export class SceneStore extends EventTarget {
       groupId: null,
       color: metadata.color ?? '#8b5e3c',
       strokeWidth: metadata.strokeWidth ?? 8,
+      connections: {
+        start: metadata.connections?.start ? { ...metadata.connections.start } : null,
+        end: metadata.connections?.end ? { ...metadata.connections.end } : null,
+      },
     };
 
     this.objects.push(object);
@@ -410,6 +437,17 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
+  updateHoseConnections(id, connections) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'hose') return;
+    object.connections = {
+      start: connections.start ? { ...connections.start } : null,
+      end: connections.end ? { ...connections.end } : null,
+    };
+    this.render();
+    this.notify();
+  }
+
   select(id, additive = false) {
     if (!id) {
       this.selectedIds.clear();
@@ -433,8 +471,28 @@ export class SceneStore extends EventTarget {
       if (object) updater(object);
     });
 
+    this.refreshHoseConnections();
     this.render();
     this.notify();
+  }
+
+  refreshHoseConnections() {
+    this.objects.filter((object) => object.type === 'hose' && object.connections).forEach((hose) => {
+      const points = hose.points.map((point) => ({ ...point }));
+      ['start', 'end'].forEach((endpoint) => {
+        const connection = hose.connections[endpoint];
+        if (!connection) return;
+        const target = this.getObject(connection.objectId);
+        const snapPoint = target && getSnapPoints(target).find((point) => point.role === connection.role);
+        if (snapPoint) {
+          points[endpoint === 'start' ? 0 : points.length - 1] = {
+            x: snapPoint.x,
+            y: snapPoint.y,
+          };
+        }
+      });
+      Object.assign(hose, getHoseBounds(points), { points });
+    });
   }
 
   getObject(id) {
@@ -521,6 +579,9 @@ export class SceneStore extends EventTarget {
           liquid.style.height = `${object.liquid.level}%`;
           liquid.style.background = object.liquid.color;
           liquid.style.opacity = String(object.liquid.opacity);
+          const clipPath = liquidClipPaths[object.sourceId] ?? 'inset(0 4% 0 4% round 8px)';
+          liquid.style.clipPath = clipPath;
+          liquid.style.webkitClipPath = clipPath;
           wrapper.appendChild(liquid);
         }
       }

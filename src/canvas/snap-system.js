@@ -27,12 +27,39 @@ const edgePoint = (object, x, y, role) => {
   };
 };
 
-export const getSnapPoints = (object) => [
-  edgePoint(object, 0, -1, 'top'),
-  edgePoint(object, 1, 0, 'right'),
-  edgePoint(object, 0, 1, 'bottom'),
-  edgePoint(object, -1, 0, 'left'),
-];
+const snapPointProfiles = {
+  beaker: [[0, -1, 'top'], [0, 1, 'bottom']],
+  'erlenmeyer-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'round-bottom-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'flat-bottom-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'volumetric-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'filter-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'test-tube': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'test-tube-rack': [[0, -1, 'top']],
+  funnel: [[0, -1, 'top'], [0, 1, 'bottom']],
+  'long-neck-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'dropping-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'separatory-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
+  'retort-stand': [[0, -1, 'top'], [1, 0, 'right'], [-1, 0, 'left']],
+  'iron-ring': [[0, -1, 'top']],
+  tripod: [[0, -1, 'top']],
+  'universal-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
+  'flask-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
+  'test-tube-holder': [[1, 0, 'right'], [-1, 0, 'left']],
+  'alcohol-lamp': [[0, -1, 'top']],
+  'bunsen-burner': [[0, -1, 'top']],
+};
+
+export const getSnapPoints = (object) => {
+  const profile = snapPointProfiles[object.sourceId];
+  if (profile) return profile.map(([x, y, role]) => edgePoint(object, x, y, role));
+  return [
+    edgePoint(object, 0, -1, 'top'),
+    edgePoint(object, 1, 0, 'right'),
+    edgePoint(object, 0, 1, 'bottom'),
+    edgePoint(object, -1, 0, 'left'),
+  ];
+};
 
 const compatibleRoles = new Map([
   ['top', new Set(['bottom'])],
