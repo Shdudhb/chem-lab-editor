@@ -48,3 +48,7 @@ src/
   main.js
   styles.css
 ```
+
+## 待辦事項
+
+尚未補齊的規格與後續優化請參考 [docs/TODO.md](docs/TODO.md)。
