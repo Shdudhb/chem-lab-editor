@@ -272,5 +272,6 @@ window.addEventListener('keydown', (event) => {
 updateViewReadouts(canvasController.view);
 updateSelectionPanel({ selectedObjects: [] });
 updateHistoryButtons({ canUndo: false, canRedo: false });
+equipmentSearch.value = '';
 renderEquipmentCategories();
 renderEquipmentList();
