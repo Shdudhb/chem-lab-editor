@@ -155,6 +155,7 @@ export class CanvasController extends EventTarget {
 
     if (event.button === 0 && objectElement && this.tool === 'select') {
       const id = objectElement.dataset.objectId;
+      if (this.store.getObject(id)?.locked) return;
       const wasSelected = this.store.selectedIds.has(id);
       this.store.select(id, event.shiftKey);
 

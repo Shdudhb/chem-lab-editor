@@ -254,6 +254,9 @@ export class SceneStore extends EventTarget {
       width: asset.width,
       height: asset.height,
       rotation: 0,
+      visible: true,
+      locked: false,
+      groupId: null,
     };
 
     this.objects.push(object);
@@ -273,6 +276,9 @@ export class SceneStore extends EventTarget {
       points: points.map((point) => ({ ...point })),
       ...bounds,
       rotation: 0,
+      visible: true,
+      locked: false,
+      groupId: null,
       color: metadata.color ?? '#8b5e3c',
       strokeWidth: metadata.strokeWidth ?? 8,
     };
@@ -298,6 +304,9 @@ export class SceneStore extends EventTarget {
       width: Math.max(bounds.width, 1),
       height: Math.max(bounds.height, 1),
       rotation: 0,
+      visible: true,
+      locked: false,
+      groupId: null,
     };
 
     this.objects.push(object);
@@ -322,6 +331,59 @@ export class SceneStore extends EventTarget {
     const object = this.getObject(id);
     if (!object || object.type !== 'annotation') return;
     object.text = text;
+    this.render();
+    this.notify();
+  }
+
+  setVisibility(id, visible) {
+    const object = this.getObject(id);
+    if (!object) return;
+    object.visible = visible;
+    if (!visible) this.selectedIds.delete(id);
+    this.render();
+    this.notify();
+  }
+
+  setLocked(id, locked) {
+    const object = this.getObject(id);
+    if (!object) return;
+    object.locked = locked;
+    this.render();
+    this.notify();
+  }
+
+  renameObject(id, name) {
+    const object = this.getObject(id);
+    if (!object) return;
+    object.name = name.trim() || object.name;
+    this.render();
+    this.notify();
+  }
+
+  reorderObject(id, direction) {
+    const index = this.objects.findIndex((object) => object.id === id);
+    const nextIndex = direction === 'up' ? index + 1 : index - 1;
+    if (index < 0 || nextIndex < 0 || nextIndex >= this.objects.length) return;
+    [this.objects[index], this.objects[nextIndex]] = [this.objects[nextIndex], this.objects[index]];
+    this.render();
+    this.notify();
+  }
+
+  groupSelected() {
+    const selected = this.selectedObjects;
+    if (selected.length < 2) return;
+    const groupId = makeId();
+    selected.forEach((object) => { object.groupId = groupId; });
+    this.render();
+    this.notify();
+  }
+
+  ungroupSelected() {
+    const groupIds = new Set(this.selectedObjects.map((object) => object.groupId).filter(Boolean));
+    if (!groupIds.size) return;
+    this.objects.forEach((object) => {
+      if (groupIds.has(object.groupId)) object.groupId = null;
+    });
     this.render();
     this.notify();
   }
@@ -397,12 +459,14 @@ export class SceneStore extends EventTarget {
     emptyMessage.hidden = this.objects.length > 0;
 
     this.objects.forEach((object) => {
+      if (object.visible === false) return;
       const wrapper = document.createElement('div');
       wrapper.className = 'canvas-object';
       wrapper.dataset.objectId = object.id;
       wrapper.setAttribute('role', 'img');
       wrapper.setAttribute('aria-label', object.name ?? '匯入的 SVG 物件');
       wrapper.classList.toggle('is-selected', this.selectedIds.has(object.id));
+      wrapper.classList.toggle('is-locked', object.locked === true);
       wrapper.style.left = `${object.x}px`;
       wrapper.style.top = `${object.y}px`;
       wrapper.style.width = `${object.width}px`;

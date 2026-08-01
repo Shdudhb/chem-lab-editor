@@ -37,6 +37,8 @@ const equipmentCategoriesElement = document.querySelector('#equipmentCategories'
 const equipmentCategoryLabel = document.querySelector('#equipmentCategoryLabel');
 const equipmentCategoryCount = document.querySelector('#equipmentCategoryCount');
 const equipmentList = document.querySelector('#equipmentList');
+const layerSearch = document.querySelector('#layerSearch');
+const layerList = document.querySelector('#layerList');
 
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
@@ -99,6 +101,107 @@ const equipmentMetadata = (item) => ({
 });
 
 let activeEquipmentCategory = 'all';
+let layerQuery = '';
+
+const layerTypeLabel = (object) => {
+  if (object.type === 'hose') return '軟管';
+  if (object.type === 'annotation') return object.annotationType === 'number' ? '編號' : '標註';
+  return object.name ?? '器材';
+};
+
+const withLayerHistory = (callback) => {
+  const before = sceneStore.snapshot();
+  callback();
+  canvasController.recordHistory(before);
+};
+
+const renderLayers = () => {
+  const query = layerQuery.trim().toLowerCase();
+  const objects = [...sceneStore.objects].reverse().filter((object) => {
+    const label = `${object.name ?? ''} ${layerTypeLabel(object)}`.toLowerCase();
+    return !query || label.includes(query);
+  });
+  layerList.replaceChildren();
+
+  if (!objects.length) {
+    const empty = document.createElement('p');
+    empty.className = 'layer-list-empty';
+    empty.textContent = '找不到圖層';
+    layerList.appendChild(empty);
+    return;
+  }
+
+  objects.forEach((object) => {
+    const row = document.createElement('div');
+    row.className = 'layer-row';
+    row.classList.toggle('is-current', sceneStore.selectedIds.has(object.id));
+    row.classList.toggle('is-hidden', object.visible === false);
+    row.classList.toggle('is-locked', object.locked === true);
+    row.dataset.objectId = object.id;
+    row.addEventListener('click', (event) => {
+      if (event.target.closest('button, input')) return;
+      sceneStore.select(object.id, event.shiftKey);
+    });
+
+    const visibility = document.createElement('button');
+    visibility.className = 'layer-action';
+    visibility.type = 'button';
+    visibility.textContent = object.visible === false ? '○' : '◉';
+    visibility.setAttribute('aria-label', object.visible === false ? '顯示圖層' : '隱藏圖層');
+    visibility.addEventListener('click', (event) => {
+      event.stopPropagation();
+      withLayerHistory(() => sceneStore.setVisibility(object.id, object.visible === false));
+    });
+
+    const swatch = document.createElement('span');
+    swatch.className = 'layer-swatch';
+
+    const name = document.createElement('input');
+    name.className = 'layer-name';
+    name.type = 'text';
+    name.value = object.name ?? layerTypeLabel(object);
+    name.title = '重新命名圖層';
+    name.addEventListener('click', (event) => event.stopPropagation());
+    name.addEventListener('change', () => withLayerHistory(() => sceneStore.renameObject(object.id, name.value)));
+
+    const meta = document.createElement('span');
+    meta.className = 'layer-meta';
+    meta.textContent = object.groupId ? '群組' : layerTypeLabel(object);
+
+    const up = document.createElement('button');
+    up.className = 'layer-action';
+    up.type = 'button';
+    up.textContent = '↑';
+    up.setAttribute('aria-label', '圖層上移');
+    up.addEventListener('click', (event) => {
+      event.stopPropagation();
+      withLayerHistory(() => sceneStore.reorderObject(object.id, 'up'));
+    });
+
+    const down = document.createElement('button');
+    down.className = 'layer-action';
+    down.type = 'button';
+    down.textContent = '↓';
+    down.setAttribute('aria-label', '圖層下移');
+    down.addEventListener('click', (event) => {
+      event.stopPropagation();
+      withLayerHistory(() => sceneStore.reorderObject(object.id, 'down'));
+    });
+
+    const lock = document.createElement('button');
+    lock.className = 'layer-action';
+    lock.type = 'button';
+    lock.textContent = object.locked ? '🔒' : '⌑';
+    lock.setAttribute('aria-label', object.locked ? '解除鎖定' : '鎖定圖層');
+    lock.addEventListener('click', (event) => {
+      event.stopPropagation();
+      withLayerHistory(() => sceneStore.setLocked(object.id, !object.locked));
+    });
+
+    row.append(visibility, swatch, name, meta, up, down, lock);
+    layerList.appendChild(row);
+  });
+};
 
 const renderEquipmentCategories = () => {
   equipmentCategoriesElement.replaceChildren();
@@ -195,6 +298,7 @@ canvasController.addEventListener('snapchange', ({ detail }) => {
 
 sceneStore.addEventListener('change', (event) => {
   updateSelectionPanel(event.detail);
+  renderLayers();
 });
 
 canvasController.addEventListener('historychange', (event) => {
@@ -219,6 +323,19 @@ document.querySelector('[data-action="add-hose-point"]').addEventListener('click
 
 document.querySelector('[data-action="remove-hose-point"]').addEventListener('click', () => {
   canvasController.removeHoseControlPoint();
+});
+
+document.querySelector('[data-action="group-selection"]').addEventListener('click', () => {
+  withLayerHistory(() => sceneStore.groupSelected());
+});
+
+document.querySelector('[data-action="ungroup-selection"]').addEventListener('click', () => {
+  withLayerHistory(() => sceneStore.ungroupSelected());
+});
+
+layerSearch.addEventListener('input', () => {
+  layerQuery = layerSearch.value;
+  renderLayers();
 });
 
 const updateSelectedLiquid = (patch) => {
@@ -348,3 +465,4 @@ updateHistoryButtons({ canUndo: false, canRedo: false });
 equipmentSearch.value = '';
 renderEquipmentCategories();
 renderEquipmentList();
+renderLayers();

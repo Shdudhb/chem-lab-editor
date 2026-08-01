@@ -192,17 +192,19 @@
             </div>
           </div>
           <div class="layers-actions">
-            <button class="icon-button small" type="button" disabled aria-label="新增圖層">＋</button>
-            <button class="icon-button small" type="button" disabled aria-label="圖層選單">•••</button>
+            <button class="icon-button small" type="button" data-action="group-selection" aria-label="群組選取物件">⊞</button>
+            <button class="icon-button small" type="button" data-action="ungroup-selection" aria-label="取消群組">⊟</button>
           </div>
         </div>
-        <div class="layer-row is-current">
-          <span class="layer-visibility" aria-hidden="true">◉</span>
-          <span class="layer-swatch" aria-hidden="true"></span>
-          <span class="layer-name">畫布</span>
-          <span class="layer-meta" id="objectLayerCount">0 個物件</span>
-          <span class="layer-lock" aria-hidden="true">⌑</span>
+        <label class="layer-search-field">
+          <span aria-hidden="true">⌕</span>
+          <input id="layerSearch" type="search" placeholder="搜尋圖層" autocomplete="off" />
+        </label>
+        <div class="layer-toolbar-note">
+          <span id="objectLayerCount">0 個物件</span>
+          <span>由上到下為前到後</span>
         </div>
+        <div class="layer-list" id="layerList" aria-label="物件圖層清單"></div>
       </section>
     </div>
 
