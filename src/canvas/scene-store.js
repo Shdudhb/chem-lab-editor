@@ -2,6 +2,40 @@ const DEFAULT_WIDTH = 180;
 const DEFAULT_HEIGHT = 140;
 const MAX_IMPORT_SIZE = 220;
 
+const getHoseBounds = (points) => {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const left = Math.min(...xs);
+  const top = Math.min(...ys);
+  const right = Math.max(...xs);
+  const bottom = Math.max(...ys);
+  return { x: left, y: top, width: Math.max(1, right - left), height: Math.max(1, bottom - top) };
+};
+
+const getHosePath = (points, bounds) => {
+  if (points.length < 2) return '';
+  const local = points.map((point) => ({ x: point.x - bounds.x, y: point.y - bounds.y }));
+  let path = `M ${local[0].x} ${local[0].y}`;
+
+  for (let index = 0; index < local.length - 1; index += 1) {
+    const previous = local[index - 1] ?? local[index];
+    const start = local[index];
+    const end = local[index + 1];
+    const next = local[index + 2] ?? end;
+    const controlOne = {
+      x: start.x + (end.x - previous.x) / 6,
+      y: start.y + (end.y - previous.y) / 6,
+    };
+    const controlTwo = {
+      x: end.x - (next.x - start.x) / 6,
+      y: end.y - (next.y - start.y) / 6,
+    };
+    path += ` C ${controlOne.x} ${controlOne.y}, ${controlTwo.x} ${controlTwo.y}, ${end.x} ${end.y}`;
+  }
+
+  return path;
+};
+
 const makeId = () => (
   globalThis.crypto?.randomUUID?.()
   ?? `svg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -92,7 +126,10 @@ export class SceneStore extends EventTarget {
 
   snapshot() {
     return {
-      objects: this.objects.map((object) => ({ ...object })),
+      objects: this.objects.map((object) => ({
+        ...object,
+        points: object.points?.map((point) => ({ ...point })),
+      })),
       selectedIds: [...this.selectedIds],
     };
   }
@@ -122,6 +159,37 @@ export class SceneStore extends EventTarget {
     this.render();
     this.notify();
     return object.id;
+  }
+
+  addHose(points, metadata = {}) {
+    const bounds = getHoseBounds(points);
+    const object = {
+      id: makeId(),
+      type: 'hose',
+      name: '橡膠軟管',
+      ...metadata,
+      points: points.map((point) => ({ ...point })),
+      ...bounds,
+      rotation: 0,
+      color: metadata.color ?? '#8b5e3c',
+      strokeWidth: metadata.strokeWidth ?? 8,
+    };
+
+    this.objects.push(object);
+    this.selectedIds = new Set([object.id]);
+    this.render();
+    this.notify();
+    return object.id;
+  }
+
+  updateHose(id, points) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'hose') return;
+    Object.assign(object, getHoseBounds(points), {
+      points: points.map((point) => ({ ...point })),
+    });
+    this.render();
+    this.notify();
   }
 
   select(id, additive = false) {
@@ -185,11 +253,43 @@ export class SceneStore extends EventTarget {
       wrapper.style.height = `${object.height}px`;
       wrapper.style.transform = `rotate(${object.rotation}deg)`;
 
-      const parser = new DOMParser();
-      const parsedDocument = parser.parseFromString(object.svgMarkup, 'image/svg+xml');
-      const svg = parsedDocument.documentElement;
-      if (svg?.nodeName.toLowerCase() === 'svg') {
-        wrapper.appendChild(document.importNode(svg, true));
+      if (object.type === 'hose') {
+        wrapper.classList.add('hose-object');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', `0 0 ${object.width} ${object.height}`);
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.classList.add('hose-path');
+        path.setAttribute('d', getHosePath(object.points, object));
+        path.setAttribute('stroke', object.color);
+        path.setAttribute('stroke-width', object.strokeWidth);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(path);
+        wrapper.appendChild(svg);
+
+        if (this.selectedIds.has(object.id)) {
+          object.points.forEach((point, index) => {
+            const controlPoint = document.createElement('span');
+            controlPoint.className = 'hose-control-point';
+            controlPoint.dataset.hosePoint = String(index);
+            controlPoint.style.left = `${point.x - object.x}px`;
+            controlPoint.style.top = `${point.y - object.y}px`;
+            controlPoint.setAttribute('aria-label', `軟管控制點 ${index + 1}`);
+            wrapper.appendChild(controlPoint);
+          });
+        }
+      }
+
+      if (object.type !== 'hose') {
+        const parser = new DOMParser();
+        const parsedDocument = parser.parseFromString(object.svgMarkup, 'image/svg+xml');
+        const svg = parsedDocument.documentElement;
+        if (svg?.nodeName.toLowerCase() === 'svg') {
+          wrapper.appendChild(document.importNode(svg, true));
+        }
       }
 
       this.scene.appendChild(wrapper);

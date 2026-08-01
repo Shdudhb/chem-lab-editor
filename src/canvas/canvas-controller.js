@@ -5,7 +5,7 @@ import {
   parseSvgAsset,
   rotateVector,
 } from './scene-store.js';
-import { findSnapCandidate } from './snap-system.js';
+import { findPointSnapCandidate, findSnapCandidate } from './snap-system.js';
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 3;
@@ -130,7 +130,18 @@ export class CanvasController extends EventTarget {
 
     const target = event.target instanceof Element ? event.target : null;
     const handle = target?.closest('[data-handle]');
+    const hosePoint = target?.closest('[data-hose-point]');
     const objectElement = target?.closest('.canvas-object');
+
+    if (event.button === 0 && hosePoint && this.store.selectedObjects.length === 1) {
+      this.startHosePointDrag(event, Number(hosePoint.dataset.hosePoint));
+      return;
+    }
+
+    if (event.button === 0 && this.tool === 'hose' && !objectElement) {
+      this.startHoseDraw(event);
+      return;
+    }
 
     if (event.button === 0 && handle && this.store.selectedObjects.length === 1) {
       this.startHandleDrag(event, handle.dataset.handle, handle.dataset.corner);
@@ -189,6 +200,42 @@ export class CanvasController extends EventTarget {
 
     this.viewport.setPointerCapture(event.pointerId);
     this.viewport.classList.add('is-dragging-object');
+    event.preventDefault();
+  }
+
+  startHoseDraw(event) {
+    const pointer = this.screenToWorld(event.clientX, event.clientY);
+    const targetObjects = this.store.objects.filter((object) => object.type !== 'hose');
+    const startSnapCandidate = findPointSnapCandidate(pointer, targetObjects);
+    const start = startSnapCandidate
+      ? { x: pointer.x + startSnapCandidate.delta.x, y: pointer.y + startSnapCandidate.delta.y }
+      : pointer;
+    this.dragState = {
+      type: 'hose-draw',
+      pointerId: event.pointerId,
+      before: this.store.snapshot(),
+      points: [start, { ...start }],
+      startSnapCandidate,
+    };
+    this.viewport.setPointerCapture(event.pointerId);
+    this.viewport.classList.add('is-drawing-hose');
+    this.renderHosePreview(this.dragState.points, startSnapCandidate);
+    event.preventDefault();
+  }
+
+  startHosePointDrag(event, pointIndex) {
+    const object = this.store.selectedObjects[0];
+    if (object?.type !== 'hose') return;
+    this.dragState = {
+      type: 'hose-point',
+      pointerId: event.pointerId,
+      objectId: object.id,
+      pointIndex,
+      before: this.store.snapshot(),
+      points: object.points.map((point) => ({ ...point })),
+    };
+    this.viewport.setPointerCapture(event.pointerId);
+    this.viewport.classList.add('is-transforming');
     event.preventDefault();
   }
 
@@ -263,6 +310,38 @@ export class CanvasController extends EventTarget {
       return;
     }
 
+    if (this.dragState.type === 'hose-draw') {
+      const pointer = this.screenToWorld(event.clientX, event.clientY);
+      const targetObjects = this.store.objects.filter((object) => object.type !== 'hose');
+      const snapCandidate = findPointSnapCandidate(pointer, targetObjects);
+      const end = snapCandidate
+        ? { x: pointer.x + snapCandidate.delta.x, y: pointer.y + snapCandidate.delta.y }
+        : pointer;
+      this.dragState.points[1] = end;
+      this.dragState.snapCandidate = snapCandidate;
+      this.renderHosePreview(this.dragState.points, snapCandidate);
+      return;
+    }
+
+    if (this.dragState.type === 'hose-point') {
+      const pointer = this.screenToWorld(event.clientX, event.clientY);
+      const object = this.store.getObject(this.dragState.objectId);
+      const targetObjects = this.store.objects.filter((candidate) => candidate.id !== object.id && candidate.type !== 'hose');
+      const snapCandidate = this.dragState.pointIndex === 0 || this.dragState.pointIndex === object.points.length - 1
+        ? findPointSnapCandidate(pointer, targetObjects)
+        : null;
+      const nextPoint = snapCandidate
+        ? { x: pointer.x + snapCandidate.delta.x, y: pointer.y + snapCandidate.delta.y }
+        : pointer;
+      const points = this.dragState.points.map((point, index) => (
+        index === this.dragState.pointIndex ? nextPoint : point
+      ));
+      this.dragState.snapCandidate = snapCandidate;
+      this.store.updateHose(object.id, points);
+      this.renderSnapPreview(snapCandidate);
+      return;
+    }
+
     const pointer = this.screenToWorld(event.clientX, event.clientY);
     if (this.dragState.type === 'resize') {
       this.resizeObject(pointer);
@@ -316,13 +395,66 @@ export class CanvasController extends EventTarget {
     });
   }
 
+  addHoseControlPoint() {
+    const object = this.store.selectedObjects[0];
+    if (object?.type !== 'hose') return;
+    const before = this.store.snapshot();
+    let segmentIndex = 0;
+    let longest = -1;
+
+    object.points.slice(0, -1).forEach((point, index) => {
+      const next = object.points[index + 1];
+      const length = Math.hypot(next.x - point.x, next.y - point.y);
+      if (length > longest) {
+        longest = length;
+        segmentIndex = index;
+      }
+    });
+
+    const start = object.points[segmentIndex];
+    const end = object.points[segmentIndex + 1];
+    const points = object.points.map((point) => ({ ...point }));
+    points.splice(segmentIndex + 1, 0, {
+      x: (start.x + end.x) / 2,
+      y: (start.y + end.y) / 2,
+    });
+    this.store.updateHose(object.id, points);
+    this.recordHistory(before);
+  }
+
+  removeHoseControlPoint() {
+    const object = this.store.selectedObjects[0];
+    if (object?.type !== 'hose' || object.points.length <= 2) return;
+    const before = this.store.snapshot();
+    const points = object.points.slice(0, -1).map((point) => ({ ...point }));
+    points.pop();
+    points.push({ ...object.points.at(-1) });
+    this.store.updateHose(object.id, points);
+    this.recordHistory(before);
+  }
+
   handlePointerUp(event) {
     if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
 
     const state = this.dragState;
     this.dragState = null;
-    this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming');
+    this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose');
     this.clearSnapPreview();
+    this.clearHosePreview();
+
+    if (state.type === 'hose-draw') {
+      const [start, end] = state.points;
+      if (Math.hypot(end.x - start.x, end.y - start.y) > 8) {
+        this.store.addHose([
+          start,
+          { x: start.x + (end.x - start.x) / 3, y: start.y + (end.y - start.y) / 3 },
+          { x: start.x + (end.x - start.x) * 2 / 3, y: start.y + (end.y - start.y) * 2 / 3 },
+          end,
+        ]);
+      }
+      this.recordHistory(state.before);
+      return;
+    }
 
     if (state.before) {
       this.recordHistory(state.before);
@@ -331,6 +463,38 @@ export class CanvasController extends EventTarget {
     if (this.viewport.hasPointerCapture(event.pointerId)) {
       this.viewport.releasePointerCapture(event.pointerId);
     }
+  }
+
+  renderHosePreview(points, snapCandidate = null) {
+    this.scene.querySelector('.hose-preview')?.remove();
+    const [start, end] = points;
+    const controlOne = {
+      x: start.x + (end.x - start.x) / 3,
+      y: start.y + (end.y - start.y) / 3,
+    };
+    const controlTwo = {
+      x: start.x + (end.x - start.x) * 2 / 3,
+      y: start.y + (end.y - start.y) * 2 / 3,
+    };
+    const preview = document.createElement('div');
+    preview.className = 'hose-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 1000 600');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${start.x} ${start.y} C ${controlOne.x} ${controlOne.y}, ${controlTwo.x} ${controlTwo.y}, ${end.x} ${end.y}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#8b5e3c');
+    path.setAttribute('stroke-width', '8');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    preview.appendChild(svg);
+    this.scene.appendChild(preview);
+    this.renderSnapPreview(snapCandidate);
+  }
+
+  clearHosePreview() {
+    this.scene.querySelector('.hose-preview')?.remove();
   }
 
   renderSnapPreview(candidate) {

@@ -27,6 +27,10 @@
             <span aria-hidden="true">✋</span>
             平移
           </button>
+          <button class="tool-button" type="button" data-tool="hose" aria-pressed="false">
+            <span aria-hidden="true">⌁</span>
+            軟管
+          </button>
           <span class="toolbar-divider" aria-hidden="true"></span>
           <button class="secondary-button compact" type="button" data-action="import-svg">
             ＋ 匯入 SVG
@@ -123,6 +127,10 @@
             <div class="property-stat">
               <span>旋轉</span>
               <output id="selectionRotation">0°</output>
+            </div>
+            <div class="hose-controls" id="hoseControls" hidden>
+              <button class="secondary-button compact" type="button" data-action="add-hose-point">新增控制點</button>
+              <button class="secondary-button compact" type="button" data-action="remove-hose-point">刪除控制點</button>
             </div>
             <p>拖曳右下角控制點縮放，
               <br />拖曳上方控制點旋轉。</p>

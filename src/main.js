@@ -19,6 +19,7 @@ const undoButton = document.querySelector('[data-action="undo"]');
 const redoButton = document.querySelector('[data-action="redo"]');
 const propertyEmptyState = document.querySelector('#propertyEmptyState');
 const propertySelectionState = document.querySelector('#propertySelectionState');
+const hoseControls = document.querySelector('#hoseControls');
 const selectionCount = document.querySelector('#selectionCount');
 const selectionDimensions = document.querySelector('#selectionDimensions');
 const selectionRotation = document.querySelector('#selectionRotation');
@@ -46,6 +47,7 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   const hasSelection = selectedCount > 0;
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
+  hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
   objectLayerCount.textContent = `${sceneStore.objects.length} 個物件`;
 
   if (!hasSelection) return;
@@ -191,6 +193,14 @@ document.querySelector('[data-action="reset-view"]').addEventListener('click', (
   canvasController.resetView();
 });
 
+document.querySelector('[data-action="add-hose-point"]').addEventListener('click', () => {
+  canvasController.addHoseControlPoint();
+});
+
+document.querySelector('[data-action="remove-hose-point"]').addEventListener('click', () => {
+  canvasController.removeHoseControlPoint();
+});
+
 importButton.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', async () => {
@@ -250,7 +260,9 @@ document.querySelectorAll('[data-tool]').forEach((button) => {
     canvasController.setTool(tool);
     canvasHint.textContent = tool === 'pan'
       ? '拖曳畫布以平移 · 滾輪縮放'
-      : '點擊 SVG 選取 · Shift 多選 · 拖曳移動';
+      : tool === 'hose'
+        ? '拖曳建立橡膠軟管，端點靠近器材接點時會自動吸附。'
+        : '點擊 SVG 選取 · Shift 多選 · 拖曳移動';
   });
 });
 

@@ -79,6 +79,32 @@ export const findSnapCandidate = (movingObjects, targetObjects) => {
   return bestCandidate;
 };
 
+export const findPointSnapCandidate = (point, targetObjects) => {
+  let bestCandidate = null;
+
+  targetObjects.forEach((targetObject) => {
+    getSnapPoints(targetObject).forEach((targetPoint) => {
+      const distance = distanceBetween(point, targetPoint);
+      if (distance > SNAP_DISTANCE) return;
+
+      if (!bestCandidate || distance < bestCandidate.distance) {
+        bestCandidate = {
+          distance,
+          delta: {
+            x: targetPoint.x - point.x,
+            y: targetPoint.y - point.y,
+          },
+          sourcePoint: point,
+          targetPoint,
+          targetObjectId: targetObject.id,
+        };
+      }
+    });
+  });
+
+  return bestCandidate;
+};
+
 export const SNAP_RULES = {
   distance: SNAP_DISTANCE,
   description: '上下接點與左右接點在距離內時自動吸附',
