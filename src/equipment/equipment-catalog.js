@@ -47,6 +47,76 @@ export const equipmentCategoryIcons = {
   `,
 };
 
+const genericEquipmentContents = {
+  flask: `<path fill="${muted}" d="M48 17h24v30l18 42a8 8 0 0 1-7 11H37a8 8 0 0 1-7-11l18-42z"/><path d="M48 17h24M43 39h34M37 78h46"/><path stroke="${accent}" stroke-width="8" d="M40 74h40"/>`,
+  bottle: `<path fill="${muted}" d="M43 27h34v12l8 8v44a8 8 0 0 1-8 8H43a8 8 0 0 1-8-8V47l8-8z"/><path d="M43 27h34M43 39h34M35 69h50"/><path stroke="${accent}" stroke-width="8" d="M40 67h40"/>`,
+  funnel: `<path fill="${muted}" d="M20 25h80L68 59v35H52V59z"/><path d="M20 25h80M52 59h16M52 94h16"/><path stroke="${accent}" stroke-width="8" d="M53 62h14"/>`,
+  tube: `<path fill="${muted}" d="M46 18h28v61a14 14 0 0 1-28 0z"/><path d="M46 18h28M46 63h28"/><path stroke="${accent}" stroke-width="8" d="M50 61h20"/>`,
+  dish: `<path fill="${muted}" d="M22 61q38 30 76 0-4 35-38 35T22 61z"/><ellipse cx="60" cy="61" rx="38" ry="13"/><path stroke="${accent}" stroke-width="7" d="M34 61h52"/>`,
+  rack: `<path fill="${muted}" d="M20 36h80v54H20z"/><path d="M20 53h80M32 36v54M48 36v54M64 36v54M80 36v54"/><path fill="${accent}" d="M27 53h10v27H27zM43 53h10v27H43zM59 53h10v27H59zM75 53h10v27H75z"/>`,
+  uTube: `<path d="M35 20v55a25 25 0 0 0 50 0V20"/><path fill="${muted}" d="M35 49h16v26a9 9 0 0 0 18 0V49h16v26a25 25 0 0 1-50 0z"/><path stroke="${accent}" stroke-width="7" d="M43 68a17 17 0 0 0 34 0"/>`,
+  condenser: `<path fill="${muted}" d="M34 22h52v74H34z"/><path d="M34 22h52M34 96h52M48 22v74M72 22v74M25 36h9M86 36h9M25 82h9M86 82h9"/><path stroke="${accent}" stroke-width="7" d="M50 31h20v56H50z"/>`,
+  support: `<path fill="${muted}" d="M24 94h72l-7 10H31z"/><path d="M48 94V18M42 18h12M34 34h55M34 34v15M89 34v15"/><circle cx="57" cy="52" r="8" fill="${accent}"/>`,
+  clamp: `<circle cx="61" cy="55" r="17" fill="${muted}"/><circle cx="61" cy="55" r="8" fill="#fff"/><path d="M45 55H22M78 55l22-19M78 55l22 19"/><path stroke="${accent}" stroke-width="7" d="M22 55h18"/>`,
+  burner: `<path fill="${muted}" d="M35 48h50v43a9 9 0 0 1-9 9H44a9 9 0 0 1-9-9z"/><path d="M44 48h32M50 35h20v13H50zM60 35V24"/><path fill="${accent}" d="M60 24c-9-9 6-12 0-22 15 10 7 19 0 22z"/>`,
+  mesh: `<path fill="${muted}" d="M23 42h74l-8 12H31z"/><path d="M31 54 23 98M89 54l8 44M39 42l-8 12M52 42l-8 12M65 42l-8 12M78 42l-8 12M91 42l-8 12"/><path stroke="${accent}" stroke-width="5" d="M34 47h52"/>`,
+  stopper: `<path fill="${muted}" d="M37 46h46l-6 49H43z"/><path d="M37 46h46M43 95h34"/><path stroke="${accent}" stroke-width="8" d="M43 57h34"/>`,
+  rod: `<path stroke="${accent}" stroke-width="8" d="m35 92 50-65"/><path d="m31 96 8-8M85 27l7-8"/>`,
+  hose: `<path stroke="${accent}" stroke-width="8" d="M24 84C38 22 82 100 98 34"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
+  jar: `<path fill="${muted}" d="M36 31h48v61a8 8 0 0 1-8 8H44a8 8 0 0 1-8-8z"/><path d="M36 31h48M44 20h32v11H44zM36 66h48"/><path stroke="${accent}" stroke-width="8" d="M41 64h38"/>`,
+  balance: `<path fill="${muted}" d="M35 78h50v20H35z"/><path d="M60 78V25M42 35h36M30 52h24M66 52h24"/><path stroke="${accent}" stroke-width="7" d="M27 56h30M63 56h30"/><path d="M22 56 12 75h30zM58 56 48 75h30z"/>`,
+};
+
+const makeEquipment = (id, name, category, description, kind) => ({
+  id,
+  name,
+  category,
+  description,
+  svg: equipmentSvg(genericEquipmentContents[kind] ?? genericEquipmentContents.tube),
+});
+
+const extraEquipment = [
+  makeEquipment('flat-bottom-flask', '平底燒瓶', 'glassware', '平底反應瓶', 'flask'),
+  makeEquipment('volumetric-flask', '容量瓶', 'glassware', '精確定容容器', 'flask'),
+  makeEquipment('filter-flask', '抽濾瓶', 'glassware', '減壓過濾容器', 'flask'),
+  makeEquipment('test-tube-rack', '試管架', 'glassware', '試管收納架', 'rack'),
+  makeEquipment('u-tube', 'U 型管', 'glassware', '連通與氣體實驗用管', 'uTube'),
+  makeEquipment('condenser', '冷凝管', 'glassware', '蒸餾冷凝器材', 'condenser'),
+  makeEquipment('long-neck-funnel', '長頸漏斗', 'glassware', '液體導入漏斗', 'funnel'),
+  makeEquipment('dropping-funnel', '滴液漏斗', 'glassware', '控制滴加速度', 'funnel'),
+  makeEquipment('separatory-funnel', '分液漏斗', 'glassware', '液液分離器材', 'funnel'),
+  makeEquipment('dropper', '滴管', 'glassware', '少量液體轉移', 'tube'),
+  makeEquipment('pipette', '移液管', 'glassware', '精確移取液體', 'tube'),
+  makeEquipment('volumetric-pipette', '容量吸管', 'glassware', '定量移液器材', 'tube'),
+  makeEquipment('reagent-bottle', '試劑瓶', 'glassware', '液體試劑儲存', 'bottle'),
+  makeEquipment('wide-mouth-bottle', '廣口瓶', 'glassware', '固體試劑儲存', 'bottle'),
+  makeEquipment('wash-bottle', '洗瓶', 'glassware', '蒸餾水沖洗器材', 'bottle'),
+  makeEquipment('petri-dish', '培養皿', 'glassware', '培養與觀察樣品', 'dish'),
+  makeEquipment('evaporating-dish', '蒸發皿', 'glassware', '蒸發濃縮液體', 'dish'),
+  makeEquipment('watch-glass', '時計皿', 'glassware', '覆蓋與少量蒸發', 'dish'),
+  makeEquipment('surface-dish', '表面皿', 'glassware', '樣品承載器皿', 'dish'),
+  makeEquipment('crystallizing-dish', '結晶皿', 'glassware', '溶液結晶器皿', 'dish'),
+  makeEquipment('universal-clamp', '萬用夾', 'support', '多用途固定夾', 'clamp'),
+  makeEquipment('flask-clamp', '燒瓶夾', 'support', '固定燒瓶', 'clamp'),
+  makeEquipment('test-tube-holder', '試管夾', 'support', '夾持試管', 'clamp'),
+  makeEquipment('crucible-tongs', '坩堝鉗', 'support', '夾取高溫坩堝', 'clamp'),
+  makeEquipment('bunsen-burner', '本生燈', 'heating', '高溫氣體加熱器材', 'burner'),
+  makeEquipment('asbestos-mesh', '石棉網', 'heating', '均勻分散熱量', 'mesh'),
+  makeEquipment('wooden-stopper', '木塞', 'accessories', '容器密封配件', 'stopper'),
+  makeEquipment('glass-tubing', '玻璃導管', 'accessories', '硬質導氣管', 'rod'),
+  makeEquipment('rubber-tubing', '橡膠軟管', 'accessories', '柔性連接管', 'hose'),
+  makeEquipment('water-tank', '水箱', 'accessories', '水流實驗容器', 'bottle'),
+  makeEquipment('aspirator', '水流抽氣器', 'accessories', '水流產生真空', 'funnel'),
+  makeEquipment('water-delivery-tube', '導水管', 'accessories', '水下導管', 'hose'),
+  makeEquipment('gas-delivery-tube', '導氣管', 'accessories', '氣體導管', 'hose'),
+  makeEquipment('gas-jar', '集氣瓶', 'accessories', '收集氣體', 'jar'),
+  makeEquipment('pneumatic-trough', '集氣槽', 'accessories', '排水集氣槽', 'bottle'),
+  makeEquipment('test-tube-brush', '試管刷', 'accessories', '清潔試管', 'rod'),
+  makeEquipment('spatula', '藥匙', 'accessories', '取用固體藥品', 'rod'),
+  makeEquipment('tweezers', '鑷子', 'accessories', '夾取細小樣品', 'clamp'),
+  makeEquipment('electronic-balance', '電子天平', 'accessories', '量測樣品質量', 'balance'),
+];
+
 export const equipmentCatalog = [
   {
     id: 'beaker',
@@ -196,6 +266,7 @@ export const equipmentCatalog = [
       <path stroke="${accent}" stroke-width="8" d="M43 58h34"/>
     `),
   },
+  ...extraEquipment,
 ];
 
 export const getEquipmentById = (id) => equipmentCatalog.find((item) => item.id === id);
