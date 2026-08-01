@@ -2,11 +2,12 @@ import './styles.css';
 import { CanvasController } from './canvas/canvas-controller.js';
 import { SceneStore } from './canvas/scene-store.js';
 import { exportScene } from './export/exporter.js';
+import { createSceneStorage, parseScene, serializeScene } from './storage/scene-storage.js';
+import { createEquipmentUserStore } from './equipment/equipment-user-store.js';
 import {
   equipmentCatalog,
   equipmentCategories,
   equipmentCategoryIcons,
-  getEquipmentById,
 } from './equipment/equipment-catalog.js';
 
 const viewport = document.querySelector('#canvasViewport');
@@ -57,9 +58,20 @@ const exportFormat = document.querySelector('#exportFormat');
 const exportScale = document.querySelector('#exportScale');
 const exportTransparent = document.querySelector('#exportTransparent');
 const exportScaleControl = document.querySelector('#exportScaleControl');
+const saveSceneButton = document.querySelector('#saveSceneButton');
+const openSceneButton = document.querySelector('#openSceneButton');
+const sceneFileInput = document.querySelector('#sceneFileInput');
+const customEquipmentButton = document.querySelector('#openCustomEquipmentButton');
+const customEquipmentDialog = document.querySelector('#customEquipmentDialog');
+const customEquipmentForm = document.querySelector('#customEquipmentForm');
+const customEquipmentName = document.querySelector('#customEquipmentName');
+const customEquipmentDescription = document.querySelector('#customEquipmentDescription');
+const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
 
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
+const sceneStorage = createSceneStorage({ endpoint: import.meta.env.VITE_SCENE_STORAGE_URL });
+const equipmentUserStore = createEquipmentUserStore();
 
 const DEFAULT_LIQUID_LAYER = { level: 0, color: '#67aee8', opacity: 0 };
 
@@ -211,6 +223,42 @@ const equipmentMetadata = (item) => ({
   category: item.category,
 });
 
+const userEquipmentCategories = [
+  { id: 'favorites', label: '收藏器材', icon: '★' },
+  { id: 'recent', label: '最近使用', icon: '↻' },
+  { id: 'custom', label: '自訂器材', icon: '✦' },
+];
+
+const getAllEquipment = () => [...equipmentCatalog, ...equipmentUserStore.custom];
+const getEquipmentCategories = () => [...equipmentCategories, ...userEquipmentCategories];
+const escapeHtml = (value) => String(value)
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#39;');
+
+const sanitizeEquipmentSvg = (svgText) => {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(svgText, 'image/svg+xml');
+  const root = document.documentElement;
+  if (!root || root.nodeName.toLowerCase() !== 'svg' || document.querySelector('parsererror')) {
+    throw new Error('請提供有效的 SVG 圖形。');
+  }
+  document.querySelectorAll('script, foreignObject').forEach((node) => node.remove());
+  document.querySelectorAll('*').forEach((element) => {
+    [...element.attributes].forEach((attribute) => {
+      if (attribute.name.toLowerCase().startsWith('on')) element.removeAttribute(attribute.name);
+    });
+  });
+  return new XMLSerializer().serializeToString(root);
+};
+
+const addEquipmentToScene = (item, screenPoint = null) => {
+  canvasController.addSvgMarkup(item.svg, equipmentMetadata(item), screenPoint);
+  equipmentUserStore.addRecent(item.id);
+};
+
 let activeEquipmentCategory = 'all';
 let layerQuery = '';
 
@@ -348,18 +396,24 @@ const renderLayers = () => {
 const renderEquipmentCategories = () => {
   equipmentCategoriesElement.replaceChildren();
 
-  equipmentCategories.forEach((category) => {
+  getEquipmentCategories().forEach((category) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'equipment-category-button';
     button.classList.toggle('is-active', category.id === activeEquipmentCategory);
     button.innerHTML = `
       <span class="equipment-category-main">
-        <span class="equipment-category-icon">${equipmentCategoryIcons[category.id]}</span>
+        <span class="equipment-category-icon">${category.icon ?? equipmentCategoryIcons[category.id] ?? '•'}</span>
         <span>${category.label}</span>
       </span>
       <span class="equipment-category-trailing">
-        <span>${category.id === 'all' ? equipmentCatalog.length : equipmentCatalog.filter((item) => item.category === category.id).length}</span>
+        <span>${category.id === 'favorites'
+          ? getAllEquipment().filter((item) => equipmentUserStore.isFavorite(item.id)).length
+          : category.id === 'recent'
+            ? equipmentUserStore.recent.filter((id) => getAllEquipment().some((item) => item.id === id)).length
+            : category.id === 'all'
+              ? getAllEquipment().length
+              : getAllEquipment().filter((item) => item.category === category.id).length}</span>
         <span class="equipment-category-chevron" aria-hidden="true">›</span>
       </span>
     `;
@@ -375,8 +429,11 @@ const renderEquipmentCategories = () => {
 
 const renderEquipmentList = () => {
   const query = equipmentSearch.value.trim().toLowerCase();
-  const filtered = equipmentCatalog.filter((item) => {
+  const allEquipment = getAllEquipment();
+  const filtered = allEquipment.filter((item) => {
     const matchesCategory = activeEquipmentCategory === 'all'
+      || activeEquipmentCategory === 'favorites' && equipmentUserStore.isFavorite(item.id)
+      || activeEquipmentCategory === 'recent' && equipmentUserStore.recent.includes(item.id)
       || item.category === activeEquipmentCategory;
     const matchesQuery = !query
       || item.name.toLowerCase().includes(query)
@@ -384,7 +441,7 @@ const renderEquipmentList = () => {
     return matchesCategory && matchesQuery;
   });
 
-  const activeCategory = equipmentCategories.find((category) => category.id === activeEquipmentCategory);
+  const activeCategory = getEquipmentCategories().find((category) => category.id === activeEquipmentCategory);
   equipmentCategoryLabel.textContent = query
     ? `搜尋結果${activeCategory && activeCategory.id !== 'all' ? ` · ${activeCategory.label}` : ''}`
     : activeCategory?.label ?? '全部器材';
@@ -400,23 +457,49 @@ const renderEquipmentList = () => {
   }
 
   filtered.forEach((item) => {
-    const card = document.createElement('button');
-    card.type = 'button';
+    const card = document.createElement('div');
     card.className = 'equipment-card';
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
     card.draggable = true;
     card.dataset.equipmentId = item.id;
     card.innerHTML = `
       <span class="equipment-preview" aria-hidden="true">${item.svg}</span>
       <span class="equipment-card-copy">
-        <strong>${item.name}</strong>
-        <small>${item.description}</small>
+        <strong>${escapeHtml(item.name)}</strong>
+        <small>${escapeHtml(item.description)}</small>
       </span>
-      <span class="equipment-add-icon" aria-hidden="true">＋</span>
+      <span class="equipment-card-actions">
+        <button class="equipment-favorite ${equipmentUserStore.isFavorite(item.id) ? 'is-active' : ''}" type="button" aria-label="${equipmentUserStore.isFavorite(item.id) ? '取消收藏' : '加入收藏'}">★</button>
+        ${item.category === 'custom' ? '<button class="equipment-delete" type="button" aria-label="刪除自訂器材">×</button>' : ''}
+        <span class="equipment-add-icon" aria-hidden="true">＋</span>
+      </span>
     `;
 
-    card.addEventListener('click', () => {
-      canvasController.addSvgMarkup(item.svg, equipmentMetadata(item));
+    const addCardEquipment = () => {
+      addEquipmentToScene(item);
       canvasHint.textContent = `${item.name} 已加入畫布 · 拖曳物件調整位置`;
+    };
+    card.addEventListener('click', (event) => {
+      if (event.target.closest('button')) return;
+      addCardEquipment();
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      addCardEquipment();
+    });
+    card.querySelector('.equipment-favorite').addEventListener('click', (event) => {
+      event.stopPropagation();
+      equipmentUserStore.toggleFavorite(item.id);
+      renderEquipmentCategories();
+      renderEquipmentList();
+    });
+    card.querySelector('.equipment-delete')?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      equipmentUserStore.removeCustom(item.id);
+      renderEquipmentCategories();
+      renderEquipmentList();
     });
 
     card.addEventListener('dragstart', (event) => {
@@ -506,8 +589,8 @@ document.querySelector('[data-action="open-export"]').addEventListener('click', 
 });
 
 exportFormat.addEventListener('change', () => {
-  exportScaleControl.hidden = exportFormat.value === 'svg';
-  exportTransparent.disabled = exportFormat.value === 'jpg';
+  exportScaleControl.hidden = ['svg', 'json'].includes(exportFormat.value);
+  exportTransparent.disabled = ['jpg', 'json'].includes(exportFormat.value);
 });
 
 exportForm.addEventListener('submit', async (event) => {
@@ -515,17 +598,98 @@ exportForm.addEventListener('submit', async (event) => {
   const submit = document.querySelector('#exportSubmit');
   submit.disabled = true;
   try {
-    await exportScene(sceneStore.objects, {
-      format: exportFormat.value,
-      scale: Number(exportScale.value),
-      transparent: exportTransparent.checked,
-    });
+    if (exportFormat.value === 'json') {
+      const sceneDocument = getSceneDocument();
+      await sceneStorage.save(sceneDocument);
+      downloadSceneDocument(sceneDocument);
+    } else {
+      await exportScene(sceneStore.objects, {
+        format: exportFormat.value,
+        scale: Number(exportScale.value),
+        transparent: exportTransparent.checked,
+      });
+    }
     exportDialog.close();
     canvasHint.textContent = `已匯出 ${exportFormat.value.toUpperCase()} 圖稿。`;
   } catch (error) {
     canvasHint.textContent = `匯出失敗：${error.message}`;
   } finally {
     submit.disabled = false;
+  }
+});
+
+const getSceneDocument = () => ({
+  ...sceneStore.snapshot(),
+  view: { ...canvasController.view },
+});
+
+const downloadSceneDocument = (sceneDocument) => {
+  const blob = new Blob([serializeScene(sceneDocument)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `chem-lab-scene-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+const saveScene = async () => {
+  const sceneDocument = getSceneDocument();
+  await sceneStorage.save(sceneDocument);
+  downloadSceneDocument(sceneDocument);
+  canvasHint.textContent = '場景已儲存，可用「開啟場景」重新載入。';
+};
+
+const loadSceneDocument = (sceneDocument) => {
+  canvasController.loadScene(sceneDocument, sceneDocument.view);
+  canvasHint.textContent = '場景已開啟。';
+};
+
+saveSceneButton.addEventListener('click', async () => {
+  saveSceneButton.disabled = true;
+  try {
+    await saveScene();
+  } catch (error) {
+    canvasHint.textContent = `儲存失敗：${error.message}`;
+  } finally {
+    saveSceneButton.disabled = false;
+  }
+});
+
+openSceneButton.addEventListener('click', () => sceneFileInput.click());
+
+sceneFileInput.addEventListener('change', async () => {
+  const [file] = sceneFileInput.files;
+  if (!file) return;
+  try {
+    loadSceneDocument(parseScene(await file.text()));
+  } catch (error) {
+    canvasHint.textContent = `開啟失敗：${error.message}`;
+  } finally {
+    sceneFileInput.value = '';
+  }
+});
+
+customEquipmentButton.addEventListener('click', () => {
+  customEquipmentForm.reset();
+  customEquipmentDialog.showModal();
+});
+
+customEquipmentForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  try {
+    const item = equipmentUserStore.addCustom({
+      name: customEquipmentName.value.trim(),
+      description: customEquipmentDescription.value.trim() || '自訂實驗器材',
+      svg: sanitizeEquipmentSvg(customEquipmentSvg.value),
+    });
+    customEquipmentDialog.close();
+    activeEquipmentCategory = 'custom';
+    renderEquipmentCategories();
+    renderEquipmentList();
+    canvasHint.textContent = `${item.name} 已加入自訂器材。`;
+  } catch (error) {
+    canvasHint.textContent = `自訂器材無法加入：${error.message}`;
   }
 });
 
@@ -611,10 +775,10 @@ viewport.addEventListener('drop', (event) => {
   viewport.classList.remove('is-drop-target');
 
   const equipmentId = event.dataTransfer.getData('application/x-chem-lab-equipment');
-  const item = getEquipmentById(equipmentId);
+  const item = getAllEquipment().find((candidate) => candidate.id === equipmentId);
   if (!item) return;
 
-  canvasController.addSvgMarkup(item.svg, equipmentMetadata(item), {
+  addEquipmentToScene(item, {
     x: event.clientX,
     y: event.clientY,
   });
@@ -672,3 +836,9 @@ equipmentSearch.value = '';
 renderEquipmentCategories();
 renderEquipmentList();
 renderLayers();
+
+sceneStorage.load().then((savedScene) => {
+  if (savedScene?.objects?.length) loadSceneDocument(savedScene);
+}).catch(() => {
+  // A missing or unavailable autosave should not prevent the editor from opening.
+});

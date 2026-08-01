@@ -15,12 +15,15 @@ npm run dev
 
 - Infinite Canvas：格線、平移、縮放與物件選取
 - SVG 器材庫：搜尋、分類、點擊放置與拖曳放置
+- 器材管理：收藏、最近使用與自訂 SVG 器材
 - 器材吸附：上下／左右接點預覽與自動對位
 - Bezier 橡膠軟管：控制點、端點吸附與自動更新
-- 液體屬性：液面高度、顏色與透明度
-- 標註工具：文字、箭頭、線段、矩形、圓形與編號
-- 圖層管理：搜尋、重新命名、隱藏、鎖定、排序與群組
-- 匯出：SVG、PNG、JPG，支援透明背景與 1x／2x／4x
+- 液體屬性：多層液體、液面高度、顏色與透明度
+- 標註工具：文字、箭頭、自由線、線段、矩形、圓形與編號
+- 圖層管理：搜尋、重新命名、隱藏、鎖定、排序與群組變形
+- 場景檔案：儲存／開啟 JSON，並支援瀏覽器本機自動保存
+- 儲存介面：內建 localStorage，另提供可插拔 HTTP 儲存 adapter
+- 匯出：SVG、PNG、JPG、JSON，支援透明背景與 1x／2x／4x
 
 ## 建置與預覽
 
@@ -28,6 +31,8 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+若要接上雲端場景服務，可在啟動前設定 `VITE_SCENE_STORAGE_URL`。介面會以 `PUT` 儲存、`GET` 讀取、`DELETE` 清除 JSON 場景；未設定時則使用瀏覽器 `localStorage`。
 
 ## 技術選擇
 
@@ -43,8 +48,11 @@ src/
     snap-system.js
   equipment/
     equipment-catalog.js
+    equipment-user-store.js
   export/
     exporter.js
+  storage/
+    scene-storage.js
   main.js
   styles.css
 ```

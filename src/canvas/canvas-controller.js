@@ -117,6 +117,17 @@ export class CanvasController extends EventTarget {
     this.emitHistoryChange();
   }
 
+  loadScene(snapshot, view = null) {
+    this.store.restore(snapshot);
+    this.history = [];
+    this.historyIndex = -1;
+    if (view && Number.isFinite(view.zoom) && Number.isFinite(view.panX) && Number.isFinite(view.panY)) {
+      this.view = { zoom: view.zoom, panX: view.panX, panY: view.panY };
+    }
+    this.render();
+    this.emitHistoryChange();
+  }
+
   get canUndo() {
     return this.historyIndex >= 0;
   }

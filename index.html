@@ -74,7 +74,8 @@
 
         <div class="topbar-actions">
           <button class="secondary-button" type="button" data-action="open-export">匯出</button>
-          <button class="primary-button" type="button" disabled title="雲端儲存尚未實作">儲存</button>
+          <button class="secondary-button" id="openSceneButton" type="button">開啟場景</button>
+          <button class="primary-button" id="saveSceneButton" type="button">儲存場景</button>
         </div>
       </header>
 
@@ -85,7 +86,7 @@
               <p class="eyebrow">LIBRARY</p>
               <h2>器材</h2>
             </div>
-            <span class="phase-badge">Phase 8</span>
+            <span class="phase-badge">Phase P2</span>
           </div>
           <label class="search-field">
             <span aria-hidden="true">⌕</span>
@@ -99,6 +100,7 @@
             </span>
             <span class="equipment-module-chevron" aria-hidden="true">⌄</span>
           </div>
+          <button class="secondary-button compact equipment-custom-button" id="openCustomEquipmentButton" type="button">＋ 自訂器材</button>
           <div class="equipment-categories" id="equipmentCategories" aria-label="器材分類"></div>
           <div class="equipment-list-heading">
             <strong id="equipmentCategoryLabel">全部器材</strong>
@@ -259,6 +261,7 @@
             <option value="svg">SVG</option>
             <option value="png">PNG</option>
             <option value="jpg">JPG</option>
+            <option value="json">JSON 場景</option>
           </select>
         </label>
         <label class="property-control" id="exportScaleControl" hidden>
@@ -281,6 +284,35 @@
     </dialog>
 
     <input id="svgFileInput" type="file" accept="image/svg+xml,.svg" hidden />
+    <input id="sceneFileInput" type="file" accept="application/json,.json" hidden />
+
+    <dialog class="export-dialog custom-equipment-dialog" id="customEquipmentDialog">
+      <form method="dialog" id="customEquipmentForm">
+        <div class="export-dialog-heading">
+          <div>
+            <p class="eyebrow">CUSTOM EQUIPMENT</p>
+            <h2>新增自訂器材</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="關閉自訂器材視窗">×</button>
+        </div>
+        <label class="property-control">
+          <span>名稱</span>
+          <input id="customEquipmentName" name="name" type="text" required maxlength="40" />
+        </label>
+        <label class="property-control">
+          <span>說明</span>
+          <input id="customEquipmentDescription" name="description" type="text" maxlength="80" />
+        </label>
+        <label class="property-control">
+          <span>SVG 圖形</span>
+          <textarea id="customEquipmentSvg" name="svg" rows="6" required placeholder="貼上 &lt;svg&gt;...&lt;/svg&gt;"></textarea>
+        </label>
+        <div class="export-dialog-actions">
+          <button class="secondary-button" value="cancel">取消</button>
+          <button class="primary-button" id="customEquipmentSubmit" value="default">加入器材庫</button>
+        </div>
+      </form>
+    </dialog>
 
     <script type="module" src="/src/main.js"></script>
   </body>
