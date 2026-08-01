@@ -32,6 +32,16 @@ npm run build
 npm run preview
 ```
 
+## 測試與效能
+
+```bash
+npm test
+```
+
+回歸測試涵蓋器材吸附、軟管 Bezier 路徑、分層液體、群組場景、標註匯出與儲存介面。拖曳時使用 `requestAnimationFrame` 合併更新；SVG 物件會優先採局部重繪，畫布狀態列會顯示最近一次渲染耗時、物件數與更新模式。
+
+畫布支援以鍵盤操作：先聚焦畫布後可用方向鍵移動選取物件，`Shift` 加方向鍵以 10 px 移動，`Delete`／`Backspace` 刪除，`Escape` 取消目前操作。器材卡片與圖層列也可用 `Enter`／空白鍵操作。Tailscale 與區域網路連線問題請參考 [故障排除文件](docs/TROUBLESHOOTING.md)。
+
 若要接上雲端場景服務，可在啟動前設定 `VITE_SCENE_STORAGE_URL`。介面會以 `PUT` 儲存、`GET` 讀取、`DELETE` 清除 JSON 場景；未設定時則使用瀏覽器 `localStorage`。
 
 ## 技術選擇

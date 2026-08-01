@@ -189,6 +189,7 @@ button:disabled, input:disabled { cursor: not-allowed; }
 .icon-button.small { width: 26px; height: 26px; color: #87938e; font-size: 16px; }
 .layer-row { display: flex; align-items: center; gap: 10px; height: 45px; padding: 0 12px; color: #61706a; border-top: 1px solid #edf1ef; font-size: 12px; }
 .layer-row.is-current { color: #247b6e; background: #f0f6f3; border: 1px solid #d8e9e2; border-radius: 6px; }
+.layer-row:focus-visible { outline: 2px solid #63ad9d; outline-offset: -2px; }
 .layer-visibility, .layer-lock { color: #93a19b; font-size: 13px; }
 .layer-swatch { width: 10px; height: 10px; background: #dfe9e4; border-radius: 3px; }
 .layer-name { font-weight: 600; }

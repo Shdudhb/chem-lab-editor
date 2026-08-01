@@ -14,6 +14,7 @@ const viewport = document.querySelector('#canvasViewport');
 const scene = document.querySelector('#canvasScene');
 const zoomReadout = document.querySelector('#zoomReadout');
 const coordinatesReadout = document.querySelector('#coordinatesReadout');
+const renderReadout = document.querySelector('#renderReadout');
 const canvasHint = document.querySelector('#canvasHint');
 const fileInput = document.querySelector('#svgFileInput');
 const importButton = document.querySelector('[data-action="import-svg"]');
@@ -303,6 +304,9 @@ const renderLayers = () => {
   objects.forEach((object) => {
     const row = document.createElement('div');
     row.className = 'layer-row';
+    row.setAttribute('role', 'listitem');
+    row.tabIndex = 0;
+    row.setAttribute('aria-selected', String(sceneStore.selectedIds.has(object.id)));
     row.classList.toggle('is-current', sceneStore.selectedIds.has(object.id));
     row.classList.toggle('is-hidden', object.visible === false);
     row.classList.toggle('is-locked', object.locked === true);
@@ -314,6 +318,12 @@ const renderLayers = () => {
       } else {
         sceneStore.select(object.id, event.shiftKey);
       }
+    });
+    row.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      if (object.groupId) sceneStore.selectGroup(object.groupId, event.shiftKey);
+      else sceneStore.select(object.id, event.shiftKey);
     });
 
     const isGroupFirst = object.groupId
@@ -460,6 +470,7 @@ const renderEquipmentList = () => {
     const card = document.createElement('div');
     card.className = 'equipment-card';
     card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `${item.name}：${item.description}`);
     card.tabIndex = 0;
     card.draggable = true;
     card.dataset.equipmentId = item.id;
@@ -524,6 +535,10 @@ canvasController.addEventListener('snapchange', ({ detail }) => {
 sceneStore.addEventListener('change', (event) => {
   updateSelectionPanel(event.detail);
   renderLayers();
+  if (event.detail.performance) {
+    const { lastDuration, objectCount, mode } = event.detail.performance;
+    renderReadout.textContent = `渲染 ${lastDuration.toFixed(1)} ms · ${objectCount} 物件 · ${mode === 'partial' ? '局部' : '完整'}`;
+  }
 });
 
 canvasController.addEventListener('historychange', (event) => {
@@ -832,6 +847,7 @@ window.addEventListener('keydown', (event) => {
 updateViewReadouts(canvasController.view);
 updateSelectionPanel({ selectedObjects: [] });
 updateHistoryButtons({ canUndo: false, canRedo: false });
+renderReadout.textContent = `渲染 ${sceneStore.renderMetrics.lastDuration.toFixed(1)} ms · 0 物件 · 完整`;
 equipmentSearch.value = '';
 renderEquipmentCategories();
 renderEquipmentList();

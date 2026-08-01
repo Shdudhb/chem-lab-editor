@@ -86,7 +86,7 @@
               <p class="eyebrow">LIBRARY</p>
               <h2>器材</h2>
             </div>
-            <span class="phase-badge">Phase P2</span>
+            <span class="phase-badge">Phase P3</span>
           </div>
           <label class="search-field">
             <span aria-hidden="true">⌕</span>
@@ -113,9 +113,9 @@
         <section class="canvas-panel" aria-label="無限畫布區域">
           <div class="canvas-toolbar-note">
             <span class="live-dot" aria-hidden="true"></span>
-            <span id="canvasHint">點擊 SVG 選取 · Shift 多選 · 拖曳移動</span>
+            <span id="canvasHint" aria-live="polite">點擊 SVG 選取 · Shift 多選 · 拖曳移動</span>
           </div>
-          <div class="canvas-viewport" id="canvasViewport" tabindex="0" aria-label="Infinite Canvas，可平移與縮放">
+          <div class="canvas-viewport" id="canvasViewport" tabindex="0" aria-label="Infinite Canvas，可平移與縮放" aria-keyshortcuts="Delete Backspace ArrowUp ArrowDown ArrowLeft ArrowRight">
             <div class="canvas-scene" id="canvasScene">
               <div class="canvas-origin-marker"></div>
               <div class="empty-canvas-message">
@@ -130,6 +130,8 @@
             <span id="coordinatesReadout">X 0 · Y 0</span>
             <span class="status-separator" aria-hidden="true"></span>
             <span>格線 20 px</span>
+            <span class="status-separator" aria-hidden="true"></span>
+            <span id="renderReadout">渲染 0 ms</span>
           </div>
         </section>
 
@@ -242,7 +244,7 @@
           <span id="objectLayerCount">0 個物件</span>
           <span>由上到下為前到後</span>
         </div>
-        <div class="layer-list" id="layerList" aria-label="物件圖層清單"></div>
+        <div class="layer-list" id="layerList" role="list" aria-label="物件圖層清單"></div>
       </section>
     </div>
 

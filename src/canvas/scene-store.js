@@ -289,6 +289,10 @@ export class SceneStore extends EventTarget {
     this.scene = scene;
     this.objects = [];
     this.selectedIds = new Set();
+    this.renderFrame = null;
+    this.pendingRenderIds = new Set();
+    this.pendingFullRender = false;
+    this.renderMetrics = { renders: 0, lastDuration: 0, mode: 'full', objectCount: 0 };
     this.render();
   }
 
@@ -321,6 +325,13 @@ export class SceneStore extends EventTarget {
   }
 
   restore(snapshot) {
+    if (this.renderFrame) {
+      if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.renderFrame);
+      else clearTimeout(this.renderFrame);
+      this.renderFrame = null;
+    }
+    this.pendingRenderIds.clear();
+    this.pendingFullRender = false;
     this.objects = snapshot.objects.map((object) => ({ ...object }));
     this.selectedIds = new Set(snapshot.selectedIds);
     this.render();
@@ -475,6 +486,22 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
+  removeObjects(ids) {
+    const removeIds = new Set(ids);
+    if (!removeIds.size) return;
+    this.objects = this.objects.filter((object) => !removeIds.has(object.id));
+    this.objects.forEach((object) => {
+      if (object.type !== 'hose' || !object.connections) return;
+      ['start', 'end'].forEach((endpoint) => {
+        if (removeIds.has(object.connections[endpoint]?.objectId)) object.connections[endpoint] = null;
+      });
+    });
+    removeIds.forEach((id) => this.selectedIds.delete(id));
+    this.refreshHoseConnections();
+    this.render();
+    this.notify();
+  }
+
   setLocked(id, locked) {
     const object = this.getObject(id);
     if (!object) return;
@@ -589,25 +616,33 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
-  updateHose(id, points) {
+  updateHose(id, points, { defer = false } = {}) {
     const object = this.getObject(id);
     if (!object || object.type !== 'hose') return;
     Object.assign(object, getHoseBounds(points), {
       points: points.map((point) => ({ ...point })),
     });
-    this.render();
-    this.notify();
+    if (defer) {
+      this.requestRender([], { full: true });
+    } else {
+      this.render();
+      this.notify();
+    }
   }
 
-  updateHoseConnections(id, connections) {
+  updateHoseConnections(id, connections, { defer = false } = {}) {
     const object = this.getObject(id);
     if (!object || object.type !== 'hose') return;
     object.connections = {
       start: connections.start ? { ...connections.start } : null,
       end: connections.end ? { ...connections.end } : null,
     };
-    this.render();
-    this.notify();
+    if (defer) {
+      this.requestRender([], { full: true });
+    } else {
+      this.render();
+      this.notify();
+    }
   }
 
   updateHoseStyle(id, style) {
@@ -643,15 +678,25 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
-  updateObjects(ids, updater) {
-    ids.forEach((id) => {
+  updateObjects(ids, updater, { defer = false } = {}) {
+    const objectIds = [...ids];
+    objectIds.forEach((id) => {
       const object = this.objects.find((candidate) => candidate.id === id);
       if (object) updater(object);
     });
 
-    this.refreshHoseConnections();
-    this.render();
-    this.notify();
+    if (defer) {
+      const affectsConnectedHose = this.objects.some((object) => object.type === 'hose'
+        && ['start', 'end'].some((endpoint) => object.connections?.[endpoint]
+          && objectIds.includes(object.connections[endpoint].objectId)));
+      this.requestRender(objectIds, {
+        full: objectIds.some((id) => this.getObject(id)?.type !== 'svg') || affectsConnectedHose,
+      });
+    } else {
+      this.refreshHoseConnections();
+      this.render();
+      this.notify();
+    }
   }
 
   refreshHoseConnections() {
@@ -689,7 +734,80 @@ export class SceneStore extends EventTarget {
     return { x: left, y: top, width: right - left, height: bottom - top };
   }
 
+  requestRender(ids = [], { full = false } = {}) {
+    [...ids].forEach((id) => this.pendingRenderIds.add(id));
+    this.pendingFullRender ||= full;
+    if (this.renderFrame) return;
+    const callback = () => {
+      this.renderFrame = null;
+      const dirtyIds = [...this.pendingRenderIds];
+      const needsFullRender = this.pendingFullRender
+        || !dirtyIds.length
+        || dirtyIds.some((id) => this.getObject(id)?.type !== 'svg');
+      this.pendingRenderIds.clear();
+      this.pendingFullRender = false;
+      this.refreshHoseConnections();
+      if (needsFullRender) {
+        this.render();
+      } else {
+        this.renderPartial(dirtyIds);
+      }
+      this.notify();
+    };
+    this.renderFrame = typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame(callback)
+      : setTimeout(callback, 16);
+  }
+
+  flushRender() {
+    if (!this.renderFrame) return;
+    if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.renderFrame);
+    else clearTimeout(this.renderFrame);
+    this.renderFrame = null;
+    const dirtyIds = [...this.pendingRenderIds];
+    const needsFullRender = this.pendingFullRender
+      || !dirtyIds.length
+      || dirtyIds.some((id) => this.getObject(id)?.type !== 'svg');
+    this.pendingRenderIds.clear();
+    this.pendingFullRender = false;
+    this.refreshHoseConnections();
+    if (needsFullRender) this.render();
+    else this.renderPartial(dirtyIds);
+    this.notify();
+  }
+
+  renderPartial(ids) {
+    const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    ids.forEach((id) => {
+      const object = this.getObject(id);
+      const wrapper = this.scene.querySelector(`[data-object-id="${id}"]`);
+      if (!object || !wrapper) return;
+      wrapper.style.left = `${object.x}px`;
+      wrapper.style.top = `${object.y}px`;
+      wrapper.style.width = `${object.width}px`;
+      wrapper.style.height = `${object.height}px`;
+      wrapper.style.transform = `rotate(${object.rotation}deg)`;
+      wrapper.classList.toggle('is-selected', this.selectedIds.has(object.id));
+      wrapper.classList.toggle('is-locked', object.locked === true);
+      wrapper.setAttribute('aria-selected', String(this.selectedIds.has(object.id)));
+    });
+    this.scene.querySelector('.selection-overlay')?.remove();
+    this.renderSelectionOverlay();
+    this.recordRenderMetric('partial', startedAt);
+  }
+
+  recordRenderMetric(mode, startedAt) {
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    this.renderMetrics = {
+      renders: this.renderMetrics.renders + 1,
+      lastDuration: now - startedAt,
+      mode,
+      objectCount: this.objects.length,
+    };
+  }
+
   render() {
+    const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
     this.scene.querySelectorAll('.canvas-object, .selection-overlay').forEach((node) => node.remove());
     const emptyMessage = this.scene.querySelector('.empty-canvas-message');
     emptyMessage.hidden = this.objects.length > 0;
@@ -700,6 +818,8 @@ export class SceneStore extends EventTarget {
       wrapper.className = 'canvas-object';
       wrapper.dataset.objectId = object.id;
       wrapper.setAttribute('role', 'img');
+      wrapper.setAttribute('tabindex', '-1');
+      wrapper.setAttribute('aria-selected', String(this.selectedIds.has(object.id)));
       wrapper.setAttribute('aria-label', object.name ?? '匯入的 SVG 物件');
       wrapper.classList.toggle('is-selected', this.selectedIds.has(object.id));
       wrapper.classList.toggle('is-locked', object.locked === true);
@@ -775,6 +895,7 @@ export class SceneStore extends EventTarget {
     });
 
     this.renderSelectionOverlay();
+    this.recordRenderMetric('full', startedAt);
   }
 
   renderSelectionOverlay() {
@@ -844,6 +965,7 @@ export class SceneStore extends EventTarget {
       detail: {
         objects: this.objects,
         selectedObjects: this.selectedObjects,
+        performance: this.renderMetrics,
       },
     }));
   }

@@ -138,6 +138,7 @@ export class CanvasController extends EventTarget {
 
   handlePointerDown(event) {
     if (event.button !== 0 && event.button !== 1) return;
+    if (event.button === 0 && document.activeElement !== this.viewport) this.viewport.focus({ preventScroll: true });
 
     const target = event.target instanceof Element ? event.target : null;
     const handle = target?.closest('[data-handle]');
@@ -401,7 +402,7 @@ export class CanvasController extends EventTarget {
         const original = this.dragState.positions.find((position) => position.id === object.id);
         object.x = original.x + deltaX + snapDelta.x;
         object.y = original.y + deltaY + snapDelta.y;
-      });
+      }, { defer: true });
       this.renderSnapPreview(snapCandidate);
       return;
     }
@@ -451,14 +452,14 @@ export class CanvasController extends EventTarget {
         index === this.dragState.pointIndex ? nextPoint : point
       ));
       this.dragState.snapCandidate = snapCandidate;
-      this.store.updateHose(object.id, points);
+      this.store.updateHose(object.id, points, { defer: true });
       const endpoint = this.dragState.pointIndex === 0 ? 'start' : 'end';
       this.store.updateHoseConnections(object.id, {
         ...object.connections,
         [endpoint]: snapCandidate
           ? { objectId: snapCandidate.targetObjectId, role: snapCandidate.targetPoint.role }
           : null,
-      });
+      }, { defer: true });
       this.renderSnapPreview(snapCandidate);
       return;
     }
@@ -517,7 +518,7 @@ export class CanvasController extends EventTarget {
           y: object.y + (point.y - startObject.y) * scaleY,
         }));
       }
-    });
+    }, { defer: true });
   }
 
   rotateObject(pointer, freeRotation) {
@@ -531,7 +532,7 @@ export class CanvasController extends EventTarget {
 
     this.store.updateObjects([state.objectId], (object) => {
       object.rotation = rotation;
-    });
+    }, { defer: true });
   }
 
   resizeGroup(pointer) {
@@ -561,7 +562,7 @@ export class CanvasController extends EventTarget {
           y: object.y + (point.y - original.y) * scaleY,
         }));
       }
-    });
+    }, { defer: true });
   }
 
   rotateGroup(pointer) {
@@ -581,7 +582,7 @@ export class CanvasController extends EventTarget {
       object.x = rotatedCenter.x - original.width / 2;
       object.y = rotatedCenter.y - original.height / 2;
       object.rotation = original.rotation + delta;
-    });
+    }, { defer: true });
   }
 
   addHoseControlPoint() {
@@ -633,6 +634,7 @@ export class CanvasController extends EventTarget {
     this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose', 'is-drawing-annotation');
     this.clearSnapPreview();
     this.clearHosePreview();
+    this.store.flushRender();
 
     if (state.type === 'annotation-draw') {
       const distance = Math.hypot(state.end.x - state.start.x, state.end.y - state.start.y);
@@ -839,6 +841,50 @@ export class CanvasController extends EventTarget {
   }
 
   handleKeydown(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    const isFormField = target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+    if (event.key === 'Escape') {
+      if (this.dragState) {
+        const state = this.dragState;
+        this.dragState = null;
+        if (state.before) this.store.restore(state.before);
+        this.clearSnapPreview();
+        this.clearHosePreview();
+        this.store.scene.querySelector('.annotation-preview')?.remove();
+        this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose', 'is-drawing-annotation');
+      } else {
+        this.store.select(null);
+      }
+      return;
+    }
+    if (isFormField) return;
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (!this.store.selectedObjects.length) return;
+      const before = this.store.snapshot();
+      this.store.removeObjects(this.store.selectedObjects.map((object) => object.id));
+      this.recordHistory(before);
+      event.preventDefault();
+      return;
+    }
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      const distance = event.shiftKey ? 10 : 1;
+      const delta = {
+        ArrowUp: { x: 0, y: -distance },
+        ArrowDown: { x: 0, y: distance },
+        ArrowLeft: { x: -distance, y: 0 },
+        ArrowRight: { x: distance, y: 0 },
+      }[event.key];
+      const movable = this.store.selectedObjects.filter((object) => !object.locked);
+      if (!movable.length) return;
+      const before = this.store.snapshot();
+      this.store.updateObjects(movable.map((object) => object.id), (object) => {
+        object.x += delta.x;
+        object.y += delta.y;
+      });
+      this.recordHistory(before);
+      event.preventDefault();
+      return;
+    }
     if (event.key === '+' || event.key === '=') {
       event.preventDefault();
       this.zoomBy(1.2);
