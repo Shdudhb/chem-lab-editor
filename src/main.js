@@ -25,6 +25,8 @@ const selectionRotation = document.querySelector('#selectionRotation');
 const objectLayerCount = document.querySelector('#objectLayerCount');
 const equipmentSearch = document.querySelector('#equipmentSearch');
 const equipmentCategoriesElement = document.querySelector('#equipmentCategories');
+const equipmentCategoryLabel = document.querySelector('#equipmentCategoryLabel');
+const equipmentCategoryCount = document.querySelector('#equipmentCategoryCount');
 const equipmentList = document.querySelector('#equipmentList');
 
 const sceneStore = new SceneStore(scene);
@@ -85,8 +87,14 @@ const renderEquipmentCategories = () => {
     button.className = 'equipment-category-button';
     button.classList.toggle('is-active', category.id === activeEquipmentCategory);
     button.innerHTML = `
-      <span class="equipment-category-icon">${equipmentCategoryIcons[category.id]}</span>
-      <span>${category.label}</span>
+      <span class="equipment-category-main">
+        <span class="equipment-category-icon">${equipmentCategoryIcons[category.id]}</span>
+        <span>${category.label}</span>
+      </span>
+      <span class="equipment-category-trailing">
+        <span>${category.id === 'all' ? equipmentCatalog.length : equipmentCatalog.filter((item) => item.category === category.id).length}</span>
+        <span class="equipment-category-chevron" aria-hidden="true">›</span>
+      </span>
     `;
     button.addEventListener('click', () => {
       activeEquipmentCategory = category.id;
@@ -108,6 +116,11 @@ const renderEquipmentList = () => {
     return matchesCategory && matchesQuery;
   });
 
+  const activeCategory = equipmentCategories.find((category) => category.id === activeEquipmentCategory);
+  equipmentCategoryLabel.textContent = query
+    ? `搜尋結果${activeCategory && activeCategory.id !== 'all' ? ` · ${activeCategory.label}` : ''}`
+    : activeCategory?.label ?? '全部器材';
+  equipmentCategoryCount.textContent = String(filtered.length);
   equipmentList.replaceChildren();
 
   if (!filtered.length) {
