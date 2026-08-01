@@ -69,7 +69,7 @@
         </nav>
 
         <div class="topbar-actions">
-          <button class="secondary-button" type="button" disabled title="Phase 8 開放">匯出</button>
+          <button class="secondary-button" type="button" data-action="open-export">匯出</button>
           <button class="primary-button" type="button" disabled title="Phase 8 開放">儲存</button>
         </div>
       </header>
@@ -207,6 +207,42 @@
         <div class="layer-list" id="layerList" aria-label="物件圖層清單"></div>
       </section>
     </div>
+
+    <dialog class="export-dialog" id="exportDialog">
+      <form method="dialog" id="exportForm">
+        <div class="export-dialog-heading">
+          <div>
+            <p class="eyebrow">EXPORT</p>
+            <h2>匯出圖稿</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="關閉匯出視窗">×</button>
+        </div>
+        <label class="property-control">
+          <span>格式</span>
+          <select id="exportFormat">
+            <option value="svg">SVG</option>
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+          </select>
+        </label>
+        <label class="property-control" id="exportScaleControl" hidden>
+          <span>解析度</span>
+          <select id="exportScale">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="4">4x</option>
+          </select>
+        </label>
+        <label class="export-check">
+          <input id="exportTransparent" type="checkbox" />
+          <span>透明背景</span>
+        </label>
+        <div class="export-dialog-actions">
+          <button class="secondary-button" value="cancel">取消</button>
+          <button class="primary-button" id="exportSubmit" value="default">下載</button>
+        </div>
+      </form>
+    </dialog>
 
     <input id="svgFileInput" type="file" accept="image/svg+xml,.svg" hidden />
 

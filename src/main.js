@@ -1,6 +1,7 @@
 import './styles.css';
 import { CanvasController } from './canvas/canvas-controller.js';
 import { SceneStore } from './canvas/scene-store.js';
+import { exportScene } from './export/exporter.js';
 import {
   equipmentCatalog,
   equipmentCategories,
@@ -39,6 +40,12 @@ const equipmentCategoryCount = document.querySelector('#equipmentCategoryCount')
 const equipmentList = document.querySelector('#equipmentList');
 const layerSearch = document.querySelector('#layerSearch');
 const layerList = document.querySelector('#layerList');
+const exportDialog = document.querySelector('#exportDialog');
+const exportForm = document.querySelector('#exportForm');
+const exportFormat = document.querySelector('#exportFormat');
+const exportScale = document.querySelector('#exportScale');
+const exportTransparent = document.querySelector('#exportTransparent');
+const exportScaleControl = document.querySelector('#exportScaleControl');
 
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
@@ -336,6 +343,34 @@ document.querySelector('[data-action="ungroup-selection"]').addEventListener('cl
 layerSearch.addEventListener('input', () => {
   layerQuery = layerSearch.value;
   renderLayers();
+});
+
+document.querySelector('[data-action="open-export"]').addEventListener('click', () => {
+  exportDialog.showModal();
+});
+
+exportFormat.addEventListener('change', () => {
+  exportScaleControl.hidden = exportFormat.value === 'svg';
+  exportTransparent.disabled = exportFormat.value === 'jpg';
+});
+
+exportForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const submit = document.querySelector('#exportSubmit');
+  submit.disabled = true;
+  try {
+    await exportScene(sceneStore.objects, {
+      format: exportFormat.value,
+      scale: Number(exportScale.value),
+      transparent: exportTransparent.checked,
+    });
+    exportDialog.close();
+    canvasHint.textContent = `已匯出 ${exportFormat.value.toUpperCase()} 圖稿。`;
+  } catch (error) {
+    canvasHint.textContent = `匯出失敗：${error.message}`;
+  } finally {
+    submit.disabled = false;
+  }
 });
 
 const updateSelectedLiquid = (patch) => {
