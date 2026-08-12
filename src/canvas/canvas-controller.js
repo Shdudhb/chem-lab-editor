@@ -886,11 +886,7 @@ export class CanvasController extends EventTarget {
     if (event.key === 'Delete' || event.key === 'Backspace') {
       if (!this.store.selectedObjects.length) return;
       event.preventDefault();
-      const removable = this.store.selectedObjects.filter((object) => !object.locked);
-      if (!removable.length) return;
-      const before = this.store.snapshot();
-      this.store.removeObjects(removable.map((object) => object.id));
-      this.recordHistory(before);
+      this.deleteSelected();
       return;
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
@@ -920,6 +916,15 @@ export class CanvasController extends EventTarget {
       event.preventDefault();
       this.zoomBy(1 / 1.2);
     }
+  }
+
+  deleteSelected() {
+    const removable = this.store.selectedObjects.filter((object) => !object.locked);
+    if (!removable.length) return false;
+    const before = this.store.snapshot();
+    this.store.removeObjects(removable.map((object) => object.id));
+    this.recordHistory(before);
+    return true;
   }
 
   zoomBy(factor) {

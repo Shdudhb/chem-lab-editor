@@ -71,6 +71,7 @@ const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
 const appShell = document.querySelector('.app-shell');
 const mobilePanelBackdrop = document.querySelector('#mobilePanelBackdrop');
 const mobilePanelButtons = [...document.querySelectorAll('[data-mobile-panel]')];
+const mobileDeleteButton = document.querySelector('[data-action="delete-selection"]');
 
 const mobilePanelNames = ['equipment', 'layers', 'properties'];
 const mobilePanelClass = (panel) => `is-mobile-${panel}-open`;
@@ -188,6 +189,7 @@ const updateViewReadouts = ({ zoom, panX, panY }) => {
 const updateSelectionPanel = ({ selectedObjects }) => {
   const selectedCount = selectedObjects.length;
   const hasSelection = selectedCount > 0;
+  mobileDeleteButton.disabled = !selectedObjects.some((object) => !object.locked);
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
   hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
@@ -592,6 +594,11 @@ document.querySelector('[data-action="add-hose-point"]').addEventListener('click
 
 document.querySelector('[data-action="remove-hose-point"]').addEventListener('click', () => {
   canvasController.removeHoseControlPoint();
+});
+
+mobileDeleteButton.addEventListener('click', () => {
+  if (!canvasController.deleteSelected()) return;
+  canvasHint.textContent = '已刪除選取物件';
 });
 
 const updateSelectedHoseStyle = (patch) => {

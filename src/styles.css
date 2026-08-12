@@ -271,9 +271,12 @@ button:disabled, input:disabled { cursor: not-allowed; }
   .layer-list .layer-row { min-height: 44px; height: 44px; gap: 8px; }
   .layer-action { width: 30px; height: 30px; font-size: 15px; }
 
-  .mobile-bottom-bar { position: relative; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; align-items: stretch; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #fbfcfb; border-top: 1px solid #dce3df; }
+  .mobile-bottom-bar { position: relative; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; align-items: stretch; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #fbfcfb; border-top: 1px solid #dce3df; }
   .mobile-panel-button { display: grid; place-items: center; gap: 2px; min-height: 44px; padding: 3px 6px; color: #718078; background: transparent; border-radius: 8px; font-size: 10px; }
   .mobile-panel-button:hover, .mobile-panel-button[aria-expanded="true"] { color: #176b5f; background: #e3f1ed; }
+  .mobile-panel-button.mobile-delete-button { color: #a36a6a; }
+  .mobile-panel-button.mobile-delete-button:hover:not(:disabled) { color: #a14d4d; background: #fbeaea; }
+  .mobile-panel-button.mobile-delete-button:disabled { color: #b5c0bb; opacity: .58; cursor: not-allowed; }
   .mobile-panel-icon { font-size: 18px; line-height: 1; }
   .mobile-panel-backdrop { position: fixed; inset: 0; z-index: 19; display: block; width: 100%; height: 100%; padding: 0; background: rgba(31, 48, 43, .3); border: 0; }
   .mobile-panel-backdrop[hidden] { display: none; }
