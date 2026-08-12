@@ -1,6 +1,9 @@
-const stroke = '#283934';
-const accent = '#83b8a6';
-const muted = '#d9e6e0';
+// Chemix-inspired apparatus palette: soft mint glass, green outlines, and
+// clean high-contrast silhouettes that remain legible on the canvas and in
+// the apparatus library.
+const stroke = '#4f765f';
+const accent = '#71b99f';
+const muted = '#e3f0ea';
 
 const equipmentSvg = (content) => `
   <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">

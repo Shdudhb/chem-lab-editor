@@ -71,7 +71,7 @@ const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
 const appShell = document.querySelector('.app-shell');
 const mobilePanelBackdrop = document.querySelector('#mobilePanelBackdrop');
 const mobilePanelButtons = [...document.querySelectorAll('[data-mobile-panel]')];
-const deleteSelectionButtons = [...document.querySelectorAll('[data-action="delete-selection"]')];
+const clearCanvasButtons = [...document.querySelectorAll('[data-action="clear-canvas"]')];
 
 const mobilePanelNames = ['equipment', 'layers', 'properties'];
 const mobilePanelClass = (panel) => `is-mobile-${panel}-open`;
@@ -189,8 +189,8 @@ const updateViewReadouts = ({ zoom, panX, panY }) => {
 const updateSelectionPanel = ({ selectedObjects }) => {
   const selectedCount = selectedObjects.length;
   const hasSelection = selectedCount > 0;
-  deleteSelectionButtons.forEach((button) => {
-    button.disabled = !selectedObjects.some((object) => !object.locked);
+  clearCanvasButtons.forEach((button) => {
+    button.disabled = sceneStore.objects.length === 0;
   });
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
@@ -607,10 +607,13 @@ document.querySelector('[data-action="remove-hose-point"]').addEventListener('cl
   canvasController.removeHoseControlPoint();
 });
 
-deleteSelectionButtons.forEach((button) => {
+clearCanvasButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    if (!canvasController.deleteSelected()) return;
-    canvasHint.textContent = '已刪除選取物件';
+    if (!sceneStore.objects.length) return;
+    if (!window.confirm('確定要清空整個畫布嗎？此操作可以使用復原回復。')) return;
+    if (!canvasController.clearCanvas()) return;
+    closeMobilePanels();
+    canvasHint.textContent = '已清空整個畫布';
   });
 });
 

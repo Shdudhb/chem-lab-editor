@@ -949,6 +949,14 @@ export class CanvasController extends EventTarget {
     return true;
   }
 
+  clearCanvas() {
+    if (!this.store.objects.length) return false;
+    const before = this.store.snapshot();
+    this.store.removeObjects(this.store.objects.map((object) => object.id));
+    this.recordHistory(before);
+    return true;
+  }
+
   zoomBy(factor) {
     const bounds = this.viewport.getBoundingClientRect();
     const centerX = bounds.width / 2;
