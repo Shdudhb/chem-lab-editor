@@ -145,27 +145,27 @@ export class CanvasController extends EventTarget {
     const hosePoint = target?.closest('[data-hose-point]');
     const objectElement = target?.closest('.canvas-object');
 
-    if (event.button === 0 && hosePoint && this.store.selectedObjects.length === 1) {
+    if (event.button === 0 && this.tool === 'select' && hosePoint && this.store.selectedObjects.length === 1) {
       this.startHosePointDrag(event, Number(hosePoint.dataset.hosePoint));
       return;
     }
 
-    if (event.button === 0 && this.tool === 'hose' && !objectElement) {
+    if (event.button === 0 && this.tool === 'hose') {
       this.startHoseDraw(event);
       return;
     }
 
-    if (event.button === 0 && ['text', 'arrow', 'line', 'rectangle', 'circle', 'number', 'freehand'].includes(this.tool) && !objectElement) {
+    if (event.button === 0 && ['text', 'arrow', 'line', 'rectangle', 'circle', 'number', 'freehand'].includes(this.tool)) {
       this.startAnnotationDraw(event, this.tool);
       return;
     }
 
-    if (event.button === 0 && handle && this.store.selectedObjects.length === 1) {
+    if (event.button === 0 && this.tool === 'select' && handle && this.store.selectedObjects.length === 1) {
       this.startHandleDrag(event, handle.dataset.handle, handle.dataset.corner);
       return;
     }
 
-    if (event.button === 0 && handle && this.isGroupSelection()) {
+    if (event.button === 0 && this.tool === 'select' && handle && this.isGroupSelection()) {
       this.startHandleDrag(event, handle.dataset.handle, handle.dataset.corner);
       return;
     }
@@ -453,20 +453,26 @@ export class CanvasController extends EventTarget {
       ));
       this.dragState.snapCandidate = snapCandidate;
       this.store.updateHose(object.id, points, { defer: true });
-      const endpoint = this.dragState.pointIndex === 0 ? 'start' : 'end';
-      this.store.updateHoseConnections(object.id, {
-        ...object.connections,
-        [endpoint]: snapCandidate
-          ? { objectId: snapCandidate.targetObjectId, role: snapCandidate.targetPoint.role }
-          : null,
-      }, { defer: true });
+      const endpoint = this.dragState.pointIndex === 0
+        ? 'start'
+        : this.dragState.pointIndex === object.points.length - 1
+          ? 'end'
+          : null;
+      if (endpoint) {
+        this.store.updateHoseConnections(object.id, {
+          ...object.connections,
+          [endpoint]: snapCandidate
+            ? { objectId: snapCandidate.targetObjectId, role: snapCandidate.targetPoint.role }
+            : null,
+        }, { defer: true });
+      }
       this.renderSnapPreview(snapCandidate);
       return;
     }
 
     const pointer = this.screenToWorld(event.clientX, event.clientY);
     if (this.dragState.type === 'resize') {
-      this.resizeObject(pointer);
+      this.resizeObject(pointer, event.shiftKey);
       return;
     }
 
@@ -476,7 +482,7 @@ export class CanvasController extends EventTarget {
     }
 
     if (this.dragState.type === 'group-resize') {
-      this.resizeGroup(pointer);
+      this.resizeGroup(pointer, event.shiftKey);
       return;
     }
 
@@ -485,7 +491,7 @@ export class CanvasController extends EventTarget {
     }
   }
 
-  resizeObject(pointer) {
+  resizeObject(pointer, freeResize = false) {
     const state = this.dragState;
     const startObject = state.startObject;
     const signs = cornerSigns(state.corner);
@@ -493,8 +499,13 @@ export class CanvasController extends EventTarget {
       x: pointer.x - state.fixedPoint.x,
       y: pointer.y - state.fixedPoint.y,
     }, startObject.rotation);
-    const width = Math.max(MIN_OBJECT_SIZE, Math.abs(localPointer.x));
-    const height = Math.max(MIN_OBJECT_SIZE, Math.abs(localPointer.y));
+    let width = Math.max(MIN_OBJECT_SIZE, Math.abs(localPointer.x));
+    let height = Math.max(MIN_OBJECT_SIZE, Math.abs(localPointer.y));
+    if (!freeResize) {
+      const scale = Math.max(width / Math.max(1, startObject.width), height / Math.max(1, startObject.height));
+      width = Math.max(MIN_OBJECT_SIZE, startObject.width * scale);
+      height = Math.max(MIN_OBJECT_SIZE, startObject.height * scale);
+    }
     const localCenter = {
       x: signs.x * width / 2,
       y: signs.y * height / 2,
@@ -535,14 +546,21 @@ export class CanvasController extends EventTarget {
     }, { defer: true });
   }
 
-  resizeGroup(pointer) {
+  resizeGroup(pointer, freeResize = false) {
     const state = this.dragState;
     const { bounds, fixedPoint, corner } = state;
+    let width = Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.x - fixedPoint.x));
+    let height = Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.y - fixedPoint.y));
+    if (!freeResize) {
+      const scale = Math.max(width / Math.max(1, bounds.width), height / Math.max(1, bounds.height));
+      width = Math.max(MIN_OBJECT_SIZE, bounds.width * scale);
+      height = Math.max(MIN_OBJECT_SIZE, bounds.height * scale);
+    }
     const nextBounds = {
       x: corner.includes('e') ? fixedPoint.x : pointer.x,
       y: corner.includes('s') ? fixedPoint.y : pointer.y,
-      width: Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.x - fixedPoint.x)),
-      height: Math.max(MIN_OBJECT_SIZE, Math.abs(pointer.y - fixedPoint.y)),
+      width,
+      height,
     };
     if (!corner.includes('e')) nextBounds.x = fixedPoint.x - nextBounds.width;
     if (!corner.includes('s')) nextBounds.y = fixedPoint.y - nextBounds.height;
@@ -634,7 +652,17 @@ export class CanvasController extends EventTarget {
     this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose', 'is-drawing-annotation');
     this.clearSnapPreview();
     this.clearHosePreview();
+    this.clearAnnotationPreview();
     this.store.flushRender();
+
+    if (this.viewport.hasPointerCapture(event.pointerId)) {
+      this.viewport.releasePointerCapture(event.pointerId);
+    }
+
+    if (event.type === 'pointercancel') {
+      if (state.before) this.store.restore(state.before);
+      return;
+    }
 
     if (state.type === 'annotation-draw') {
       const distance = Math.hypot(state.end.x - state.start.x, state.end.y - state.start.y);
@@ -648,7 +676,6 @@ export class CanvasController extends EventTarget {
           points: state.annotationType === 'freehand' ? state.points : undefined,
         });
       }
-      this.clearAnnotationPreview();
       this.recordHistory(state.before);
       return;
     }
@@ -680,9 +707,6 @@ export class CanvasController extends EventTarget {
       this.recordHistory(state.before);
     }
 
-    if (this.viewport.hasPointerCapture(event.pointerId)) {
-      this.viewport.releasePointerCapture(event.pointerId);
-    }
   }
 
   renderAnnotationPreview(annotationType, start, end, points = [start, end]) {
@@ -852,6 +876,7 @@ export class CanvasController extends EventTarget {
         this.clearHosePreview();
         this.store.scene.querySelector('.annotation-preview')?.remove();
         this.viewport.classList.remove('is-panning', 'is-dragging-object', 'is-transforming', 'is-drawing-hose', 'is-drawing-annotation');
+        if (this.viewport.hasPointerCapture(state.pointerId)) this.viewport.releasePointerCapture(state.pointerId);
       } else {
         this.store.select(null);
       }
@@ -860,10 +885,12 @@ export class CanvasController extends EventTarget {
     if (isFormField) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
       if (!this.store.selectedObjects.length) return;
-      const before = this.store.snapshot();
-      this.store.removeObjects(this.store.selectedObjects.map((object) => object.id));
-      this.recordHistory(before);
       event.preventDefault();
+      const removable = this.store.selectedObjects.filter((object) => !object.locked);
+      if (!removable.length) return;
+      const before = this.store.snapshot();
+      this.store.removeObjects(removable.map((object) => object.id));
+      this.recordHistory(before);
       return;
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {

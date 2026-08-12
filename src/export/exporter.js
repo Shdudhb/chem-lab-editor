@@ -5,6 +5,54 @@ const escapeXml = (value) => String(value)
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&apos;');
 
+const EXPORT_PADDING = 24;
+
+const finiteNumber = (value, fallback = 0) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const getRotation = (object) => finiteNumber(object.rotation);
+
+const getObjectCorners = (object) => {
+  const x = finiteNumber(object.x);
+  const y = finiteNumber(object.y);
+  const width = Math.max(0, finiteNumber(object.width));
+  const height = Math.max(0, finiteNumber(object.height));
+  const rotation = getRotation(object) * Math.PI / 180;
+  const cosine = Math.cos(rotation);
+  const sine = Math.sin(rotation);
+  const centerX = x + width / 2;
+  const centerY = y + height / 2;
+
+  return [
+    { x, y },
+    { x: x + width, y },
+    { x: x + width, y: y + height },
+    { x, y: y + height },
+  ].map((corner) => {
+    const offsetX = corner.x - centerX;
+    const offsetY = corner.y - centerY;
+    return {
+      x: centerX + offsetX * cosine - offsetY * sine,
+      y: centerY + offsetX * sine + offsetY * cosine,
+    };
+  });
+};
+
+const getWorldRotationTransform = (object) => {
+  const rotation = getRotation(object);
+  if (!rotation) return '';
+  const centerX = finiteNumber(object.x) + Math.max(0, finiteNumber(object.width)) / 2;
+  const centerY = finiteNumber(object.y) + Math.max(0, finiteNumber(object.height)) / 2;
+  return `rotate(${rotation} ${centerX} ${centerY})`;
+};
+
+const wrapWithWorldRotation = (object, markup) => {
+  const transform = getWorldRotationTransform(object);
+  return transform ? `<g transform="${transform}">${markup}</g>` : markup;
+};
+
 const getLiquidLayers = (object) => {
   const layers = Array.isArray(object.liquid?.layers)
     ? object.liquid.layers
@@ -18,7 +66,7 @@ const getLiquidLayers = (object) => {
   }));
 };
 
-const hosePath = (points) => {
+const hosePath = (points = []) => {
   if (points.length < 2) return '';
   let path = `M ${points[0].x} ${points[0].y}`;
   for (let index = 0; index < points.length - 1; index += 1) {
@@ -42,31 +90,47 @@ const hosePath = (points) => {
 const getBounds = (objects) => {
   const visible = objects.filter((object) => object.visible !== false);
   if (!visible.length) return { x: 0, y: 0, width: 1000, height: 600 };
-  const left = Math.min(...visible.map((object) => object.x));
-  const top = Math.min(...visible.map((object) => object.y));
-  const right = Math.max(...visible.map((object) => object.x + object.width));
-  const bottom = Math.max(...visible.map((object) => object.y + object.height));
-  return { x: left - 24, y: top - 24, width: right - left + 48, height: bottom - top + 48 };
+  const corners = visible.flatMap(getObjectCorners);
+  const padding = Math.max(
+    EXPORT_PADDING,
+    ...visible.map((object) => Math.max(0, finiteNumber(object.strokeWidth)) / 2 + 4),
+  );
+  const left = Math.min(...corners.map((corner) => corner.x));
+  const top = Math.min(...corners.map((corner) => corner.y));
+  const right = Math.max(...corners.map((corner) => corner.x));
+  const bottom = Math.max(...corners.map((corner) => corner.y));
+  return {
+    x: left - padding,
+    y: top - padding,
+    width: right - left + padding * 2,
+    height: bottom - top + padding * 2,
+  };
 };
 
 const svgObjectMarkup = (object) => {
-  const svg = object.svgMarkup
-    .replace('width="100%"', `width="${object.width}"`)
-    .replace('height="100%"', `height="${object.height}"`);
+  const width = Math.max(0, finiteNumber(object.width));
+  const height = Math.max(0, finiteNumber(object.height));
+  const x = finiteNumber(object.x);
+  const y = finiteNumber(object.y);
+  const svg = String(object.svgMarkup ?? '')
+    .replace('width="100%"', `width="${width}"`)
+    .replace('height="100%"', `height="${height}"`);
   let liquidOffset = 0;
   const liquid = getLiquidLayers(object).map((layer) => {
     const layerHeight = Math.min(layer.level, 100 - liquidOffset);
     if (layerHeight <= 0) return '';
-    const markup = `<rect x="${object.width * .18}" y="${object.height * (1 - (liquidOffset + layerHeight) / 100)}" width="${object.width * .64}" height="${object.height * layerHeight / 100}" rx="8" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}"/>`;
+    const markup = `<rect x="${width * .18}" y="${height * (1 - (liquidOffset + layerHeight) / 100)}" width="${width * .64}" height="${height * layerHeight / 100}" rx="8" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}"/>`;
     liquidOffset += layerHeight;
     return markup;
   }).join('');
-  return `<g transform="translate(${object.x} ${object.y}) rotate(${object.rotation} ${object.width / 2} ${object.height / 2})">${svg}${liquid}</g>`;
+  const rotation = getRotation(object);
+  const rotationTransform = rotation ? ` rotate(${rotation} ${width / 2} ${height / 2})` : '';
+  return `<g transform="translate(${x} ${y})${rotationTransform}">${svg}${liquid}</g>`;
 };
 
 const annotationMarkup = (object) => {
-  const stroke = object.stroke ?? '#356f66';
-  const strokeWidth = object.strokeWidth ?? 2;
+  const stroke = escapeXml(object.stroke ?? '#356f66');
+  const strokeWidth = Math.max(1, finiteNumber(object.strokeWidth, 2));
   if (object.annotationType === 'text') {
     return `<text x="${object.x}" y="${object.y + (object.fontSize ?? 16)}" fill="${stroke}" font-family="${escapeXml(object.fontFamily ?? 'Inter, sans-serif')}" font-size="${object.fontSize ?? 16}">${escapeXml(object.text)}</text>`;
   }
@@ -95,8 +159,11 @@ export const buildSceneSvg = (objects, { transparent = false } = {}) => {
     .filter((object) => object.visible !== false)
     .map((object) => {
       if (object.type === 'svg') return svgObjectMarkup(object);
-      if (object.type === 'hose') return `<path d="${hosePath(object.points)}" fill="none" stroke="${escapeXml(object.color)}" stroke-width="${object.strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`;
-      return annotationMarkup(object);
+      if (object.type === 'hose') {
+        const path = `<path d="${hosePath(object.points)}" fill="none" stroke="${escapeXml(object.color)}" stroke-width="${Math.max(1, finiteNumber(object.strokeWidth, 8))}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        return wrapWithWorldRotation(object, path);
+      }
+      return wrapWithWorldRotation(object, annotationMarkup(object));
     })
     .join('');
   const background = transparent ? '' : `<rect x="${bounds.x}" y="${bounds.y}" width="${bounds.width}" height="${bounds.height}" fill="#ffffff"/>`;

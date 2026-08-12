@@ -86,6 +86,22 @@ test('annotation export includes freehand path and open arrow marker', () => {
   assert.match(svg, /export-arrow-open/);
 });
 
+test('export keeps rotation for annotations and hoses and expands the viewBox', () => {
+  const svg = buildSceneSvg([
+    {
+      type: 'annotation', annotationType: 'arrow', visible: true, x: 0, y: 0, width: 200, height: 20,
+      rotation: 45, start: { x: 0, y: 10 }, end: { x: 200, y: 10 }, stroke: '#0088ff', strokeWidth: 4,
+    },
+    {
+      type: 'hose', visible: true, x: 250, y: 0, width: 100, height: 20, rotation: 90,
+      points: [{ x: 250, y: 10 }, { x: 350, y: 10 }], color: '#8b5e3c', strokeWidth: 8,
+    },
+  ]);
+  assert.match(svg, /transform="rotate\(45 100 10\)"/);
+  assert.match(svg, /transform="rotate\(90 300 10\)"/);
+  assert.match(svg, /viewBox="-?[\d.]+ -9[\d.]+ [\d.]+ [\d.]+"/);
+});
+
 test('local scene storage saves and loads through an adapter', async () => {
   const storage = createLocalSceneStorage({ storage: fakeStorage(), key: 'test-scene' });
   const scene = { objects: [], selectedIds: [], view: { zoom: 1, panX: 0, panY: 0 } };

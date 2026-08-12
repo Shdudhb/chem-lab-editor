@@ -68,11 +68,34 @@ const customEquipmentForm = document.querySelector('#customEquipmentForm');
 const customEquipmentName = document.querySelector('#customEquipmentName');
 const customEquipmentDescription = document.querySelector('#customEquipmentDescription');
 const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
+const appShell = document.querySelector('.app-shell');
+const mobilePanelBackdrop = document.querySelector('#mobilePanelBackdrop');
+const mobilePanelButtons = [...document.querySelectorAll('[data-mobile-panel]')];
+
+const mobilePanelNames = ['equipment', 'layers', 'properties'];
+const mobilePanelClass = (panel) => `is-mobile-${panel}-open`;
+const isMobilePanelOpen = () => mobilePanelNames.some((panel) => appShell.classList.contains(mobilePanelClass(panel)));
+const closeMobilePanels = () => {
+  mobilePanelNames.forEach((panel) => appShell.classList.remove(mobilePanelClass(panel)));
+  mobilePanelButtons.forEach((button) => button.setAttribute('aria-expanded', 'false'));
+  mobilePanelBackdrop.hidden = true;
+};
+const toggleMobilePanel = (panel) => {
+  const nextState = !appShell.classList.contains(mobilePanelClass(panel));
+  closeMobilePanels();
+  if (!nextState) return;
+  appShell.classList.add(mobilePanelClass(panel));
+  mobilePanelButtons
+    .filter((button) => button.dataset.mobilePanel === panel)
+    .forEach((button) => button.setAttribute('aria-expanded', 'true'));
+  mobilePanelBackdrop.hidden = false;
+};
 
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
 const sceneStorage = createSceneStorage({ endpoint: import.meta.env.VITE_SCENE_STORAGE_URL });
 const equipmentUserStore = createEquipmentUserStore();
+let autoSaveTimer = null;
 
 const DEFAULT_LIQUID_LAYER = { level: 0, color: '#67aee8', opacity: 0 };
 
@@ -249,7 +272,10 @@ const sanitizeEquipmentSvg = (svgText) => {
   document.querySelectorAll('script, foreignObject').forEach((node) => node.remove());
   document.querySelectorAll('*').forEach((element) => {
     [...element.attributes].forEach((attribute) => {
-      if (attribute.name.toLowerCase().startsWith('on')) element.removeAttribute(attribute.name);
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value.trim().toLowerCase();
+      const isUnsafeUrl = ['href', 'xlink:href', 'src'].includes(name) && value.startsWith('javascript:');
+      if (name.startsWith('on') || isUnsafeUrl) element.removeAttribute(attribute.name);
     });
   });
   return new XMLSerializer().serializeToString(root);
@@ -320,6 +346,7 @@ const renderLayers = () => {
       }
     });
     row.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('button, input')) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       if (object.groupId) sceneStore.selectGroup(object.groupId, event.shiftKey);
@@ -496,6 +523,7 @@ const renderEquipmentList = () => {
       addCardEquipment();
     });
     card.addEventListener('keydown', (event) => {
+      if (event.target instanceof Element && event.target.closest('button')) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       addCardEquipment();
@@ -539,6 +567,7 @@ sceneStore.addEventListener('change', (event) => {
     const { lastDuration, objectCount, mode } = event.detail.performance;
     renderReadout.textContent = `渲染 ${lastDuration.toFixed(1)} ms · ${objectCount} 物件 · ${mode === 'partial' ? '局部' : '完整'}`;
   }
+  scheduleLocalAutosave();
 });
 
 canvasController.addEventListener('historychange', (event) => {
@@ -603,6 +632,10 @@ document.querySelector('[data-action="open-export"]').addEventListener('click', 
   exportDialog.showModal();
 });
 
+document.querySelectorAll('[data-action="close-export"]').forEach((button) => {
+  button.addEventListener('click', () => exportDialog.close());
+});
+
 exportFormat.addEventListener('change', () => {
   exportScaleControl.hidden = ['svg', 'json'].includes(exportFormat.value);
   exportTransparent.disabled = ['jpg', 'json'].includes(exportFormat.value);
@@ -638,6 +671,19 @@ const getSceneDocument = () => ({
   view: { ...canvasController.view },
 });
 
+const scheduleLocalAutosave = () => {
+  if (import.meta.env.VITE_SCENE_STORAGE_URL) return;
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    autoSaveTimer = null;
+    try {
+      await sceneStorage.save(getSceneDocument());
+    } catch {
+      // Autosave errors should not interrupt editing.
+    }
+  }, 350);
+};
+
 const downloadSceneDocument = (sceneDocument) => {
   const blob = new Blob([serializeScene(sceneDocument)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -649,6 +695,10 @@ const downloadSceneDocument = (sceneDocument) => {
 };
 
 const saveScene = async () => {
+  if (autoSaveTimer) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+  }
   const sceneDocument = getSceneDocument();
   await sceneStorage.save(sceneDocument);
   downloadSceneDocument(sceneDocument);
@@ -688,6 +738,10 @@ sceneFileInput.addEventListener('change', async () => {
 customEquipmentButton.addEventListener('click', () => {
   customEquipmentForm.reset();
   customEquipmentDialog.showModal();
+});
+
+document.querySelectorAll('[data-action="close-custom-equipment"]').forEach((button) => {
+  button.addEventListener('click', () => customEquipmentDialog.close());
 });
 
 customEquipmentForm.addEventListener('submit', (event) => {
@@ -823,7 +877,32 @@ document.querySelectorAll('[data-tool]').forEach((button) => {
   });
 });
 
+mobilePanelButtons.forEach((button) => {
+  button.addEventListener('click', () => toggleMobilePanel(button.dataset.mobilePanel));
+});
+
+mobilePanelBackdrop.addEventListener('click', closeMobilePanels);
+
+if (typeof window.matchMedia === 'function') {
+  const mobileLayoutQuery = window.matchMedia('(max-width: 820px), (max-width: 1024px) and (orientation: landscape)');
+  const handleLayoutChange = (event) => {
+    if (!event.matches) closeMobilePanels();
+  };
+  if (typeof mobileLayoutQuery.addEventListener === 'function') {
+    mobileLayoutQuery.addEventListener('change', handleLayoutChange);
+  } else {
+    mobileLayoutQuery.addListener(handleLayoutChange);
+  }
+}
+
 window.addEventListener('keydown', (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  const isEditable = target && (target.matches('input, textarea, select') || target.isContentEditable);
+  if (event.defaultPrevented || isEditable) return;
+  if (event.key === 'Escape' && isMobilePanelOpen()) {
+    closeMobilePanels();
+    return;
+  }
   const isModifierPressed = event.metaKey || event.ctrlKey;
   const key = event.key.toLowerCase();
 
@@ -854,7 +933,7 @@ renderEquipmentList();
 renderLayers();
 
 sceneStorage.load().then((savedScene) => {
-  if (savedScene?.objects?.length) loadSceneDocument(savedScene);
+  if (savedScene) loadSceneDocument(savedScene);
 }).catch(() => {
   // A missing or unavailable autosave should not prevent the editor from opening.
 });

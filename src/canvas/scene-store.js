@@ -40,6 +40,25 @@ const getLiquidLayers = (liquid) => {
   return layers.length ? layers.map(normalizeLiquidLayer) : [{ ...DEFAULT_LIQUID_LAYER }];
 };
 
+const cloneSceneObject = (object) => ({
+  ...object,
+  points: object.points?.map((point) => ({ ...point })),
+  start: object.start ? { ...object.start } : undefined,
+  end: object.end ? { ...object.end } : undefined,
+  liquid: object.liquid
+    ? {
+      ...object.liquid,
+      layers: object.liquid.layers?.map((layer) => ({ ...layer })),
+    }
+    : undefined,
+  connections: object.connections
+    ? {
+      start: object.connections.start ? { ...object.connections.start } : null,
+      end: object.connections.end ? { ...object.connections.end } : null,
+    }
+    : undefined,
+});
+
 const getHoseBounds = (points) => {
   const xs = points.map((point) => point.x);
   const ys = points.map((point) => point.y);
@@ -302,24 +321,7 @@ export class SceneStore extends EventTarget {
 
   snapshot() {
     return {
-      objects: this.objects.map((object) => ({
-        ...object,
-        points: object.points?.map((point) => ({ ...point })),
-        start: object.start ? { ...object.start } : undefined,
-        end: object.end ? { ...object.end } : undefined,
-        liquid: object.liquid
-          ? {
-            ...object.liquid,
-            layers: object.liquid.layers?.map((layer) => ({ ...layer })),
-          }
-          : undefined,
-        connections: object.connections
-          ? {
-            start: object.connections.start ? { ...object.connections.start } : null,
-            end: object.connections.end ? { ...object.connections.end } : null,
-          }
-          : undefined,
-      })),
+      objects: this.objects.map(cloneSceneObject),
       selectedIds: [...this.selectedIds],
     };
   }
@@ -332,8 +334,9 @@ export class SceneStore extends EventTarget {
     }
     this.pendingRenderIds.clear();
     this.pendingFullRender = false;
-    this.objects = snapshot.objects.map((object) => ({ ...object }));
+    this.objects = snapshot.objects.map(cloneSceneObject);
     this.selectedIds = new Set(snapshot.selectedIds);
+    this.refreshHoseConnections();
     this.render();
     this.notify();
   }
@@ -780,7 +783,8 @@ export class SceneStore extends EventTarget {
     const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
     ids.forEach((id) => {
       const object = this.getObject(id);
-      const wrapper = this.scene.querySelector(`[data-object-id="${id}"]`);
+      const wrapper = [...this.scene.querySelectorAll('.canvas-object')]
+        .find((node) => node.dataset.objectId === id);
       if (!object || !wrapper) return;
       wrapper.style.left = `${object.x}px`;
       wrapper.style.top = `${object.y}px`;

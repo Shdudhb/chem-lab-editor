@@ -80,7 +80,7 @@
       </header>
 
       <main class="workspace">
-        <aside class="side-panel equipment-panel" aria-label="器材面板">
+        <aside class="side-panel equipment-panel" id="equipmentPanel" aria-label="器材面板">
           <div class="panel-heading">
             <div>
               <p class="eyebrow">LIBRARY</p>
@@ -135,7 +135,7 @@
           </div>
         </section>
 
-        <aside class="side-panel properties-panel" aria-label="屬性面板">
+        <aside class="side-panel properties-panel" id="propertiesPanel" aria-label="屬性面板">
           <div class="panel-heading">
             <div>
               <p class="eyebrow">INSPECTOR</p>
@@ -222,7 +222,24 @@
         </aside>
       </main>
 
-      <section class="layers-panel" aria-label="圖層面板">
+      <nav class="mobile-bottom-bar" aria-label="手機面板工具列">
+        <button class="mobile-panel-button" type="button" data-mobile-panel="equipment" aria-controls="equipmentPanel" aria-expanded="false">
+          <span class="mobile-panel-icon" aria-hidden="true">⚗</span>
+          <span>器材</span>
+        </button>
+        <button class="mobile-panel-button" type="button" data-mobile-panel="layers" aria-controls="layersPanel" aria-expanded="false">
+          <span class="mobile-panel-icon" aria-hidden="true">≡</span>
+          <span>圖層</span>
+        </button>
+        <button class="mobile-panel-button" type="button" data-mobile-panel="properties" aria-controls="propertiesPanel" aria-expanded="false">
+          <span class="mobile-panel-icon" aria-hidden="true">◇</span>
+          <span>屬性</span>
+        </button>
+      </nav>
+
+      <button class="mobile-panel-backdrop" id="mobilePanelBackdrop" type="button" aria-label="關閉手機面板" hidden></button>
+
+      <section class="layers-panel" id="layersPanel" aria-label="圖層面板">
         <div class="layers-heading">
           <div class="layers-title-group">
             <span class="layers-handle" aria-hidden="true">⠿</span>
@@ -255,7 +272,7 @@
             <p class="eyebrow">EXPORT</p>
             <h2>匯出圖稿</h2>
           </div>
-          <button class="icon-button" value="cancel" aria-label="關閉匯出視窗">×</button>
+          <button class="icon-button" type="button" data-action="close-export" aria-label="關閉匯出視窗">×</button>
         </div>
         <label class="property-control">
           <span>格式</span>
@@ -279,7 +296,7 @@
           <span>透明背景</span>
         </label>
         <div class="export-dialog-actions">
-          <button class="secondary-button" value="cancel">取消</button>
+          <button class="secondary-button" type="button" data-action="close-export">取消</button>
           <button class="primary-button" id="exportSubmit" value="default">下載</button>
         </div>
       </form>
@@ -295,7 +312,7 @@
             <p class="eyebrow">CUSTOM EQUIPMENT</p>
             <h2>新增自訂器材</h2>
           </div>
-          <button class="icon-button" value="cancel" aria-label="關閉自訂器材視窗">×</button>
+          <button class="icon-button" type="button" data-action="close-custom-equipment" aria-label="關閉自訂器材視窗">×</button>
         </div>
         <label class="property-control">
           <span>名稱</span>
@@ -310,7 +327,7 @@
           <textarea id="customEquipmentSvg" name="svg" rows="6" required placeholder="貼上 &lt;svg&gt;...&lt;/svg&gt;"></textarea>
         </label>
         <div class="export-dialog-actions">
-          <button class="secondary-button" value="cancel">取消</button>
+          <button class="secondary-button" type="button" data-action="close-custom-equipment">取消</button>
           <button class="primary-button" id="customEquipmentSubmit" value="default">加入器材庫</button>
         </div>
       </form>
