@@ -1,7 +1,7 @@
 const SNAP_DISTANCE = 18;
 
 const rotatePoint = (point, degrees) => {
-  const radians = degrees * Math.PI / 180;
+  const radians = (Number(degrees) || 0) * Math.PI / 180;
   const cosine = Math.cos(radians);
   const sine = Math.sin(radians);
   return {
@@ -28,26 +28,26 @@ const edgePoint = (object, x, y, role) => {
 };
 
 const snapPointProfiles = {
-  beaker: [[0, -1, 'top'], [0, 1, 'bottom']],
-  'erlenmeyer-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'round-bottom-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'flat-bottom-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'volumetric-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'filter-flask': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'test-tube': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'test-tube-rack': [[0, -1, 'top']],
-  funnel: [[0, -1, 'top'], [0, 1, 'bottom']],
-  'long-neck-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'dropping-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
-  'separatory-funnel': [[0, -1, 'top'], [0, 1, 'bottom']],
+  beaker: [[0, -0.58, 'top'], [0, 0.63, 'bottom']],
+  'erlenmeyer-flask': [[0, -0.7, 'top'], [0, 0.73, 'bottom']],
+  'round-bottom-flask': [[0, -0.72, 'top'], [0, 0.84, 'bottom']],
+  'flat-bottom-flask': [[0, -0.72, 'top'], [0, 0.73, 'bottom']],
+  'volumetric-flask': [[0, -0.73, 'top'], [0, 0.77, 'bottom']],
+  'filter-flask': [[0, -0.73, 'top'], [0.83, 0.08, 'right'], [0, 0.73, 'bottom']],
+  'test-tube': [[0, -0.7, 'top'], [0, 0.57, 'bottom']],
+  'test-tube-rack': [[0, -0.4, 'top']],
+  funnel: [[0, -0.6, 'top'], [0, 0.58, 'bottom']],
+  'long-neck-funnel': [[0, -0.6, 'top'], [0, 0.58, 'bottom']],
+  'dropping-funnel': [[0, -0.6, 'top'], [0, 0.58, 'bottom']],
+  'separatory-funnel': [[0, -0.6, 'top'], [0, 0.58, 'bottom']],
   'retort-stand': [[0, -1, 'top'], [1, 0, 'right'], [-1, 0, 'left']],
   'iron-ring': [[0, -1, 'top']],
   tripod: [[0, -1, 'top']],
   'universal-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
   'flask-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
   'test-tube-holder': [[1, 0, 'right'], [-1, 0, 'left']],
-  'alcohol-lamp': [[0, -1, 'top']],
-  'bunsen-burner': [[0, -1, 'top']],
+  'alcohol-lamp': [[0, -0.58, 'top']],
+  'bunsen-burner': [[0, -0.6, 'top']],
 };
 
 export const getSnapPoints = (object) => {

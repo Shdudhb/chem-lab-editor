@@ -71,7 +71,7 @@ const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
 const appShell = document.querySelector('.app-shell');
 const mobilePanelBackdrop = document.querySelector('#mobilePanelBackdrop');
 const mobilePanelButtons = [...document.querySelectorAll('[data-mobile-panel]')];
-const mobileDeleteButton = document.querySelector('[data-action="delete-selection"]');
+const deleteSelectionButtons = [...document.querySelectorAll('[data-action="delete-selection"]')];
 
 const mobilePanelNames = ['equipment', 'layers', 'properties'];
 const mobilePanelClass = (panel) => `is-mobile-${panel}-open`;
@@ -189,7 +189,9 @@ const updateViewReadouts = ({ zoom, panX, panY }) => {
 const updateSelectionPanel = ({ selectedObjects }) => {
   const selectedCount = selectedObjects.length;
   const hasSelection = selectedCount > 0;
-  mobileDeleteButton.disabled = !selectedObjects.some((object) => !object.locked);
+  deleteSelectionButtons.forEach((button) => {
+    button.disabled = !selectedObjects.some((object) => !object.locked);
+  });
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
   hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
@@ -247,6 +249,7 @@ const equipmentMetadata = (item) => ({
   sourceId: item.id,
   name: item.name,
   category: item.category,
+  equipmentType: item.equipmentType,
 });
 
 const userEquipmentCategories = [
@@ -284,7 +287,12 @@ const sanitizeEquipmentSvg = (svgText) => {
 };
 
 const addEquipmentToScene = (item, screenPoint = null) => {
-  canvasController.addSvgMarkup(item.svg, equipmentMetadata(item), screenPoint);
+  const metadata = equipmentMetadata(item);
+  if (item.equipmentType === 'hose') {
+    canvasController.addFlexibleHose(metadata, screenPoint);
+  } else {
+    canvasController.addSvgMarkup(item.svg, metadata, screenPoint);
+  }
   equipmentUserStore.addRecent(item.id);
 };
 
@@ -492,6 +500,7 @@ const renderEquipmentList = () => {
     empty.className = 'equipment-list-empty';
     empty.textContent = '找不到符合的器材';
     equipmentList.appendChild(empty);
+    if (query) equipmentList.closest('.equipment-panel')?.scrollTo({ top: Math.max(0, equipmentList.offsetTop - 150) });
     return;
   }
 
@@ -550,6 +559,8 @@ const renderEquipmentList = () => {
 
     equipmentList.appendChild(card);
   });
+
+  if (query) equipmentList.closest('.equipment-panel')?.scrollTo({ top: Math.max(0, equipmentList.offsetTop - 150) });
 };
 
 canvasController.addEventListener('viewchange', (event) => {
@@ -596,9 +607,11 @@ document.querySelector('[data-action="remove-hose-point"]').addEventListener('cl
   canvasController.removeHoseControlPoint();
 });
 
-mobileDeleteButton.addEventListener('click', () => {
-  if (!canvasController.deleteSelected()) return;
-  canvasHint.textContent = '已刪除選取物件';
+deleteSelectionButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!canvasController.deleteSelected()) return;
+    canvasHint.textContent = '已刪除選取物件';
+  });
 });
 
 const updateSelectedHoseStyle = (patch) => {

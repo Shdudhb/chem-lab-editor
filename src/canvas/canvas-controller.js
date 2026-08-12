@@ -84,6 +84,28 @@ export class CanvasController extends EventTarget {
     this.addAsset(asset, metadata, screenPoint);
   }
 
+  addFlexibleHose(metadata = {}, screenPoint = null) {
+    const bounds = this.viewport.getBoundingClientRect();
+    const center = screenPoint
+      ? this.screenToWorld(screenPoint.x, screenPoint.y)
+      : this.screenToWorld(bounds.width / 2, bounds.height / 2);
+    const halfLength = 90;
+    const bend = 18;
+    const points = [
+      { x: center.x - halfLength, y: center.y },
+      { x: center.x - halfLength / 3, y: center.y - bend },
+      { x: center.x + halfLength / 3, y: center.y + bend },
+      { x: center.x + halfLength, y: center.y },
+    ];
+    const before = this.store.snapshot();
+    this.store.addHose(points, {
+      ...metadata,
+      name: metadata.name ?? '橡膠軟管',
+      activePointIndex: 1,
+    });
+    this.recordHistory(before);
+  }
+
   addAsset(asset, metadata = {}, screenPoint = null) {
     const bounds = this.viewport.getBoundingClientRect();
     const center = screenPoint

@@ -72,13 +72,48 @@ const makeEquipment = (id, name, category, description, kind) => ({
   name,
   category,
   description,
+  equipmentType: kind,
   svg: equipmentSvg(genericEquipmentContents[kind] ?? genericEquipmentContents.tube),
 });
 
 const extraEquipment = [
-  makeEquipment('flat-bottom-flask', '平底燒瓶', 'glassware', '平底反應瓶', 'flask'),
-  makeEquipment('volumetric-flask', '容量瓶', 'glassware', '精確定容容器', 'flask'),
-  makeEquipment('filter-flask', '抽濾瓶', 'glassware', '減壓過濾容器', 'flask'),
+  {
+    id: 'flat-bottom-flask',
+    name: '平底燒瓶',
+    category: 'glassware',
+    description: '平底反應瓶',
+    equipmentType: 'flat-bottom-flask',
+    svg: equipmentSvg(`
+      <path fill="${muted}" d="M48 16h24v31l17 39v10H31V86l17-39z"/>
+      <path d="M48 16h24M45 33h30M31 96h58"/>
+      <path stroke="${accent}" stroke-width="8" d="M37 76h46"/>
+    `),
+  },
+  {
+    id: 'volumetric-flask',
+    name: '容量瓶',
+    category: 'glassware',
+    description: '精確定容容器',
+    equipmentType: 'volumetric-flask',
+    svg: equipmentSvg(`
+      <path fill="${muted}" d="M51 16h18v30c0 6 21 16 25 32 4 18-10 30-34 30S26 96 30 78c4-16 25-26 25-32V16z"/>
+      <path d="M51 16h18M48 27h24M38 70h44"/>
+      <path stroke="${accent}" stroke-width="8" d="M38 76c4 15 17 23 22 23s18-8 22-23"/>
+    `),
+  },
+  {
+    id: 'filter-flask',
+    name: '抽濾瓶',
+    category: 'glassware',
+    description: '減壓過濾容器，側管可接軟管',
+    equipmentType: 'filter-flask',
+    svg: equipmentSvg(`
+      <path fill="${muted}" d="M47 16h26v30l17 40v10H30V86l17-40z"/>
+      <path fill="${muted}" d="M78 58h31v14H78z"/>
+      <path d="M47 16h26M44 33h32M30 96h60M78 58h31M78 72h31M103 58v14"/>
+      <path stroke="${accent}" stroke-width="8" d="M37 76h43"/>
+    `),
+  },
   makeEquipment('test-tube-rack', '試管架', 'glassware', '試管收納架', 'rack'),
   makeEquipment('u-tube', 'U 型管', 'glassware', '連通與氣體實驗用管', 'uTube'),
   makeEquipment('condenser', '冷凝管', 'glassware', '蒸餾冷凝器材', 'condenser'),

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findPointSnapCandidate, getSnapPoints } from '../src/canvas/snap-system.js';
+import { getEquipmentById } from '../src/equipment/equipment-catalog.js';
 import { buildSceneSvg } from '../src/export/exporter.js';
 import { createEquipmentUserStore } from '../src/equipment/equipment-user-store.js';
 import { createLocalSceneStorage, parseScene, serializeScene } from '../src/storage/scene-storage.js';
@@ -19,6 +20,23 @@ test('snap system finds equipment-specific connection points', () => {
   const points = getSnapPoints(beaker);
   const candidate = findPointSnapCandidate({ x: points[0].x + 3, y: points[0].y + 3 }, [beaker]);
   assert.equal(candidate?.targetPoint.role, 'top');
+});
+
+test('flask catalog models are distinct and filter flask exposes a side port', () => {
+  const flat = getEquipmentById('flat-bottom-flask');
+  const volumetric = getEquipmentById('volumetric-flask');
+  const filter = getEquipmentById('filter-flask');
+  const hose = getEquipmentById('rubber-tubing');
+
+  assert.notEqual(flat.svg, volumetric.svg);
+  assert.notEqual(volumetric.svg, filter.svg);
+  assert.match(filter.svg, /M78 58h31/);
+  assert.equal(hose.equipmentType, 'hose');
+
+  const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
+  assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
+  assert.ok(Math.abs(filterPoints[1].x - 109.8) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].y - 64.8) < 0.001);
 });
 
 test('hose export keeps Bezier geometry and style', () => {

@@ -30,6 +30,8 @@ button:disabled, input:disabled { cursor: not-allowed; }
 .toolbar-divider { width: 1px; height: 24px; margin: 0 7px; background: #dce3df; }
 .icon-button { width: 30px; height: 30px; color: #52615d; background: transparent; font-size: 19px; line-height: 1; }
 .icon-button:hover:not(:disabled) { background: #edf1ef; }
+.delete-selection-button { color: #a36a6a; }
+.delete-selection-button:hover:not(:disabled) { color: #a14d4d; background: #fbeaea; }
 .zoom-readout { display: inline-grid; place-items: center; width: 49px; color: #45514e; font-size: 12px; }
 .text-button { padding: 8px 10px; color: #66716d; background: transparent; font-size: 12px; }
 .text-button:hover { color: #176b5f; background: #edf4f1; }
@@ -50,7 +52,7 @@ button:disabled, input:disabled { cursor: not-allowed; }
 
 .workspace { display: grid; grid-template-columns: 224px minmax(0, 1fr) 224px; min-height: 0; }
 .side-panel { min-width: 0; background: #fbfcfb; }
-.equipment-panel { border-right: 1px solid #dce3df; }
+.equipment-panel { min-height: 0; overflow-y: auto; border-right: 1px solid #dce3df; }
 .properties-panel { overflow-y: auto; border-left: 1px solid #dce3df; }
 .panel-heading { justify-content: space-between; padding: 23px 18px 15px; }
 .panel-heading h2 { margin-top: 5px; font-size: 16px; }
@@ -263,6 +265,7 @@ button:disabled, input:disabled { cursor: not-allowed; }
   .property-control input[type="range"] { min-height: 32px; }
   .property-control input[type="color"] { height: 38px; }
   .property-control input, .property-control select, .property-control textarea, .export-dialog select { font-size: 16px; }
+  .hose-control-point { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
 
   .layers-panel { position: fixed; right: 0; bottom: 58px; left: 0; z-index: 20; height: min(48vh, 420px); max-height: calc(100dvh - 120px); padding: 0 14px 12px; overflow: hidden; border-top: 1px solid #dce3df; border-radius: 16px 16px 0 0; box-shadow: 0 -12px 38px rgba(26, 54, 46, .16); transform: translateY(104%); visibility: hidden; pointer-events: none; transition: transform .22s ease, visibility .22s ease; }
   .app-shell.is-mobile-layers-open .layers-panel { transform: translateY(0); visibility: visible; pointer-events: auto; }
