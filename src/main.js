@@ -1,6 +1,6 @@
 import './styles.css';
 import { CanvasController } from './canvas/canvas-controller.js';
-import { SceneStore } from './canvas/scene-store.js';
+import { getLiquidLayers as getSceneLiquidLayers, SceneStore } from './canvas/scene-store.js';
 import { exportScene } from './export/exporter.js';
 import { createSceneStorage, parseScene, serializeScene } from './storage/scene-storage.js';
 import { createEquipmentUserStore } from './equipment/equipment-user-store.js';
@@ -99,16 +99,7 @@ const sceneStorage = createSceneStorage({ endpoint: import.meta.env.VITE_SCENE_S
 const equipmentUserStore = createEquipmentUserStore();
 let autoSaveTimer = null;
 
-const DEFAULT_LIQUID_LAYER = { level: 0, color: '#67aee8', opacity: 0 };
-
-const getLiquidLayers = (object) => {
-  const layers = Array.isArray(object?.liquid?.layers)
-    ? object.liquid.layers
-    : object?.liquid
-      ? [object.liquid]
-      : [DEFAULT_LIQUID_LAYER];
-  return layers.length ? layers : [DEFAULT_LIQUID_LAYER];
-};
+const getLiquidLayers = (object) => getSceneLiquidLayers(object?.liquid);
 
 const createLiquidLayerCard = (index) => {
   const card = document.createElement('div');
@@ -128,8 +119,8 @@ const createLiquidLayerCard = (index) => {
       <input data-liquid-color type="color" value="#67aee8" />
     </label>
     <label class="property-control">
-      <span>透明度 <output data-liquid-opacity-value>0%</output></span>
-      <input data-liquid-opacity type="range" min="0" max="100" step="1" value="0" />
+      <span>透明度 <output data-liquid-opacity-value>72%</output></span>
+      <input data-liquid-opacity type="range" min="0" max="100" step="1" value="72" />
     </label>
   `;
 

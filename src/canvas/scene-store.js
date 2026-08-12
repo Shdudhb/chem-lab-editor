@@ -3,26 +3,46 @@ import { getSnapPoints } from './snap-system.js';
 const DEFAULT_WIDTH = 180;
 const DEFAULT_HEIGHT = 140;
 const MAX_IMPORT_SIZE = 220;
-const liquidClipPaths = {
-  beaker: 'polygon(8% 0, 92% 0, 86% 100%, 14% 100%)',
-  'erlenmeyer-flask': 'polygon(30% 0, 70% 0, 100% 100%, 0 100%)',
-  'round-bottom-flask': 'ellipse(50% 50% at 50% 50%)',
-  'flat-bottom-flask': 'polygon(25% 0, 75% 0, 92% 100%, 8% 100%)',
-  'volumetric-flask': 'polygon(38% 0, 62% 0, 90% 100%, 10% 100%)',
-  'filter-flask': 'polygon(28% 0, 72% 0, 94% 100%, 6% 100%)',
-  'test-tube': 'inset(0 8% 0 8% round 0 0 22px 22px)',
-  'graduated-cylinder': 'inset(0 5% 0 5% round 0 0 8px 8px)',
-  'petri-dish': 'ellipse(50% 50% at 50% 50%)',
-  'evaporating-dish': 'ellipse(50% 50% at 50% 50%)',
-  'watch-glass': 'ellipse(50% 50% at 50% 50%)',
-  'surface-dish': 'ellipse(50% 50% at 50% 50%)',
-  'crystallizing-dish': 'ellipse(50% 50% at 50% 50%)',
+const liquidVessels = {
+  beaker: { top: 21, bottom: 82, leftTop: 26, rightTop: 74, leftBottom: 36, rightBottom: 70 },
+  'erlenmeyer-flask': { top: 15, bottom: 87, leftTop: 40, rightTop: 60, leftBottom: 27, rightBottom: 73 },
+  'round-bottom-flask': { top: 14, bottom: 93, leftTop: 42, rightTop: 58, leftBottom: 25, rightBottom: 75 },
+  'flat-bottom-flask': { top: 13, bottom: 88, leftTop: 40, rightTop: 60, leftBottom: 26, rightBottom: 74 },
+  'volumetric-flask': { top: 13, bottom: 90, leftTop: 43, rightTop: 57, leftBottom: 24, rightBottom: 78 },
+  'filter-flask': { top: 13, bottom: 88, leftTop: 39, rightTop: 61, leftBottom: 26, rightBottom: 74 },
+  'test-tube': { top: 15, bottom: 79, leftTop: 38, rightTop: 62, leftBottom: 38, rightBottom: 62 },
+  'graduated-cylinder': { top: 13, bottom: 82, leftTop: 36, rightTop: 64, leftBottom: 36, rightBottom: 64 },
+  'petri-dish': { top: 39, bottom: 79, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'evaporating-dish': { top: 39, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'watch-glass': { top: 34, bottom: 69, leftTop: 15, rightTop: 85, leftBottom: 15, rightBottom: 85 },
+  'surface-dish': { top: 32, bottom: 67, leftTop: 14, rightTop: 86, leftBottom: 14, rightBottom: 86 },
+  'crystallizing-dish': { top: 38, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+};
+
+const defaultLiquidVessel = {
+  top: 12,
+  bottom: 88,
+  leftTop: 8,
+  rightTop: 92,
+  leftBottom: 8,
+  rightBottom: 92,
+};
+
+const clampPercent = (value) => Math.min(100, Math.max(0, value));
+const interpolatePercent = (start, end, ratio) => start + (end - start) * ratio;
+
+const getLiquidBandClipPath = (vessel, bandTop, bandBottom) => {
+  const height = Math.max(1, vessel.bottom - vessel.top);
+  const ratio = (value) => clampPercent((value - vessel.top) / height);
+  const leftAt = (value) => interpolatePercent(vessel.leftTop, vessel.leftBottom, ratio(value));
+  const rightAt = (value) => interpolatePercent(vessel.rightTop, vessel.rightBottom, ratio(value));
+  return `polygon(${leftAt(bandTop)}% 0%, ${rightAt(bandTop)}% 0%, ${rightAt(bandBottom)}% 100%, ${leftAt(bandBottom)}% 100%)`;
 };
 
 const DEFAULT_LIQUID_LAYER = {
   level: 0,
   color: '#67aee8',
-  opacity: 0,
+  opacity: 0.72,
 };
 
 const normalizeLiquidLayer = (layer = {}) => ({
@@ -31,13 +51,23 @@ const normalizeLiquidLayer = (layer = {}) => ({
   opacity: Math.min(1, Math.max(0, Number(layer.opacity) || 0)),
 });
 
-const getLiquidLayers = (liquid) => {
+const normalizeLiquidLayers = (layers) => {
+  let usedLevel = 0;
+  return layers.map((layer) => {
+    const normalized = normalizeLiquidLayer(layer);
+    const level = Math.min(normalized.level, Math.max(0, 100 - usedLevel));
+    usedLevel += level;
+    return { ...normalized, level };
+  });
+};
+
+export const getLiquidLayers = (liquid) => {
   const layers = Array.isArray(liquid?.layers)
     ? liquid.layers
     : liquid
       ? [liquid]
       : [DEFAULT_LIQUID_LAYER];
-  return layers.length ? layers.map(normalizeLiquidLayer) : [{ ...DEFAULT_LIQUID_LAYER }];
+  return layers.length ? normalizeLiquidLayers(layers) : [{ ...DEFAULT_LIQUID_LAYER }];
 };
 
 const cloneSceneObject = (object) => ({
@@ -586,7 +616,7 @@ export class SceneStore extends EventTarget {
     const layers = getLiquidLayers(object.liquid);
     const index = Math.min(layers.length - 1, Math.max(0, Number(layerIndex) || 0));
     layers[index] = normalizeLiquidLayer({ ...layers[index], ...liquid });
-    object.liquid = { layers };
+    object.liquid = { layers: normalizeLiquidLayers(layers) };
     this.render();
     this.notify();
   }
@@ -601,7 +631,7 @@ export class SceneStore extends EventTarget {
       opacity: 0.7,
       ...layer,
     }));
-    object.liquid = { layers };
+    object.liquid = { layers: normalizeLiquidLayers(layers) };
     this.render();
     this.notify();
   }
@@ -876,18 +906,22 @@ export class SceneStore extends EventTarget {
         if (svg?.nodeName.toLowerCase() === 'svg') {
           wrapper.appendChild(document.importNode(svg, true));
         }
+        const vessel = liquidVessels[object.sourceId] ?? defaultLiquidVessel;
+        const availableHeight = Math.max(1, vessel.bottom - vessel.top);
         let liquidOffset = 0;
         getLiquidLayers(object.liquid).forEach((layer, layerIndex) => {
           const layerHeight = Math.min(layer.level, 100 - liquidOffset);
           if (layerHeight <= 0) return;
+          const bandBottom = vessel.bottom - (availableHeight * liquidOffset) / 100;
+          const bandTop = bandBottom - (availableHeight * layerHeight) / 100;
           const liquid = document.createElement('span');
           liquid.className = 'liquid-overlay';
-          liquid.style.height = `${layerHeight}%`;
-          liquid.style.bottom = `calc(8% + ${liquidOffset}%)`;
+          liquid.style.height = `${Math.max(0, bandBottom - bandTop)}%`;
+          liquid.style.bottom = `${Math.max(0, 100 - bandBottom)}%`;
           liquid.style.background = layer.color;
           liquid.style.opacity = String(layer.opacity);
           liquid.style.zIndex = String(layerIndex + 1);
-          const clipPath = liquidClipPaths[object.sourceId] ?? 'inset(0 4% 0 4% round 8px)';
+          const clipPath = getLiquidBandClipPath(vessel, bandTop, bandBottom);
           liquid.style.clipPath = clipPath;
           liquid.style.webkitClipPath = clipPath;
           wrapper.appendChild(liquid);

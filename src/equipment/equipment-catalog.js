@@ -1,5 +1,6 @@
-// Chemix-inspired apparatus palette: dark line art, translucent glass, and
-// pale blue liquid fills that remain legible on the canvas and in the library.
+// Chemix-inspired apparatus palette: dark line art and translucent glass.
+// Liquid color is kept for the editor's optional liquid-layer controls only;
+// catalog apparatus start empty and never render a filled liquid by default.
 const stroke = '#3f5149';
 const detail = '#71817a';
 const accent = '#78b6a3';
@@ -11,7 +12,8 @@ const hose = '#8b654d';
 const equipmentSvg = (content) => `
   <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
     <g fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      ${content}
+      ${content
+        .replace(new RegExp(`<(?:path|circle)\\b(?=[^>]*(?:fill|stroke)="${liquid}")[^>]*/>`, 'g'), '')}
     </g>
   </svg>
 `;

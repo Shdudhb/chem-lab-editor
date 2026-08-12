@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findPointSnapCandidate, getSnapPoints } from '../src/canvas/snap-system.js';
-import { getEquipmentById } from '../src/equipment/equipment-catalog.js';
+import { equipmentCatalog, getEquipmentById } from '../src/equipment/equipment-catalog.js';
+import { getLiquidLayers } from '../src/canvas/scene-store.js';
 import { buildSceneSvg } from '../src/export/exporter.js';
 import { createEquipmentUserStore } from '../src/equipment/equipment-user-store.js';
 import { createLocalSceneStorage, parseScene, serializeScene } from '../src/storage/scene-storage.js';
@@ -37,6 +38,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
   assert.ok(Math.abs(filterPoints[1].x - 109.8) < 0.001);
   assert.ok(Math.abs(filterPoints[1].y - 64.8) < 0.001);
+});
+
+test('catalog apparatus start empty and liquid layers stay within 100 percent', () => {
+  assert.ok(equipmentCatalog.every((item) => !item.svg.includes('#b7dfe7')));
+  assert.equal(getLiquidLayers(undefined)[0].level, 0);
+  assert.equal(getLiquidLayers(undefined)[0].opacity, 0.72);
+
+  const layers = getLiquidLayers({ layers: [
+    { level: 70, color: '#67aee8', opacity: 0.72 },
+    { level: 60, color: '#f2a65a', opacity: 0.72 },
+  ] });
+  assert.deepEqual(layers.map((layer) => layer.level), [70, 30]);
 });
 
 test('hose export keeps Bezier geometry and style', () => {
