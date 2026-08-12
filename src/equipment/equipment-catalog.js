@@ -1,13 +1,16 @@
 // Chemix-inspired apparatus palette: dark line art, translucent glass, and
 // pale blue liquid fills that remain legible on the canvas and in the library.
-const stroke = '#4f625b';
-const accent = '#71b99f';
-const liquid = '#a9d8e3';
-const muted = '#edf5f2';
+const stroke = '#3f5149';
+const detail = '#71817a';
+const accent = '#78b6a3';
+const liquid = '#b7dfe7';
+const muted = '#f4faf8';
+const heat = '#f0a565';
+const hose = '#8b654d';
 
 const equipmentSvg = (content) => `
   <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-    <g fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       ${content}
     </g>
   </svg>
@@ -51,32 +54,56 @@ export const equipmentCategoryIcons = {
 };
 
 const genericEquipmentContents = {
-  flask: `<path fill="${muted}" d="M48 17h24v30l18 42a8 8 0 0 1-7 11H37a8 8 0 0 1-7-11l18-42z"/><path d="M48 17h24M43 39h34M37 78h46"/><path stroke="${liquid}" stroke-width="8" d="M40 74h40"/>`,
-  bottle: `<path fill="${muted}" d="M43 27h34v12l8 8v44a8 8 0 0 1-8 8H43a8 8 0 0 1-8-8V47l8-8z"/><path d="M43 27h34M43 39h34M35 69h50"/><path stroke="${liquid}" stroke-width="8" d="M40 67h40"/>`,
-  funnel: `<path fill="${muted}" d="M20 25h80L68 59v35H52V59z"/><path d="M20 25h80M52 59h16M52 94h16"/><path stroke="${liquid}" stroke-width="8" d="M53 62h14"/>`,
-  tube: `<path fill="${muted}" d="M46 18h28v61a14 14 0 0 1-28 0z"/><path d="M46 18h28M46 63h28"/><path stroke="${liquid}" stroke-width="8" d="M50 61h20"/>`,
-  dish: `<path fill="${muted}" d="M22 61q38 30 76 0-4 35-38 35T22 61z"/><ellipse cx="60" cy="61" rx="38" ry="13"/><path stroke="${liquid}" stroke-width="7" d="M34 61h52"/>`,
-  rack: `<path fill="${muted}" d="M20 36h80v54H20z"/><path d="M20 53h80M32 36v54M48 36v54M64 36v54M80 36v54"/><path fill="${liquid}" d="M27 53h10v27H27zM43 53h10v27H43zM59 53h10v27H59zM75 53h10v27H75z"/>`,
-  uTube: `<path d="M35 20v55a25 25 0 0 0 50 0V20"/><path fill="${muted}" d="M35 49h16v26a9 9 0 0 0 18 0V49h16v26a25 25 0 0 1-50 0z"/><path stroke="${liquid}" stroke-width="7" d="M43 68a17 17 0 0 0 34 0"/>`,
-  condenser: `<path fill="${muted}" d="M34 22h52v74H34z"/><path d="M34 22h52M34 96h52M48 22v74M72 22v74M25 36h9M86 36h9M25 82h9M86 82h9"/><path fill="${liquid}" fill-opacity=".72" d="M50 31h20v56H50z"/>`,
-  support: `<path fill="${muted}" d="M24 94h72l-7 10H31z"/><path d="M48 94V18M42 18h12M34 34h55M34 34v15M89 34v15"/><circle cx="57" cy="52" r="8" fill="${accent}"/>`,
-  clamp: `<circle cx="61" cy="55" r="17" fill="${muted}"/><circle cx="61" cy="55" r="8" fill="#fff"/><path d="M45 55H22M78 55l22-19M78 55l22 19"/><path stroke="${accent}" stroke-width="7" d="M22 55h18"/>`,
-  burner: `<path fill="${muted}" d="M35 48h50v43a9 9 0 0 1-9 9H44a9 9 0 0 1-9-9z"/><path d="M44 48h32M50 35h20v13H50zM60 35V24"/><path fill="${accent}" d="M60 24c-9-9 6-12 0-22 15 10 7 19 0 22z"/>`,
-  mesh: `<path fill="${muted}" d="M23 42h74l-8 12H31z"/><path d="M31 54 23 98M89 54l8 44M39 42l-8 12M52 42l-8 12M65 42l-8 12M78 42l-8 12M91 42l-8 12"/><path stroke="${accent}" stroke-width="5" d="M34 47h52"/>`,
-  stopper: `<path fill="${muted}" d="M37 46h46l-6 49H43z"/><path d="M37 46h46M43 95h34"/><path stroke="${accent}" stroke-width="8" d="M43 57h34"/>`,
-  rod: `<path stroke="${accent}" stroke-width="8" d="m35 92 50-65"/><path d="m31 96 8-8M85 27l7-8"/>`,
-  hose: `<path stroke="${accent}" stroke-width="8" d="M24 84C38 22 82 100 98 34"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
-  jar: `<path fill="${muted}" d="M36 31h48v61a8 8 0 0 1-8 8H44a8 8 0 0 1-8-8z"/><path d="M36 31h48M44 20h32v11H44zM36 66h48"/><path stroke="${liquid}" stroke-width="8" d="M41 64h38"/>`,
-  balance: `<path fill="${muted}" d="M35 78h50v20H35z"/><path d="M60 78V25M42 35h36M30 52h24M66 52h24"/><path stroke="${accent}" stroke-width="7" d="M27 56h30M63 56h30"/><path d="M22 56 12 75h30zM58 56 48 75h30z"/>`,
+  flask: `<path fill="${muted}" fill-opacity=".55" d="M48 17h24v30l18 42a9 9 0 0 1-8 13H38a9 9 0 0 1-8-13l18-42z"/><path d="M48 17h24M44 33h32"/><path fill="${liquid}" fill-opacity=".72" stroke="none" d="M36 74h48l4 14a8 8 0 0 1-8 10H40a8 8 0 0 1-8-10z"/><path d="M37 74h46"/>`,
+  bottle: `<path fill="${muted}" fill-opacity=".55" d="M43 24h34v15l8 8v43a9 9 0 0 1-9 9H44a9 9 0 0 1-9-9V47l8-8z"/><path d="M43 24h34M43 39h34M35 68h50"/><path fill="${liquid}" fill-opacity=".72" stroke="none" d="M36 68h48v20a7 7 0 0 1-7 7H43a7 7 0 0 1-7-7z"/><path d="M36 68h48"/>`,
+  funnel: `<path fill="${muted}" fill-opacity=".45" d="M20 24h80L68 58v37H52V58z"/><path d="M20 24h80M52 58h16M52 95h16"/><path fill="${liquid}" stroke="none" d="M53 60h14v8H53z"/><path d="M53 60h14"/>`,
+  longFunnel: `<path fill="${muted}" fill-opacity=".45" d="M20 22h80L68 55v48H52V55z"/><path d="M20 22h80M52 55h16M52 103h16M41 31h38"/>`,
+  droppingFunnel: `<path fill="${muted}" fill-opacity=".45" d="M32 22h56l-8 29v28H40V51z"/><path d="M32 22h56M40 51h40M40 79h40M52 79v24h16V79"/><circle cx="60" cy="91" r="3" fill="${accent}"/>`,
+  separatoryFunnel: `<path fill="${muted}" fill-opacity=".45" d="M43 20h34v17c0 8 15 13 15 29a32 32 0 1 1-64 0c0-16 15-21 15-29z"/><path d="M43 20h34M40 37h40M47 70h26M52 95h16M52 95v10h16V95"/><path fill="${liquid}" fill-opacity=".7" stroke="none" d="M36 70h48c-3 13-13 20-24 20S39 83 36 70z"/><path d="M37 70h46"/>`,
+  tube: `<path fill="${muted}" fill-opacity=".5" d="M46 18h28v61a14 14 0 0 1-28 0z"/><path d="M46 18h28"/><path fill="${liquid}" fill-opacity=".75" stroke="none" d="M48 62h24v16a12 12 0 0 1-24 0z"/><path d="M47 62h26"/>`,
+  dropper: `<path fill="${muted}" fill-opacity=".4" d="M51 23h18v57a9 9 0 0 1-18 0z"/><path d="M51 23h18M54 18h12M54 18v5M66 18v5M54 71h12"/><path fill="${accent}" stroke="none" d="M52 13q8-7 16 0l-2 7H54z"/>`,
+  pipette: `<path fill="${muted}" fill-opacity=".4" d="M55 18h10v68l-5 13-5-13z"/><path d="M55 18h10M57 18v-5h6v5M55 30h10M57 84h6"/>`,
+  volumetricPipette: `<path fill="${muted}" fill-opacity=".4" d="M56 17h8v37c0 7 8 10 8 18v22H48V72c0-8 8-11 8-18z"/><path d="M56 17h8M53 51h14M48 77h24M56 17v-5h8v5"/>`,
+  dish: `<path fill="${muted}" fill-opacity=".5" d="M22 61q38 26 76 0-5 34-38 34T22 61z"/><ellipse cx="60" cy="61" rx="38" ry="13"/><path fill="${liquid}" fill-opacity=".7" stroke="none" d="M34 61q26 9 52 0v5q-26 11-52 0z"/><path d="M35 61h50"/>`,
+  petriDish: `<ellipse cx="60" cy="57" rx="38" ry="13" fill="${muted}" fill-opacity=".5"/><path d="M22 57q38 25 76 0M22 57v9q38 26 76 0v-9"/><path fill="${liquid}" fill-opacity=".65" stroke="none" d="M26 64q34 20 68 0v5q-34 20-68 0z"/>`,
+  evaporatingDish: `<path fill="${muted}" fill-opacity=".5" d="M22 59q38 30 76 0-5 33-38 33T22 59z"/><ellipse cx="60" cy="59" rx="38" ry="13"/><path fill="${liquid}" fill-opacity=".7" stroke="none" d="M35 59q25 9 50 0v5q-25 10-50 0z"/>`,
+  watchGlass: `<path fill="${muted}" fill-opacity=".45" d="M19 62q41-22 82 0-41 20-82 0z"/><path d="M19 62q41-22 82 0M25 66q35 16 70 0"/>`,
+  surfaceDish: `<path fill="${muted}" fill-opacity=".45" d="M18 55q42-18 84 0-42 18-84 0z"/><path d="M18 55q42-18 84 0M25 59q35 14 70 0"/><path fill="${liquid}" fill-opacity=".65" stroke="none" d="M28 55q32-11 64 0-32 11-64 0z"/>`,
+  crystallizingDish: `<path fill="${muted}" fill-opacity=".45" d="M22 45h76l-8 38a7 7 0 0 1-7 6H37a7 7 0 0 1-7-6z"/><path d="M22 45h76M30 75h60"/><path fill="${liquid}" fill-opacity=".65" stroke="none" d="M30 75h60l-2 9a6 6 0 0 1-6 5H38a6 6 0 0 1-6-5z"/>`,
+  rack: `<path fill="${muted}" fill-opacity=".38" d="M20 38h80v51H20z"/><path d="M20 53h80M29 38v51M45 38v51M61 38v51M77 38v51M93 38v51M20 89h80"/><path fill="${liquid}" fill-opacity=".65" stroke="none" d="M29 53h10v27H29zM45 53h10v27H45zM61 53h10v27H61zM77 53h10v27H77z"/>`,
+  uTube: `<path d="M35 20v54a25 25 0 0 0 50 0V20M35 20h12M73 20h12"/><path fill="${liquid}" fill-opacity=".72" stroke="none" d="M43 52h8v22a9 9 0 0 0 18 0V52h8v22a17 17 0 0 1-34 0z"/><path d="M43 52h8M69 52h8"/>`,
+  condenser: `<path fill="${muted}" fill-opacity=".42" d="M34 22h52v74H34z"/><path d="M34 22h52M34 96h52M48 22v74M72 22v74M25 36h9M86 36h9M25 82h9M86 82h9"/><path fill="${liquid}" fill-opacity=".6" stroke="none" d="M50 31h20v56H50z"/><path d="M50 31h20M50 87h20"/>`,
+  support: `<path fill="${muted}" fill-opacity=".55" d="M24 94h72l-7 10H31z"/><path d="M48 94V18M42 18h12M34 34h55M34 34v15M89 34v15"/><circle cx="57" cy="52" r="7" fill="${accent}"/>`,
+  universalClamp: `<path d="M22 55h27M71 55h27M72 55l20-19M72 55l20 19"/><path fill="${muted}" d="M49 43h22v24H49z"/><circle cx="60" cy="55" r="8" fill="#fff"/><path d="M49 43q-8 12 0 24M71 43q8 12 0 24"/>`,
+  clamp: `<path d="M21 55h25M75 55l22-20M75 55l22 20"/><path fill="${muted}" d="M46 42h29v26H46z"/><circle cx="60" cy="55" r="9" fill="#fff"/><path d="M46 42q-8 13 0 26M75 42q8 13 0 26"/>`,
+  testTubeHolder: `<path d="M22 55h32M65 55l28-18M65 55l28 18"/><path fill="${muted}" d="M51 45h18v20H51z"/><path d="M51 45q-7 10 0 20M69 45q7 10 0 20"/>`,
+  crucibleTongs: `<path d="m26 93 35-38 34 38M61 55V31M50 31h22M57 25h8"/><circle cx="61" cy="55" r="8" fill="${muted}"/>`,
+  burner: `<path fill="${muted}" fill-opacity=".55" d="M35 48h50v43a9 9 0 0 1-9 9H44a9 9 0 0 1-9-9z"/><path d="M44 48h32M50 35h20v13H50zM60 35V24"/><path fill="${heat}" stroke="none" d="M60 24c-9-9 5-12 0-22 14 10 7 19 0 22z"/>`,
+  mesh: `<path fill="${muted}" fill-opacity=".45" d="M23 42h74l-8 12H31z"/><path d="M31 54 23 98M89 54l8 44M39 42l-8 12M52 42l-8 12M65 42l-8 12M78 42l-8 12M91 42l-8 12M31 50h58"/>`,
+  stopper: `<path fill="${muted}" fill-opacity=".6" d="M37 46h46l-6 49H43z"/><path d="M37 46h46M43 95h34M42 57h36M45 68h30M46 79h28"/>`,
+  woodenStopper: `<path fill="#e7c89c" fill-opacity=".7" d="M37 46h46l-6 49H43z"/><path d="M37 46h46M43 95h34M43 58l34 7M42 70l34 7M41 82l34 7"/>`,
+  rod: `<path stroke="${detail}" stroke-width="4" d="m35 92 50-65"/><path stroke="${stroke}" d="m31 96 8-8M85 27l7-7"/>`,
+  glassTube: `<path stroke="${detail}" stroke-width="4" d="m31 94 56-70"/><path d="m27 98 8-8M87 24l7-7"/>`,
+  hose: `<path stroke="${hose}" stroke-width="5" d="M24 84C38 22 82 100 98 34"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
+  waterHose: `<path stroke="#6e9ca5" stroke-width="5" d="M24 84C38 22 82 100 98 34"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
+  gasHose: `<path stroke="${hose}" stroke-width="5" d="M24 84C38 22 82 100 98 34" stroke-dasharray="7 4"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
+  jar: `<path fill="${muted}" fill-opacity=".5" d="M36 31h48v61a8 8 0 0 1-8 8H44a8 8 0 0 1-8-8z"/><path d="M36 31h48M44 20h32v11H44M36 66h48"/><path fill="${liquid}" fill-opacity=".72" stroke="none" d="M37 66h46v22a7 7 0 0 1-7 7H44a7 7 0 0 1-7-7z"/><path d="M37 66h46"/>`,
+  waterTank: `<path fill="${muted}" fill-opacity=".5" d="M30 29h60v65a7 7 0 0 1-7 7H37a7 7 0 0 1-7-7z"/><path d="M30 29h60M38 20h44v9H38M30 66h60"/><path fill="${liquid}" fill-opacity=".72" stroke="none" d="M31 66h58v24a7 7 0 0 1-7 7H38a7 7 0 0 1-7-7z"/>`,
+  aspirator: `<path fill="${muted}" fill-opacity=".5" d="M35 25h50l-18 34v36H53V59z"/><path d="M35 25h50M53 59h14M53 95h14M46 38h28"/><path stroke="#6e9ca5" stroke-width="4" d="M53 66h14"/>`,
+  pneumaticTrough: `<path fill="${muted}" fill-opacity=".5" d="M21 45h78l-8 47H29z"/><path d="M21 45h78M29 73h62M37 45v28M52 45v28M67 45v28M82 45v28"/><path fill="${liquid}" fill-opacity=".7" stroke="none" d="M29 73h62l-2 12H31z"/>`,
+  brush: `<path stroke="${detail}" stroke-width="4" d="M29 93 84 25"/><path d="M24 98 36 86M78 24l13-9M72 35l13 8M67 44l13 8M62 53l13 8"/>`,
+  spatula: `<path stroke="${detail}" stroke-width="4" d="m30 94 48-63"/><path fill="${muted}" d="m75 26 13-7 5 4-7 13z"/><path d="m31 97 7-8"/>`,
+  tweezers: `<path d="M29 24 60 82 91 24M60 82v20"/><path fill="${muted}" d="M54 22h12v8H54z"/>`,
+  balance: `<path fill="${muted}" fill-opacity=".5" d="M35 78h50v20H35z"/><path d="M60 78V25M42 35h36M30 52h24M66 52h24M22 56 12 75h30zM58 56 48 75h30z"/><path stroke="${detail}" d="M27 56h30M63 56h30"/>`,
 };
 
-const makeEquipment = (id, name, category, description, kind) => ({
+const makeEquipment = (id, name, category, description, kind, visualKind = kind) => ({
   id,
   name,
   category,
   description,
   equipmentType: kind,
-  svg: equipmentSvg(genericEquipmentContents[kind] ?? genericEquipmentContents.tube),
+  svg: equipmentSvg(genericEquipmentContents[visualKind] ?? genericEquipmentContents.tube),
 });
 
 const extraEquipment = [
@@ -87,9 +114,10 @@ const extraEquipment = [
     description: '平底反應瓶',
     equipmentType: 'flat-bottom-flask',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M48 16h24v31l17 39v10H31V86l17-39z"/>
+      <path fill="${muted}" fill-opacity=".55" d="M48 16h24v31l17 39v10H31V86l17-39z"/>
       <path d="M48 16h24M45 33h30M31 96h58"/>
-      <path stroke="${liquid}" stroke-width="8" d="M37 76h46"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M34 75h52l3 12q1 9-8 9H39q-9 0-8-9z"/>
+      <path d="M35 75h50"/>
     `),
   },
   {
@@ -99,9 +127,10 @@ const extraEquipment = [
     description: '精確定容容器',
     equipmentType: 'volumetric-flask',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M51 16h18v30c0 6 21 16 25 32 4 18-10 30-34 30S26 96 30 78c4-16 25-26 25-32V16z"/>
-      <path d="M51 16h18M48 27h24M38 70h44"/>
-      <path stroke="${liquid}" stroke-width="8" d="M38 76c4 15 17 23 22 23s18-8 22-23"/>
+      <path fill="${muted}" fill-opacity=".55" d="M51 16h18v30c0 6 21 16 25 32 4 18-10 30-34 30S26 96 30 78c4-16 25-26 25-32V16z"/>
+      <path d="M51 16h18M48 27h24M47 62h26"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M36 72q4 20 24 26 20-6 24-26 4 7 4 13 0 17-28 17T32 85q0-6 4-13z"/>
+      <path d="M38 72q22 5 44 0"/>
     `),
   },
   {
@@ -111,48 +140,49 @@ const extraEquipment = [
     description: '減壓過濾容器，側管可接軟管',
     equipmentType: 'filter-flask',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M47 16h26v30l17 40v10H30V86l17-40z"/>
-      <path fill="${muted}" d="M78 58h31v14H78z"/>
+      <path fill="${muted}" fill-opacity=".55" d="M47 16h26v30l17 40v10H30V86l17-40z"/>
+      <path fill="${muted}" fill-opacity=".55" d="M78 58h31v14H78z"/>
       <path d="M47 16h26M44 33h32M30 96h60M78 58h31M78 72h31M103 58v14"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M34 75h47l3 12q1 9-8 9H39q-9 0-8-9z"/>
+      <path d="M35 75h45"/>
       <circle cx="108" cy="65" r="3.5" fill="#fff"/>
-      <path stroke="${liquid}" stroke-width="8" d="M37 76h43"/>
     `),
   },
   makeEquipment('test-tube-rack', '試管架', 'glassware', '試管收納架', 'rack'),
   makeEquipment('u-tube', 'U 型管', 'glassware', '連通與氣體實驗用管', 'uTube'),
   makeEquipment('condenser', '冷凝管', 'glassware', '蒸餾冷凝器材', 'condenser'),
-  makeEquipment('long-neck-funnel', '長頸漏斗', 'glassware', '液體導入漏斗', 'funnel'),
-  makeEquipment('dropping-funnel', '滴液漏斗', 'glassware', '控制滴加速度', 'funnel'),
-  makeEquipment('separatory-funnel', '分液漏斗', 'glassware', '液液分離器材', 'funnel'),
-  makeEquipment('dropper', '滴管', 'glassware', '少量液體轉移', 'tube'),
-  makeEquipment('pipette', '移液管', 'glassware', '精確移取液體', 'tube'),
-  makeEquipment('volumetric-pipette', '容量吸管', 'glassware', '定量移液器材', 'tube'),
+  makeEquipment('long-neck-funnel', '長頸漏斗', 'glassware', '液體導入漏斗', 'funnel', 'longFunnel'),
+  makeEquipment('dropping-funnel', '滴液漏斗', 'glassware', '控制滴加速度', 'funnel', 'droppingFunnel'),
+  makeEquipment('separatory-funnel', '分液漏斗', 'glassware', '液液分離器材', 'funnel', 'separatoryFunnel'),
+  makeEquipment('dropper', '滴管', 'glassware', '少量液體轉移', 'tube', 'dropper'),
+  makeEquipment('pipette', '移液管', 'glassware', '精確移取液體', 'tube', 'pipette'),
+  makeEquipment('volumetric-pipette', '容量吸管', 'glassware', '定量移液器材', 'tube', 'volumetricPipette'),
   makeEquipment('reagent-bottle', '試劑瓶', 'glassware', '液體試劑儲存', 'bottle'),
-  makeEquipment('wide-mouth-bottle', '廣口瓶', 'glassware', '固體試劑儲存', 'bottle'),
-  makeEquipment('wash-bottle', '洗瓶', 'glassware', '蒸餾水沖洗器材', 'bottle'),
-  makeEquipment('petri-dish', '培養皿', 'glassware', '培養與觀察樣品', 'dish'),
-  makeEquipment('evaporating-dish', '蒸發皿', 'glassware', '蒸發濃縮液體', 'dish'),
-  makeEquipment('watch-glass', '時計皿', 'glassware', '覆蓋與少量蒸發', 'dish'),
-  makeEquipment('surface-dish', '表面皿', 'glassware', '樣品承載器皿', 'dish'),
-  makeEquipment('crystallizing-dish', '結晶皿', 'glassware', '溶液結晶器皿', 'dish'),
-  makeEquipment('universal-clamp', '萬用夾', 'support', '多用途固定夾', 'clamp'),
-  makeEquipment('flask-clamp', '燒瓶夾', 'support', '固定燒瓶', 'clamp'),
-  makeEquipment('test-tube-holder', '試管夾', 'support', '夾持試管', 'clamp'),
-  makeEquipment('crucible-tongs', '坩堝鉗', 'support', '夾取高溫坩堝', 'clamp'),
+  makeEquipment('wide-mouth-bottle', '廣口瓶', 'glassware', '固體試劑儲存', 'bottle', 'jar'),
+  makeEquipment('wash-bottle', '洗瓶', 'glassware', '蒸餾水沖洗器材', 'bottle', 'waterTank'),
+  makeEquipment('petri-dish', '培養皿', 'glassware', '培養與觀察樣品', 'dish', 'petriDish'),
+  makeEquipment('evaporating-dish', '蒸發皿', 'glassware', '蒸發濃縮液體', 'dish', 'evaporatingDish'),
+  makeEquipment('watch-glass', '時計皿', 'glassware', '覆蓋與少量蒸發', 'dish', 'watchGlass'),
+  makeEquipment('surface-dish', '表面皿', 'glassware', '樣品承載器皿', 'dish', 'surfaceDish'),
+  makeEquipment('crystallizing-dish', '結晶皿', 'glassware', '溶液結晶器皿', 'dish', 'crystallizingDish'),
+  makeEquipment('universal-clamp', '萬用夾', 'support', '多用途固定夾', 'clamp', 'universalClamp'),
+  makeEquipment('flask-clamp', '燒瓶夾', 'support', '固定燒瓶', 'clamp', 'clamp'),
+  makeEquipment('test-tube-holder', '試管夾', 'support', '夾持試管', 'clamp', 'testTubeHolder'),
+  makeEquipment('crucible-tongs', '坩堝鉗', 'support', '夾取高溫坩堝', 'clamp', 'crucibleTongs'),
   makeEquipment('bunsen-burner', '本生燈', 'heating', '高溫氣體加熱器材', 'burner'),
   makeEquipment('asbestos-mesh', '石棉網', 'heating', '均勻分散熱量', 'mesh'),
-  makeEquipment('wooden-stopper', '木塞', 'accessories', '容器密封配件', 'stopper'),
-  makeEquipment('glass-tubing', '玻璃導管', 'accessories', '硬質導氣管', 'rod'),
-  makeEquipment('rubber-tubing', '橡膠軟管', 'accessories', '柔性連接管', 'hose'),
-  makeEquipment('water-tank', '水箱', 'accessories', '水流實驗容器', 'bottle'),
-  makeEquipment('aspirator', '水流抽氣器', 'accessories', '水流產生真空', 'funnel'),
-  makeEquipment('water-delivery-tube', '導水管', 'accessories', '水下導管', 'hose'),
-  makeEquipment('gas-delivery-tube', '導氣管', 'accessories', '氣體導管', 'hose'),
+  makeEquipment('wooden-stopper', '木塞', 'accessories', '容器密封配件', 'stopper', 'woodenStopper'),
+  makeEquipment('glass-tubing', '玻璃導管', 'accessories', '硬質導氣管', 'rod', 'glassTube'),
+  makeEquipment('rubber-tubing', '橡膠軟管', 'accessories', '柔性連接管', 'hose', 'hose'),
+  makeEquipment('water-tank', '水箱', 'accessories', '水流實驗容器', 'bottle', 'waterTank'),
+  makeEquipment('aspirator', '水流抽氣器', 'accessories', '水流產生真空', 'funnel', 'aspirator'),
+  makeEquipment('water-delivery-tube', '導水管', 'accessories', '水下導管', 'hose', 'waterHose'),
+  makeEquipment('gas-delivery-tube', '導氣管', 'accessories', '氣體導管', 'hose', 'gasHose'),
   makeEquipment('gas-jar', '集氣瓶', 'accessories', '收集氣體', 'jar'),
-  makeEquipment('pneumatic-trough', '集氣槽', 'accessories', '排水集氣槽', 'bottle'),
-  makeEquipment('test-tube-brush', '試管刷', 'accessories', '清潔試管', 'rod'),
-  makeEquipment('spatula', '藥匙', 'accessories', '取用固體藥品', 'rod'),
-  makeEquipment('tweezers', '鑷子', 'accessories', '夾取細小樣品', 'clamp'),
+  makeEquipment('pneumatic-trough', '集氣槽', 'accessories', '排水集氣槽', 'bottle', 'pneumaticTrough'),
+  makeEquipment('test-tube-brush', '試管刷', 'accessories', '清潔試管', 'rod', 'brush'),
+  makeEquipment('spatula', '藥匙', 'accessories', '取用固體藥品', 'rod', 'spatula'),
+  makeEquipment('tweezers', '鑷子', 'accessories', '夾取細小樣品', 'clamp', 'tweezers'),
   makeEquipment('electronic-balance', '電子天平', 'accessories', '量測樣品質量', 'balance'),
 ];
 
@@ -163,10 +193,9 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '一般液體容器',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M31 25h58l-5 67a7 7 0 0 1-7 6H43a7 7 0 0 1-7-6z"/>
-      <path d="M31 25h58M36 70h49"/>
-      <path stroke="${liquid}" stroke-width="8" d="M38 67h45"/>
-      <path d="M47 39h17M47 48h10"/>
+      <path fill="${muted}" fill-opacity=".55" d="M31 25h58l-5 67a7 7 0 0 1-7 6H43a7 7 0 0 1-7-6z"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M36 68h49l-2 21a7 7 0 0 1-7 7H44a7 7 0 0 1-7-7z"/>
+      <path d="M31 25h58M36 68h49M47 39h17M47 48h10M47 57h14"/>
     `),
   },
   {
@@ -175,9 +204,9 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '錐形反應瓶',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M48 18h24v28l20 48a7 7 0 0 1-6 10H34a7 7 0 0 1-6-10l20-48z"/>
-      <path d="M48 18h24M45 38h30M37 76h46"/>
-      <path stroke="${liquid}" stroke-width="8" d="M40 72h40"/>
+      <path fill="${muted}" fill-opacity=".55" d="M48 18h24v28l20 48a7 7 0 0 1-6 10H34a7 7 0 0 1-6-10l20-48z"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M36 74h48l7 17a7 7 0 0 1-7 9H36a7 7 0 0 1-7-9z"/>
+      <path d="M48 18h24M45 38h30M36 74h48"/>
     `),
   },
   {
@@ -186,9 +215,9 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '圓底反應瓶',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M50 17h20v31c0 5 21 16 21 33a31 31 0 1 1-62 0c0-17 21-28 21-33z"/>
-      <path d="M50 17h20M46 42h28"/>
-      <path stroke="${liquid}" stroke-width="8" d="M39 78c7 6 35 6 42 0"/>
+      <path fill="${muted}" fill-opacity=".55" d="M50 17h20v31c0 5 21 16 21 33a31 31 0 1 1-62 0c0-17 21-28 21-33z"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M33 78q27 10 54 0 3 3 3 7a28 28 0 1 1-60 0q0-4 3-7z"/>
+      <path d="M50 17h20M46 42h28M36 78q24 8 48 0"/>
     `),
   },
   {
@@ -197,9 +226,9 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '小型反應容器',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M45 18h30v61a15 15 0 0 1-30 0z"/>
-      <path d="M45 18h30M45 64h30"/>
-      <path stroke="${liquid}" stroke-width="8" d="M49 62h22"/>
+      <path fill="${muted}" fill-opacity=".5" d="M45 18h30v61a15 15 0 0 1-30 0z"/>
+      <path fill="${liquid}" fill-opacity=".75" stroke="none" d="M48 63h24v16a12 12 0 0 1-24 0z"/>
+      <path d="M45 18h30M47 63h26"/>
     `),
   },
   {
@@ -208,9 +237,10 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '液體轉移用',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M22 24h76L68 57v38H52V57z"/>
+      <path fill="${muted}" fill-opacity=".45" d="M22 24h76L68 57v38H52V57z"/>
       <path d="M22 24h76M52 57h16M52 95h16"/>
-      <path stroke="${liquid}" stroke-width="8" d="M53 60h14"/>
+      <path fill="${liquid}" stroke="none" d="M53 60h14v8H53z"/>
+      <path d="M53 60h14"/>
     `),
   },
   {
@@ -219,10 +249,9 @@ export const equipmentCatalog = [
     category: 'glassware',
     description: '量測液體體積',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M43 16h34v77a5 5 0 0 1-5 5H48a5 5 0 0 1-5-5z"/>
-      <path d="M43 16h34M49 32h10M49 43h10M49 54h10M49 65h10"/>
-      <path stroke="${liquid}" stroke-width="8" d="M47 77h26"/>
-      <path d="M36 98h48"/>
+      <path fill="${muted}" fill-opacity=".5" d="M43 16h34v77a5 5 0 0 1-5 5H48a5 5 0 0 1-5-5z"/>
+      <path fill="${liquid}" fill-opacity=".72" stroke="none" d="M47 76h26v14a4 4 0 0 1-4 4H51a4 4 0 0 1-4-4z"/>
+      <path d="M43 16h34M47 76h26M49 32h10M49 43h10M49 54h10M49 65h10M36 98h48"/>
     `),
   },
   {
@@ -231,7 +260,7 @@ export const equipmentCatalog = [
     category: 'support',
     description: '固定支撐器材',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M23 94h74l-7 10H30z"/>
+      <path fill="${muted}" fill-opacity=".55" d="M23 94h74l-7 10H30z"/>
       <path d="M46 94V17M40 17h12M35 31h40M35 31v14M75 31v14M27 104h66"/>
       <circle cx="54" cy="48" r="7" fill="${accent}"/>
     `),
@@ -242,10 +271,10 @@ export const equipmentCatalog = [
     category: 'support',
     description: '環形支撐配件',
     svg: equipmentSvg(`
-      <circle cx="59" cy="53" r="27" fill="${muted}"/>
+      <circle cx="59" cy="53" r="27" fill="${muted}" fill-opacity=".4"/>
       <circle cx="59" cy="53" r="16" fill="#fff"/>
       <path d="M59 80v22M46 102h26"/>
-      <path stroke="${accent}" stroke-width="7" d="M42 53h34"/>
+      <path d="M42 53h34"/>
     `),
   },
   {
@@ -254,9 +283,8 @@ export const equipmentCatalog = [
     category: 'support',
     description: '加熱支撐架',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M28 35h64l-8 13H36z"/>
-      <path d="M36 48 23 101M84 48l13 53M60 48v53M22 101h10M88 101h10M55 101h10"/>
-      <path stroke="${accent}" stroke-width="7" d="M36 41h48"/>
+      <path fill="${muted}" fill-opacity=".45" d="M28 35h64l-8 13H36z"/>
+      <path d="M36 48 23 101M84 48l13 53M60 48v53M22 101h10M88 101h10M55 101h10M36 41h48"/>
     `),
   },
   {
@@ -265,9 +293,9 @@ export const equipmentCatalog = [
     category: 'heating',
     description: '低溫加熱器材',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M37 46h46v43a9 9 0 0 1-9 9H46a9 9 0 0 1-9-9z"/>
+      <path fill="${muted}" fill-opacity=".55" d="M37 46h46v43a9 9 0 0 1-9 9H46a9 9 0 0 1-9-9z"/>
       <path d="M45 46h30M50 35h20v11H50zM60 35V25"/>
-      <path fill="${accent}" d="M60 25c-8-8 5-12 0-20 14 9 6 18 0 20z"/>
+      <path fill="${heat}" stroke="none" d="M60 25c-8-8 5-12 0-20 14 9 6 18 0 20z"/>
       <path d="M37 76h46"/>
     `),
   },
@@ -277,9 +305,9 @@ export const equipmentCatalog = [
     category: 'accessories',
     description: '量測溫度',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M54 23a8 8 0 0 1 16 0v47a18 18 0 1 1-16 0z"/>
-      <path stroke="${accent}" stroke-width="8" d="M62 49v29"/>
-      <circle cx="62" cy="88" r="10" fill="${accent}"/>
+      <path fill="${muted}" fill-opacity=".5" d="M54 23a8 8 0 0 1 16 0v47a18 18 0 1 1-16 0z"/>
+      <path stroke="${liquid}" stroke-width="4" d="M62 49v29"/>
+      <circle cx="62" cy="88" r="10" fill="${liquid}"/>
       <path d="M75 35h9M75 47h9M75 59h9"/>
     `),
   },
@@ -289,7 +317,7 @@ export const equipmentCatalog = [
     category: 'accessories',
     description: '攪拌液體用',
     svg: equipmentSvg(`
-      <path stroke="${accent}" stroke-width="8" d="m35 91 48-62"/>
+      <path stroke="${detail}" stroke-width="4" d="m35 91 48-62"/>
       <path d="m31 95 8-8M83 29l7-8"/>
       <circle cx="34" cy="92" r="5" fill="${muted}"/>
     `),
@@ -300,9 +328,8 @@ export const equipmentCatalog = [
     category: 'accessories',
     description: '容器密封配件',
     svg: equipmentSvg(`
-      <path fill="${muted}" d="M36 49h48l-7 48H43z"/>
-      <path d="M36 49h48M43 97h34"/>
-      <path stroke="${accent}" stroke-width="8" d="M43 58h34"/>
+      <path fill="${muted}" fill-opacity=".6" d="M36 49h48l-7 48H43z"/>
+      <path d="M36 49h48M43 97h34M43 59h34M45 70h30M46 81h28"/>
     `),
   },
   ...extraEquipment,
