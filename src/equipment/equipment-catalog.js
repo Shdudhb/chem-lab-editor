@@ -1,9 +1,9 @@
-// Chemix-inspired apparatus palette: soft mint glass, green outlines, and
-// clean high-contrast silhouettes that remain legible on the canvas and in
-// the apparatus library.
-const stroke = '#4f765f';
+// Chemix-inspired apparatus palette: dark line art, translucent glass, and
+// pale blue liquid fills that remain legible on the canvas and in the library.
+const stroke = '#4f625b';
 const accent = '#71b99f';
-const muted = '#e3f0ea';
+const liquid = '#a9d8e3';
+const muted = '#edf5f2';
 
 const equipmentSvg = (content) => `
   <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
@@ -51,14 +51,14 @@ export const equipmentCategoryIcons = {
 };
 
 const genericEquipmentContents = {
-  flask: `<path fill="${muted}" d="M48 17h24v30l18 42a8 8 0 0 1-7 11H37a8 8 0 0 1-7-11l18-42z"/><path d="M48 17h24M43 39h34M37 78h46"/><path stroke="${accent}" stroke-width="8" d="M40 74h40"/>`,
-  bottle: `<path fill="${muted}" d="M43 27h34v12l8 8v44a8 8 0 0 1-8 8H43a8 8 0 0 1-8-8V47l8-8z"/><path d="M43 27h34M43 39h34M35 69h50"/><path stroke="${accent}" stroke-width="8" d="M40 67h40"/>`,
-  funnel: `<path fill="${muted}" d="M20 25h80L68 59v35H52V59z"/><path d="M20 25h80M52 59h16M52 94h16"/><path stroke="${accent}" stroke-width="8" d="M53 62h14"/>`,
-  tube: `<path fill="${muted}" d="M46 18h28v61a14 14 0 0 1-28 0z"/><path d="M46 18h28M46 63h28"/><path stroke="${accent}" stroke-width="8" d="M50 61h20"/>`,
-  dish: `<path fill="${muted}" d="M22 61q38 30 76 0-4 35-38 35T22 61z"/><ellipse cx="60" cy="61" rx="38" ry="13"/><path stroke="${accent}" stroke-width="7" d="M34 61h52"/>`,
-  rack: `<path fill="${muted}" d="M20 36h80v54H20z"/><path d="M20 53h80M32 36v54M48 36v54M64 36v54M80 36v54"/><path fill="${accent}" d="M27 53h10v27H27zM43 53h10v27H43zM59 53h10v27H59zM75 53h10v27H75z"/>`,
-  uTube: `<path d="M35 20v55a25 25 0 0 0 50 0V20"/><path fill="${muted}" d="M35 49h16v26a9 9 0 0 0 18 0V49h16v26a25 25 0 0 1-50 0z"/><path stroke="${accent}" stroke-width="7" d="M43 68a17 17 0 0 0 34 0"/>`,
-  condenser: `<path fill="${muted}" d="M34 22h52v74H34z"/><path d="M34 22h52M34 96h52M48 22v74M72 22v74M25 36h9M86 36h9M25 82h9M86 82h9"/><path stroke="${accent}" stroke-width="7" d="M50 31h20v56H50z"/>`,
+  flask: `<path fill="${muted}" d="M48 17h24v30l18 42a8 8 0 0 1-7 11H37a8 8 0 0 1-7-11l18-42z"/><path d="M48 17h24M43 39h34M37 78h46"/><path stroke="${liquid}" stroke-width="8" d="M40 74h40"/>`,
+  bottle: `<path fill="${muted}" d="M43 27h34v12l8 8v44a8 8 0 0 1-8 8H43a8 8 0 0 1-8-8V47l8-8z"/><path d="M43 27h34M43 39h34M35 69h50"/><path stroke="${liquid}" stroke-width="8" d="M40 67h40"/>`,
+  funnel: `<path fill="${muted}" d="M20 25h80L68 59v35H52V59z"/><path d="M20 25h80M52 59h16M52 94h16"/><path stroke="${liquid}" stroke-width="8" d="M53 62h14"/>`,
+  tube: `<path fill="${muted}" d="M46 18h28v61a14 14 0 0 1-28 0z"/><path d="M46 18h28M46 63h28"/><path stroke="${liquid}" stroke-width="8" d="M50 61h20"/>`,
+  dish: `<path fill="${muted}" d="M22 61q38 30 76 0-4 35-38 35T22 61z"/><ellipse cx="60" cy="61" rx="38" ry="13"/><path stroke="${liquid}" stroke-width="7" d="M34 61h52"/>`,
+  rack: `<path fill="${muted}" d="M20 36h80v54H20z"/><path d="M20 53h80M32 36v54M48 36v54M64 36v54M80 36v54"/><path fill="${liquid}" d="M27 53h10v27H27zM43 53h10v27H43zM59 53h10v27H59zM75 53h10v27H75z"/>`,
+  uTube: `<path d="M35 20v55a25 25 0 0 0 50 0V20"/><path fill="${muted}" d="M35 49h16v26a9 9 0 0 0 18 0V49h16v26a25 25 0 0 1-50 0z"/><path stroke="${liquid}" stroke-width="7" d="M43 68a17 17 0 0 0 34 0"/>`,
+  condenser: `<path fill="${muted}" d="M34 22h52v74H34z"/><path d="M34 22h52M34 96h52M48 22v74M72 22v74M25 36h9M86 36h9M25 82h9M86 82h9"/><path fill="${liquid}" fill-opacity=".72" d="M50 31h20v56H50z"/>`,
   support: `<path fill="${muted}" d="M24 94h72l-7 10H31z"/><path d="M48 94V18M42 18h12M34 34h55M34 34v15M89 34v15"/><circle cx="57" cy="52" r="8" fill="${accent}"/>`,
   clamp: `<circle cx="61" cy="55" r="17" fill="${muted}"/><circle cx="61" cy="55" r="8" fill="#fff"/><path d="M45 55H22M78 55l22-19M78 55l22 19"/><path stroke="${accent}" stroke-width="7" d="M22 55h18"/>`,
   burner: `<path fill="${muted}" d="M35 48h50v43a9 9 0 0 1-9 9H44a9 9 0 0 1-9-9z"/><path d="M44 48h32M50 35h20v13H50zM60 35V24"/><path fill="${accent}" d="M60 24c-9-9 6-12 0-22 15 10 7 19 0 22z"/>`,
@@ -66,7 +66,7 @@ const genericEquipmentContents = {
   stopper: `<path fill="${muted}" d="M37 46h46l-6 49H43z"/><path d="M37 46h46M43 95h34"/><path stroke="${accent}" stroke-width="8" d="M43 57h34"/>`,
   rod: `<path stroke="${accent}" stroke-width="8" d="m35 92 50-65"/><path d="m31 96 8-8M85 27l7-8"/>`,
   hose: `<path stroke="${accent}" stroke-width="8" d="M24 84C38 22 82 100 98 34"/><circle cx="24" cy="84" r="6" fill="${muted}"/><circle cx="98" cy="34" r="6" fill="${muted}"/>`,
-  jar: `<path fill="${muted}" d="M36 31h48v61a8 8 0 0 1-8 8H44a8 8 0 0 1-8-8z"/><path d="M36 31h48M44 20h32v11H44zM36 66h48"/><path stroke="${accent}" stroke-width="8" d="M41 64h38"/>`,
+  jar: `<path fill="${muted}" d="M36 31h48v61a8 8 0 0 1-8 8H44a8 8 0 0 1-8-8z"/><path d="M36 31h48M44 20h32v11H44zM36 66h48"/><path stroke="${liquid}" stroke-width="8" d="M41 64h38"/>`,
   balance: `<path fill="${muted}" d="M35 78h50v20H35z"/><path d="M60 78V25M42 35h36M30 52h24M66 52h24"/><path stroke="${accent}" stroke-width="7" d="M27 56h30M63 56h30"/><path d="M22 56 12 75h30zM58 56 48 75h30z"/>`,
 };
 
@@ -89,7 +89,7 @@ const extraEquipment = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M48 16h24v31l17 39v10H31V86l17-39z"/>
       <path d="M48 16h24M45 33h30M31 96h58"/>
-      <path stroke="${accent}" stroke-width="8" d="M37 76h46"/>
+      <path stroke="${liquid}" stroke-width="8" d="M37 76h46"/>
     `),
   },
   {
@@ -101,7 +101,7 @@ const extraEquipment = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M51 16h18v30c0 6 21 16 25 32 4 18-10 30-34 30S26 96 30 78c4-16 25-26 25-32V16z"/>
       <path d="M51 16h18M48 27h24M38 70h44"/>
-      <path stroke="${accent}" stroke-width="8" d="M38 76c4 15 17 23 22 23s18-8 22-23"/>
+      <path stroke="${liquid}" stroke-width="8" d="M38 76c4 15 17 23 22 23s18-8 22-23"/>
     `),
   },
   {
@@ -114,7 +114,8 @@ const extraEquipment = [
       <path fill="${muted}" d="M47 16h26v30l17 40v10H30V86l17-40z"/>
       <path fill="${muted}" d="M78 58h31v14H78z"/>
       <path d="M47 16h26M44 33h32M30 96h60M78 58h31M78 72h31M103 58v14"/>
-      <path stroke="${accent}" stroke-width="8" d="M37 76h43"/>
+      <circle cx="108" cy="65" r="3.5" fill="#fff"/>
+      <path stroke="${liquid}" stroke-width="8" d="M37 76h43"/>
     `),
   },
   makeEquipment('test-tube-rack', '試管架', 'glassware', '試管收納架', 'rack'),
@@ -164,7 +165,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M31 25h58l-5 67a7 7 0 0 1-7 6H43a7 7 0 0 1-7-6z"/>
       <path d="M31 25h58M36 70h49"/>
-      <path stroke="${accent}" stroke-width="8" d="M38 67h45"/>
+      <path stroke="${liquid}" stroke-width="8" d="M38 67h45"/>
       <path d="M47 39h17M47 48h10"/>
     `),
   },
@@ -176,7 +177,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M48 18h24v28l20 48a7 7 0 0 1-6 10H34a7 7 0 0 1-6-10l20-48z"/>
       <path d="M48 18h24M45 38h30M37 76h46"/>
-      <path stroke="${accent}" stroke-width="8" d="M40 72h40"/>
+      <path stroke="${liquid}" stroke-width="8" d="M40 72h40"/>
     `),
   },
   {
@@ -187,7 +188,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M50 17h20v31c0 5 21 16 21 33a31 31 0 1 1-62 0c0-17 21-28 21-33z"/>
       <path d="M50 17h20M46 42h28"/>
-      <path stroke="${accent}" stroke-width="8" d="M39 78c7 6 35 6 42 0"/>
+      <path stroke="${liquid}" stroke-width="8" d="M39 78c7 6 35 6 42 0"/>
     `),
   },
   {
@@ -198,7 +199,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M45 18h30v61a15 15 0 0 1-30 0z"/>
       <path d="M45 18h30M45 64h30"/>
-      <path stroke="${accent}" stroke-width="8" d="M49 62h22"/>
+      <path stroke="${liquid}" stroke-width="8" d="M49 62h22"/>
     `),
   },
   {
@@ -209,7 +210,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M22 24h76L68 57v38H52V57z"/>
       <path d="M22 24h76M52 57h16M52 95h16"/>
-      <path stroke="${accent}" stroke-width="8" d="M53 60h14"/>
+      <path stroke="${liquid}" stroke-width="8" d="M53 60h14"/>
     `),
   },
   {
@@ -220,7 +221,7 @@ export const equipmentCatalog = [
     svg: equipmentSvg(`
       <path fill="${muted}" d="M43 16h34v77a5 5 0 0 1-5 5H48a5 5 0 0 1-5-5z"/>
       <path d="M43 16h34M49 32h10M49 43h10M49 54h10M49 65h10"/>
-      <path stroke="${accent}" stroke-width="8" d="M47 77h26"/>
+      <path stroke="${liquid}" stroke-width="8" d="M47 77h26"/>
       <path d="M36 98h48"/>
     `),
   },

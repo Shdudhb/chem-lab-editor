@@ -30,6 +30,8 @@ button:disabled, input:disabled { cursor: not-allowed; }
 .toolbar-divider { width: 1px; height: 24px; margin: 0 7px; background: #dce3df; }
 .icon-button { width: 30px; height: 30px; color: #52615d; background: transparent; font-size: 19px; line-height: 1; }
 .icon-button:hover:not(:disabled) { background: #edf1ef; }
+.delete-selection-button { color: #9a6a87; }
+.delete-selection-button:hover:not(:disabled) { color: #8b4f74; background: #f8edf4; }
 .clear-canvas-button { color: #a36a6a; }
 .clear-canvas-button:hover:not(:disabled) { color: #a14d4d; background: #fbeaea; }
 .zoom-readout { display: inline-grid; place-items: center; width: 49px; color: #45514e; font-size: 12px; }
@@ -288,9 +290,12 @@ button:disabled, input:disabled { cursor: not-allowed; }
   .layer-list .layer-row { min-height: 44px; height: 44px; gap: 8px; }
   .layer-action { width: 30px; height: 30px; font-size: 15px; }
 
-  .mobile-bottom-bar { position: relative; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; align-items: stretch; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #fbfcfb; border-top: 1px solid #dce3df; }
+  .mobile-bottom-bar { position: relative; z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; align-items: stretch; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #fbfcfb; border-top: 1px solid #dce3df; }
   .mobile-panel-button { display: grid; place-items: center; gap: 2px; min-height: 44px; padding: 3px 6px; color: #718078; background: transparent; border-radius: 8px; font-size: 10px; }
   .mobile-panel-button:hover, .mobile-panel-button[aria-expanded="true"] { color: #176b5f; background: #e3f1ed; }
+  .mobile-panel-button.mobile-delete-button { color: #9a6a87; }
+  .mobile-panel-button.mobile-delete-button:hover:not(:disabled) { color: #8b4f74; background: #f8edf4; }
+  .mobile-panel-button.mobile-delete-button:disabled { color: #b5c0bb; opacity: .58; cursor: not-allowed; }
   .mobile-panel-button.mobile-clear-button { color: #a36a6a; }
   .mobile-panel-button.mobile-clear-button:hover:not(:disabled) { color: #a14d4d; background: #fbeaea; }
   .mobile-panel-button.mobile-clear-button:disabled { color: #b5c0bb; opacity: .58; cursor: not-allowed; }

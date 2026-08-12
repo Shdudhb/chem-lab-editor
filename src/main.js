@@ -71,6 +71,7 @@ const customEquipmentSvg = document.querySelector('#customEquipmentSvg');
 const appShell = document.querySelector('.app-shell');
 const mobilePanelBackdrop = document.querySelector('#mobilePanelBackdrop');
 const mobilePanelButtons = [...document.querySelectorAll('[data-mobile-panel]')];
+const deleteSelectionButtons = [...document.querySelectorAll('[data-action="delete-selection"]')];
 const clearCanvasButtons = [...document.querySelectorAll('[data-action="clear-canvas"]')];
 
 const mobilePanelNames = ['equipment', 'layers', 'properties'];
@@ -191,6 +192,9 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   const hasSelection = selectedCount > 0;
   clearCanvasButtons.forEach((button) => {
     button.disabled = sceneStore.objects.length === 0;
+  });
+  deleteSelectionButtons.forEach((button) => {
+    button.disabled = !selectedObjects.some((object) => !object.locked);
   });
   propertyEmptyState.hidden = hasSelection;
   propertySelectionState.hidden = !hasSelection;
@@ -614,6 +618,14 @@ clearCanvasButtons.forEach((button) => {
     if (!canvasController.clearCanvas()) return;
     closeMobilePanels();
     canvasHint.textContent = '已清空整個畫布';
+  });
+});
+
+deleteSelectionButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!canvasController.deleteSelected()) return;
+    closeMobilePanels();
+    canvasHint.textContent = '已刪除目前選取器材';
   });
 });
 
