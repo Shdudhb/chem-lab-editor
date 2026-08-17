@@ -189,10 +189,11 @@ const models = {
     <path d="M16 36h8v47c0 8 5 13 13 13h46c8 0 13-5 13-13V36h8"/>
   `,
   'universal-clamp': `
-    <path d="M17 60h31M72 60h31M72 60l26-25M72 60l26 25"/>
-    <rect x="47" y="45" width="26" height="30" rx="5" fill="${metal}" fill-opacity=".25"/>
-    <circle cx="60" cy="60" r="8" fill="${glass}"/>
-    <path d="M47 45c-9 8-9 22 0 30M73 45c9 8 9 22 0 30"/>
+    <rect x="9" y="54" width="65" height="12" rx="5" fill="${metal}" fill-opacity=".25"/>
+    <path d="M9 54h65v12H9M72 49h12l12-12h15M72 71h12l12 12h15M72 49v22M86 60h25"/>
+    <circle cx="28" cy="60" r="8" fill="${darkMetal}" fill-opacity=".35"/>
+    <path d="M28 48v24M22 54l12 12M34 54L22 66"/>
+    <path stroke="#5f8fb8" stroke-width="8" d="M99 37h12M99 60h12M99 83h12"/>
   `,
   'flask-clamp': `
     <path d="M15 60h33M73 60l30-27M73 60l30 27"/>

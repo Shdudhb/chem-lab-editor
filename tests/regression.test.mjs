@@ -259,6 +259,20 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(getSnapPoints({
     sourceId: 'crystallizing-dish', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const universalClamp = getEquipmentById('universal-clamp');
+  assert.match(universalClamp.svg, /M9 54h65v12H9/);
+  assert.match(universalClamp.svg, /M72 49h12l12-12h15/);
+  assert.match(universalClamp.svg, /M99 37h12M99 60h12M99 83h12/);
+  assert.doesNotMatch(universalClamp.svg, /M17 60h31|M72 60l26-25|M47 45c-9 8/);
+
+  const universalClampPoints = getSnapPoints({
+    sourceId: 'universal-clamp', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(universalClampPoints.map((point) => point.role), ['left', 'right']);
+  assert.ok(Math.abs(universalClampPoints[0].x - 9) < 0.001);
+  assert.ok(Math.abs(universalClampPoints[1].x - 111) < 0.001);
+  assert.ok(universalClampPoints.every((point) => Math.abs(point.y - 60) < 0.001));
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
