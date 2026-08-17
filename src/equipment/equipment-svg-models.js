@@ -229,9 +229,10 @@ const models = {
     <path d="M22 101c6-10 19-15 38-15s32 5 38 15v7H22z"/>
   `,
   'asbestos-mesh': `
-    <path fill="${metal}" fill-opacity=".1" d="M17 25h86v70H17z"/>
-    <path d="M17 25h86v70H17zM17 39h86M17 53h86M17 67h86M17 81h86M31 25v70M45 25v70M59 25v70M73 25v70M87 25v70"/>
-    <circle cx="60" cy="60" r="22" fill="${glass}" fill-opacity=".7"/>
+    <rect x="17" y="17" width="86" height="86" rx="2" fill="${metal}" fill-opacity=".08"/>
+    <path stroke="${detail}" stroke-width="2" d="M18 34l68 68M18 18l84 84M34 18l68 68M50 18l52 52M66 18l36 36M82 18l20 20M18 50l52 52M18 66l36 36M18 82l20 20"/>
+    <path stroke="${detail}" stroke-width="2" d="M18 86l68-68M18 102l84-84M34 102l68-68M50 102l52-52M66 102l36-36M82 102l20-20M18 70l52-52M18 54l36-36M18 38l20-20"/>
+    <circle cx="60" cy="60" r="24" fill="${glass}" stroke="${detail}" stroke-width="3"/>
   `,
   'wooden-stopper': `
     <path fill="${wood}" fill-opacity=".55" d="M34 38h52l-8 60H42z"/>
