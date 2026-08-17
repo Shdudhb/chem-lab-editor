@@ -130,9 +130,13 @@ button:disabled, input:disabled { cursor: not-allowed; }
 .liquid-controls { display: grid; gap: 12px; padding-top: 3px; }
 .liquid-controls[hidden] { display: none; }
 .liquid-controls-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #4b5e56; font-size: 11px; font-weight: 600; }
+.liquid-controls-actions { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
 .liquid-layer-list { display: grid; gap: 10px; }
 .liquid-layer-card { display: grid; gap: 9px; padding: 10px; background: #f6faf8; border: 1px solid #dfe9e4; border-radius: 7px; }
+.liquid-layer-card.is-hidden { opacity: .62; }
 .liquid-layer-heading { display: flex; align-items: center; justify-content: space-between; color: #4b5e56; font-size: 11px; }
+.liquid-layer-visibility { display: inline-flex; align-items: center; gap: 7px; min-height: 28px; cursor: pointer; }
+.liquid-layer-visibility input { width: 15px; height: 15px; margin: 0; accent-color: #247b6e; }
 .liquid-layer-heading .layer-action { width: 22px; height: 22px; }
 .annotation-controls { display: grid; gap: 12px; padding-top: 3px; }
 .annotation-controls[hidden] { display: none; }
@@ -237,7 +241,7 @@ button:disabled, input:disabled { cursor: not-allowed; }
   .empty-canvas-message { left: 398px; }
 }
 
-@media (max-width: 820px), (max-width: 1024px) and (orientation: landscape) {
+@media (max-width: 1024px) {
   html, body { width: 100%; min-width: 0; height: 100%; overflow: hidden; }
   body { min-height: 100dvh; }
 
@@ -282,6 +286,13 @@ button:disabled, input:disabled { cursor: not-allowed; }
   .property-control input[type="color"] { height: 38px; }
   .property-control input, .property-control select, .property-control textarea, .export-dialog select { font-size: 16px; }
   .hose-control-point { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
+  .liquid-controls-heading { align-items: flex-start; }
+  .liquid-controls-actions { gap: 6px; }
+  .liquid-controls-actions .secondary-button.compact { min-height: 38px; padding: 8px 10px; }
+  .liquid-layer-card { gap: 11px; padding: 12px; }
+  .liquid-layer-visibility { min-height: 36px; }
+  .liquid-layer-visibility input { width: 20px; height: 20px; }
+  .liquid-layer-heading .layer-action { width: 36px; height: 36px; }
 
   .layers-panel { position: fixed; right: 0; bottom: 58px; left: 0; z-index: 20; height: min(48vh, 420px); max-height: calc(100dvh - 120px); padding: 0 14px 12px; overflow: hidden; border-top: 1px solid #dce3df; border-radius: 16px 16px 0 0; box-shadow: 0 -12px 38px rgba(26, 54, 46, .16); transform: translateY(104%); visibility: hidden; pointer-events: none; transition: transform .22s ease, visibility .22s ease; }
   .app-shell.is-mobile-layers-open .layers-panel { transform: translateY(0); visibility: visible; pointer-events: auto; }

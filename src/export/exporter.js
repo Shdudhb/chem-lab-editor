@@ -1,3 +1,5 @@
+import { getLiquidBandGeometryForObject, getLiquidLayers } from '../canvas/scene-store.js';
+
 const escapeXml = (value) => String(value)
   .replaceAll('&', '&amp;')
   .replaceAll('<', '&lt;')
@@ -53,19 +55,6 @@ const wrapWithWorldRotation = (object, markup) => {
   return transform ? `<g transform="${transform}">${markup}</g>` : markup;
 };
 
-const getLiquidLayers = (object) => {
-  const layers = Array.isArray(object.liquid?.layers)
-    ? object.liquid.layers
-    : object.liquid
-      ? [object.liquid]
-      : [];
-  return layers.map((layer) => ({
-    level: Math.min(100, Math.max(0, Number(layer.level) || 0)),
-    color: /^#[0-9a-f]{6}$/i.test(layer.color ?? '') ? layer.color : '#67aee8',
-    opacity: Math.min(1, Math.max(0, Number(layer.opacity) || 0)),
-  }));
-};
-
 const hosePath = (points = []) => {
   if (points.length < 2) return '';
   let path = `M ${points[0].x} ${points[0].y}`;
@@ -116,16 +105,27 @@ const svgObjectMarkup = (object) => {
     .replace('width="100%"', `width="${width}"`)
     .replace('height="100%"', `height="${height}"`);
   let liquidOffset = 0;
-  const liquid = getLiquidLayers(object).map((layer) => {
-    const layerHeight = Math.min(layer.level, 100 - liquidOffset);
-    if (layerHeight <= 0) return '';
-    const markup = `<rect x="${width * .18}" y="${height * (1 - (liquidOffset + layerHeight) / 100)}" width="${width * .64}" height="${height * layerHeight / 100}" rx="8" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}"/>`;
-    liquidOffset += layerHeight;
-    return markup;
+  const clipPaths = [];
+  const liquid = (object.supportsLiquid === true ? getLiquidLayers(object.liquid) : []).map((layer, layerIndex) => {
+    const geometry = getLiquidBandGeometryForObject(object, liquidOffset, layer.level);
+    if (!geometry) return '';
+    liquidOffset += geometry.layerHeight;
+    if (!layer.visible) return '';
+
+    const leftTop = width * geometry.leftTop / 100;
+    const rightTop = width * geometry.rightTop / 100;
+    const leftBottom = width * geometry.leftBottom / 100;
+    const rightBottom = width * geometry.rightBottom / 100;
+    const bandTop = height * geometry.bandTop / 100;
+    const bandBottom = height * geometry.bandBottom / 100;
+    const clipId = `liquid-${String(object.id ?? 'object').replace(/[^a-z0-9_-]/gi, '-')}-${layerIndex}`;
+    clipPaths.push(`<clipPath id="${escapeXml(clipId)}"><path d="M ${leftTop} ${bandTop} L ${rightTop} ${bandTop} L ${rightBottom} ${bandBottom} L ${leftBottom} ${bandBottom} Z"/></clipPath>`);
+    return `<rect x="0" y="${bandTop}" width="${width}" height="${Math.max(0, bandBottom - bandTop)}" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}" clip-path="url(#${escapeXml(clipId)})"/>`;
   }).join('');
   const rotation = getRotation(object);
   const rotationTransform = rotation ? ` rotate(${rotation} ${width / 2} ${height / 2})` : '';
-  return `<g transform="translate(${x} ${y})${rotationTransform}">${svg}${liquid}</g>`;
+  const definitions = clipPaths.length ? `<defs>${clipPaths.join('')}</defs>` : '';
+  return `<g transform="translate(${x} ${y})${rotationTransform}">${definitions}${svg}${liquid}</g>`;
 };
 
 const annotationMarkup = (object) => {

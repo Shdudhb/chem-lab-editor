@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findPointSnapCandidate, getSnapPoints } from '../src/canvas/snap-system.js';
 import { equipmentCatalog, getEquipmentById } from '../src/equipment/equipment-catalog.js';
-import { getLiquidLayers } from '../src/canvas/scene-store.js';
+import { getLiquidBandGeometryForObject, getLiquidLayers } from '../src/canvas/scene-store.js';
 import { buildSceneSvg } from '../src/export/exporter.js';
 import { createEquipmentUserStore } from '../src/equipment/equipment-user-store.js';
 import { createLocalSceneStorage, parseScene, serializeScene } from '../src/storage/scene-storage.js';
@@ -31,25 +31,66 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
 
   assert.notEqual(flat.svg, volumetric.svg);
   assert.notEqual(volumetric.svg, filter.svg);
-  assert.match(filter.svg, /M78 58h31/);
+  assert.match(filter.svg, /M73 31h28/);
+  assert.match(filter.svg, /M73 39h28/);
+  assert.doesNotMatch(filter.svg, /M44 33h32|M35 75h45|M78 58h31/);
+
+  const beaker = getEquipmentById('beaker');
+  assert.match(beaker.svg, /M31 25h58l-5 67/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
   assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
-  assert.ok(Math.abs(filterPoints[1].x - 109.8) < 0.001);
-  assert.ok(Math.abs(filterPoints[1].y - 64.8) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].x - 100.8) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].y - 34.8) < 0.001);
+});
+
+test('catalog equipment has unique models for visually different apparatus', () => {
+  const normalizedModels = equipmentCatalog.map((item) => item.svg.replace(/\s+/g, ' ').trim());
+  assert.equal(new Set(normalizedModels).size, equipmentCatalog.length);
+  assert.notEqual(getEquipmentById('wide-mouth-bottle').svg, getEquipmentById('gas-jar').svg);
+  assert.notEqual(getEquipmentById('wash-bottle').svg, getEquipmentById('water-tank').svg);
+  assert.match(getEquipmentById('wash-bottle').svg, /M55 28V17h18/);
+  assert.match(getEquipmentById('condenser').svg, /M55 10v100M65 10v100/);
+  assert.match(getEquipmentById('aspirator').svg, /M52 18h16v30/);
+});
+
+test('catalog geometry explicitly controls liquid and snap capabilities', () => {
+  equipmentCatalog.forEach((item) => {
+    assert.equal(Array.isArray(item.snapPoints), true);
+    assert.equal(item.supportsLiquid, Boolean(item.liquidVessel));
+  });
+  assert.equal(getEquipmentById('beaker').supportsLiquid, true);
+  assert.equal(getEquipmentById('retort-stand').supportsLiquid, false);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'electronic-balance', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog apparatus start empty and liquid layers stay within 100 percent', () => {
   assert.ok(equipmentCatalog.every((item) => !item.svg.includes('#b7dfe7')));
   assert.equal(getLiquidLayers(undefined)[0].level, 0);
   assert.equal(getLiquidLayers(undefined)[0].opacity, 0.72);
+  assert.equal(getLiquidLayers({ layers: [{ level: 20 }] })[0].opacity, 0.72);
+  assert.equal(getLiquidLayers({ layers: [{ level: 20, visible: false }] })[0].visible, false);
 
   const layers = getLiquidLayers({ layers: [
     { level: 70, color: '#67aee8', opacity: 0.72 },
     { level: 60, color: '#f2a65a', opacity: 0.72 },
   ] });
   assert.deepEqual(layers.map((layer) => layer.level), [70, 30]);
+});
+
+test('liquid geometry follows each vessel profile and preserves hidden layer space', () => {
+  const object = { sourceId: 'erlenmeyer-flask' };
+  const first = getLiquidBandGeometryForObject(object, 0, 50);
+  const second = getLiquidBandGeometryForObject(object, 50, 25);
+
+  assert.ok(first);
+  assert.ok(second);
+  assert.ok(first.leftTop > first.leftBottom);
+  assert.ok(second.bandTop < first.bandTop);
+  assert.ok(second.bandBottom <= first.bandTop);
 });
 
 test('hose export keeps Bezier geometry and style', () => {
@@ -66,6 +107,7 @@ test('hose export keeps Bezier geometry and style', () => {
 test('layered liquid export preserves each layer', () => {
   const svg = buildSceneSvg([{
     type: 'svg', visible: true, x: 0, y: 0, width: 100, height: 100, rotation: 0,
+    supportsLiquid: true, sourceId: 'beaker',
     svgMarkup: '<svg width="100%" height="100%"></svg>',
     liquid: { layers: [
       { level: 50, color: '#67aee8', opacity: 0.7 },
@@ -74,19 +116,37 @@ test('layered liquid export preserves each layer', () => {
   }]);
   assert.equal((svg.match(/fill="#67aee8"/g) ?? []).length, 1);
   assert.equal((svg.match(/fill="#ff0000"/g) ?? []).length, 1);
-  assert.match(svg, /height="25"/);
+  assert.match(svg, /clipPath id="liquid-object-1"/);
+  assert.match(svg, /clip-path="url\(#liquid-object-1\)"/);
 });
 
 test('scene JSON round-trip preserves layers and groups', () => {
   const scene = {
     objects: [
-      { id: 'one', type: 'svg', groupId: 'group-1', groupCollapsed: true, liquid: { layers: [{ level: 30, color: '#67aee8', opacity: 0.5 }] } },
-      { id: 'two', type: 'hose', groupId: 'group-1', points: [{ x: 0, y: 0 }, { x: 10, y: 10 }] },
+      {
+        id: 'one', type: 'svg', x: 0, y: 0, width: 120, height: 120, rotation: 0,
+        svgMarkup: '<svg width="100%" height="100%"></svg>', groupId: 'group-1',
+        groupCollapsed: true, liquid: { layers: [{ level: 30, color: '#67aee8', opacity: 0.5 }] },
+      },
+      {
+        id: 'two', type: 'hose', x: 0, y: 0, width: 10, height: 10, rotation: 0,
+        groupId: 'group-1', points: [{ x: 0, y: 0 }, { x: 10, y: 10 }],
+        color: '#8b5e3c', strokeWidth: 8,
+      },
     ],
     selectedIds: ['one', 'two'],
     view: { zoom: 1.2, panX: 20, panY: 30 },
   };
   assert.deepEqual(parseScene(serializeScene(scene)), scene);
+});
+
+test('scene parser rejects malformed scene objects before rendering', () => {
+  const malformed = JSON.stringify({
+    format: 'chem-lab-editor-scene',
+    version: 1,
+    scene: { objects: [{ id: 'bad', type: 'hose' }], selectedIds: [] },
+  });
+  assert.throws(() => parseScene(malformed), /不是 Chem Lab Editor/);
 });
 
 test('equipment user store persists favorites, recent items, and custom equipment', () => {
@@ -100,6 +160,28 @@ test('equipment user store persists favorites, recent items, and custom equipmen
   assert.equal(second.isFavorite('beaker'), true);
   assert.deepEqual(second.recent, ['beaker']);
   assert.equal(second.custom[0].id, 'custom-1');
+});
+
+test('equipment user store discards malformed or unsafe custom equipment', () => {
+  const storage = fakeStorage();
+  storage.setItem('chem-lab-editor.equipment-user-state', JSON.stringify({
+    favorites: ['beaker', null, 'beaker'],
+    recent: ['beaker', 42],
+    custom: [
+      { id: 'missing-name', svg: '<svg></svg>' },
+      { id: 'unsafe', name: 'Unsafe', description: 'x', svg: '<svg><script/></svg>' },
+      { id: 'safe', name: 'Safe', description: 'ok', svg: '<svg></svg>' },
+    ],
+  }));
+  const store = createEquipmentUserStore(storage, {
+    sanitizeSvg: (svg) => {
+      if (svg.includes('<script')) throw new Error('unsafe');
+      return svg;
+    },
+  });
+  assert.deepEqual(store.favorites, ['beaker']);
+  assert.deepEqual(store.recent, ['beaker']);
+  assert.deepEqual(store.custom.map((item) => item.id), ['safe']);
 });
 
 test('annotation export includes freehand path and open arrow marker', () => {

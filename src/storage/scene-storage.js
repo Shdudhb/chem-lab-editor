@@ -1,10 +1,69 @@
 const SCENE_FORMAT = 'chem-lab-editor-scene';
 const SCENE_VERSION = 1;
 
+const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+const isFiniteNumber = (value) => Number.isFinite(value);
+const isPoint = (point) => isPlainObject(point) && isFiniteNumber(point.x) && isFiniteNumber(point.y);
+const hasObjectFrame = (object) => (
+  isFiniteNumber(object.x)
+  && isFiniteNumber(object.y)
+  && isFiniteNumber(object.width)
+  && object.width > 0
+  && isFiniteNumber(object.height)
+  && object.height > 0
+  && isFiniteNumber(object.rotation)
+);
+
+const annotationTypes = new Set(['text', 'number', 'arrow', 'line', 'rectangle', 'circle', 'freehand']);
+
+const isSceneObject = (object) => {
+  if (!isPlainObject(object) || typeof object.id !== 'string' || !object.id || !hasObjectFrame(object)) return false;
+
+  if (object.type === 'svg') {
+    return typeof object.svgMarkup === 'string'
+      && object.svgMarkup.length > 0
+      && object.svgMarkup.length <= 2_000_000;
+  }
+
+  if (object.type === 'hose') {
+    return Array.isArray(object.points)
+      && object.points.length >= 2
+      && object.points.length <= 1_000
+      && object.points.every(isPoint)
+      && isFiniteNumber(object.strokeWidth)
+      && object.strokeWidth > 0
+      && typeof object.color === 'string';
+  }
+
+  if (object.type !== 'annotation' || !annotationTypes.has(object.annotationType)) return false;
+  if (['text', 'number'].includes(object.annotationType)) return typeof object.text === 'string';
+  if (['arrow', 'line'].includes(object.annotationType)) return isPoint(object.start) && isPoint(object.end);
+  if (object.annotationType === 'freehand') {
+    return Array.isArray(object.points)
+      && object.points.length >= 2
+      && object.points.length <= 5_000
+      && object.points.every(isPoint);
+  }
+  return true;
+};
+
 const isSceneSnapshot = (scene) => (
-  scene
+  isPlainObject(scene)
   && Array.isArray(scene.objects)
+  && scene.objects.length <= 10_000
+  && scene.objects.every(isSceneObject)
   && Array.isArray(scene.selectedIds)
+  && scene.selectedIds.every((id) => typeof id === 'string')
+  && (
+    scene.view === undefined
+    || (
+      isPlainObject(scene.view)
+      && isFiniteNumber(scene.view.zoom)
+      && scene.view.zoom > 0
+      && isFiniteNumber(scene.view.panX)
+      && isFiniteNumber(scene.view.panY)
+    )
+  )
 );
 
 export const serializeScene = (scene) => {
@@ -94,4 +153,3 @@ export const createSceneStorage = (options = {}) => (
     ? createHttpSceneStorage(options)
     : createLocalSceneStorage(options)
 );
-
