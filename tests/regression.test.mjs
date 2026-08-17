@@ -206,6 +206,19 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(wideMouthPoints.map((point) => point.role), ['top']);
   assert.ok(Math.abs(wideMouthPoints[0].x - 60) < 0.001);
   assert.ok(Math.abs(wideMouthPoints[0].y - 7.8) < 0.001);
+
+  const washBottle = getEquipmentById('wash-bottle');
+  assert.match(washBottle.svg, /M48 38h24c0 4 2 7 8 9/);
+  assert.match(washBottle.svg, /M58 25v-7c0-5-3-8-8-8h-7L16 33/);
+  assert.match(washBottle.svg, /M58 38v64M65 38v64/);
+  assert.doesNotMatch(washBottle.svg, /M32 39h56v57|M54 27V15h18/);
+
+  const washBottlePoints = getSnapPoints({
+    sourceId: 'wash-bottle', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(washBottlePoints.map((point) => point.role), ['left']);
+  assert.ok(Math.abs(washBottlePoints[0].x - 16.2) < 0.001);
+  assert.ok(Math.abs(washBottlePoints[0].y - 28.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -213,7 +226,6 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.equal(new Set(normalizedModels).size, equipmentCatalog.length);
   assert.notEqual(getEquipmentById('wide-mouth-bottle').svg, getEquipmentById('gas-jar').svg);
   assert.notEqual(getEquipmentById('wash-bottle').svg, getEquipmentById('water-tank').svg);
-  assert.match(getEquipmentById('wash-bottle').svg, /M54 27V15h18/);
   const condenser = getEquipmentById('condenser');
   assert.match(condenser.svg, /M56 5v110M64 5v110/);
   assert.match(condenser.svg, /M56 17c-7 0-12 4-12 10v7/);
@@ -307,6 +319,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(volumetricFull.middle, 78);
   assert.equal(volumetricFull.bandBottom, 96);
   assert.ok(volumetricHalf.rightTop - volumetricHalf.leftTop > 35);
+
+  const washBottleFull = getLiquidBandGeometryForObject({ sourceId: 'wash-bottle' }, 0, 100);
+  const washBottleHalf = getLiquidBandGeometryForObject({ sourceId: 'wash-bottle' }, 0, 50);
+  assert.equal(washBottleFull.bandTop, 33);
+  assert.equal(washBottleFull.middle, 52);
+  assert.equal(washBottleFull.bandBottom, 92);
+  assert.equal(washBottleFull.rightTop - washBottleFull.leftTop, 20);
+  assert.ok(washBottleHalf.rightTop - washBottleHalf.leftTop > 40);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
