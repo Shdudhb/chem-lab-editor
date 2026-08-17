@@ -304,6 +304,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.ok(Math.abs(testTubeHolderPoints[0].x - 9) < 0.001);
   assert.ok(Math.abs(testTubeHolderPoints[1].x - 108) < 0.001);
   assert.ok(testTubeHolderPoints.every((point) => Math.abs(point.y - 60) < 0.001));
+
+  const crucibleTongs = getEquipmentById('crucible-tongs');
+  assert.match(crucibleTongs.svg, /M13 98l10 10c16-17 31-33 45-50L58 48/);
+  assert.match(crucibleTongs.svg, /M58 48C46 34 35 23 26 16c-7 3-10 8-10 15v9h27/);
+  assert.match(crucibleTongs.svg, /M17 40h26M103 40H77/);
+  assert.match(crucibleTongs.svg, /<circle cx="60" cy="60" r="8"/);
+  assert.doesNotMatch(crucibleTongs.svg, /M24 101 58 60 33 22|M20 98l9 7|M58 60h4/);
+  assert.notEqual(crucibleTongs.svg, testTubeHolder.svg);
+  assert.notEqual(crucibleTongs.svg, universalClamp.svg);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'crucible-tongs', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {

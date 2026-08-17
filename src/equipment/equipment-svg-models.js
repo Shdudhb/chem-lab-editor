@@ -209,9 +209,12 @@ const models = {
     <circle cx="67" cy="60" r="3" fill="${darkMetal}"/>
   `,
   'crucible-tongs': `
-    <path d="M24 101 58 60 33 22M96 101 62 60 87 22M58 60h4"/>
-    <circle cx="60" cy="60" r="7" fill="${metal}"/>
-    <path d="M20 98l9 7M100 98l-9 7M30 20l7 5M90 20l-7 5"/>
+    <path fill="${metal}" fill-opacity=".18" d="M13 98l10 10c16-17 31-33 45-50L58 48C44 65 29 81 13 98z"/>
+    <path fill="${metal}" fill-opacity=".18" d="M107 98l-10 10C81 91 66 75 52 58l10-10c14 17 29 33 45 50z"/>
+    <path d="M58 48C46 34 35 23 26 16c-7 3-10 8-10 15v9h27M62 48c12-14 23-25 32-32 7 3 10 8 10 15v9H77"/>
+    <path stroke="${darkMetal}" stroke-width="7" d="M17 40h26M103 40H77"/>
+    <circle cx="60" cy="60" r="8" fill="${metal}" fill-opacity=".3"/>
+    <circle cx="60" cy="60" r="3" fill="${darkMetal}"/>
   `,
   'bunsen-burner': `
     <path fill="${metal}" fill-opacity=".25" d="M34 91h52l10 13H24z"/>
