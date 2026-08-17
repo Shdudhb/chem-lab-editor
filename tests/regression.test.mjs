@@ -226,6 +226,14 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(getSnapPoints({
     sourceId: 'petri-dish', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const evaporatingDish = getEquipmentById('evaporating-dish');
+  assert.match(evaporatingDish.svg, /M17 38c2 24 7 38 18 45/);
+  assert.match(evaporatingDish.svg, /c10-7 15-21 17-39l7-5/);
+  assert.doesNotMatch(evaporatingDish.svg, /M17 48c0 9|M95 54l13 5|q43 24 86 0/);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'evaporating-dish', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -342,6 +350,15 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(petriFull.rightTop - petriFull.leftTop, 68);
   assert.equal(petriFull.rightBottom - petriFull.leftBottom, 54);
   assert.ok(petriHalf.bandTop > petriFull.bandTop);
+
+  const evaporatingFull = getLiquidBandGeometryForObject({ sourceId: 'evaporating-dish' }, 0, 100);
+  const evaporatingHalf = getLiquidBandGeometryForObject({ sourceId: 'evaporating-dish' }, 0, 50);
+  assert.equal(evaporatingFull.bandTop, 36);
+  assert.equal(evaporatingFull.middle, 54);
+  assert.equal(evaporatingFull.bandBottom, 72);
+  assert.equal(evaporatingFull.rightTop - evaporatingFull.leftTop, 66);
+  assert.equal(evaporatingFull.rightBottom - evaporatingFull.leftBottom, 30);
+  assert.ok(evaporatingHalf.rightTop - evaporatingHalf.leftTop > 45);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
