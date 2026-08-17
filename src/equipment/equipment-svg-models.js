@@ -115,10 +115,10 @@ const models = {
     <path d="M32 11v65a28 28 0 0 0 56 0V11M50 11v65a10 10 0 0 0 20 0V11"/>
   `,
   condenser: `
-    <path ${glassFill} d="M42 20h36v80H42z"/>
-    <path d="M42 20h36M42 100h36M47 20v80M73 20v80M55 9v102M65 9v102M42 38H27v-10M78 82h15v10"/>
-    <circle cx="27" cy="28" r="3" fill="${water}" stroke="none"/>
-    <circle cx="93" cy="92" r="3" fill="${water}" stroke="none"/>
+    <path ${glassFill} d="M44 27c0-6 5-10 12-10h8c7 0 12 4 12 10v66c0 6-5 10-12 10h-8c-7 0-12-4-12-10z"/>
+    <path d="M56 5v110M64 5v110"/>
+    <path d="M56 17c-7 0-12 4-12 10v7M44 44v49c0 6 5 10 12 10M64 103c7 0 12-4 12-10v-7M76 76V27c0-6-5-10-12-10"/>
+    <path d="M44 34H20M44 44H20M76 76h24M76 86h24"/>
   `,
   'long-neck-funnel': `
     <path ${glassFill} d="M18 22h84L68 56v52H52V56z"/>

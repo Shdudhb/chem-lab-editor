@@ -93,6 +93,15 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.ok(Math.abs(uTubePoints[0].x - 40.8) < 0.001);
   assert.ok(Math.abs(uTubePoints[1].x - 79.2) < 0.001);
   assert.ok(uTubePoints.every((point) => Math.abs(point.y - 10.8) < 0.001));
+
+  const condenserPoints = getSnapPoints({ sourceId: 'condenser', x: 0, y: 0, width: 120, height: 120 });
+  assert.deepEqual(condenserPoints.map((point) => point.role), ['top', 'bottom', 'left', 'right']);
+  assert.ok(Math.abs(condenserPoints[0].y - 4.8) < 0.001);
+  assert.ok(Math.abs(condenserPoints[1].y - 115.2) < 0.001);
+  assert.ok(Math.abs(condenserPoints[2].x - 19.8) < 0.001);
+  assert.ok(Math.abs(condenserPoints[2].y - 39) < 0.001);
+  assert.ok(Math.abs(condenserPoints[3].x - 100.2) < 0.001);
+  assert.ok(Math.abs(condenserPoints[3].y - 81) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -101,7 +110,11 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.notEqual(getEquipmentById('wide-mouth-bottle').svg, getEquipmentById('gas-jar').svg);
   assert.notEqual(getEquipmentById('wash-bottle').svg, getEquipmentById('water-tank').svg);
   assert.match(getEquipmentById('wash-bottle').svg, /M54 27V15h18/);
-  assert.match(getEquipmentById('condenser').svg, /M55 9v102M65 9v102/);
+  const condenser = getEquipmentById('condenser');
+  assert.match(condenser.svg, /M56 5v110M64 5v110/);
+  assert.match(condenser.svg, /M56 17c-7 0-12 4-12 10v7/);
+  assert.match(condenser.svg, /M44 34H20M44 44H20M76 76h24M76 86h24/);
+  assert.doesNotMatch(condenser.svg, /fill="#78b9c8"|M42 38H27v-10|M78 82h15v10/);
   assert.match(getEquipmentById('aspirator').svg, /M51 14h18v34/);
 });
 
