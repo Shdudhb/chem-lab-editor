@@ -263,10 +263,7 @@ const models = {
     <path ${detailStroke} d="M55 24v28l5 12 5-12V24"/>
   `,
   'water-delivery-tube': `
-    <path stroke="${water}" stroke-width="9" d="M16 86C35 26 76 103 104 32"/>
-    <circle cx="16" cy="86" r="6" fill="${glass}"/>
-    <circle cx="104" cy="32" r="6" fill="${glass}"/>
-    <path stroke="#fff" stroke-width="2" stroke-dasharray="5 8" d="M19 81C38 32 76 96 100 38"/>
+    <path stroke="${water}" stroke-width="9" d="M15 35C35 30 34 88 61 89s23-51 44-46"/>
   `,
   'gas-delivery-tube': `
     <path stroke="${rubber}" stroke-width="8" d="M16 86C31 27 77 102 104 32"/>

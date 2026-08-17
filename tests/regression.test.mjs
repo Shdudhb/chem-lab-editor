@@ -416,6 +416,12 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.ok(Math.abs(aspiratorPoints[1].x - 106.8) < 0.001);
   assert.ok(Math.abs(aspiratorPoints[1].y - 55.8) < 0.001);
   assert.ok(Math.abs(aspiratorPoints[2].y - 109.2) < 0.001);
+
+  const waterDeliveryTube = getEquipmentById('water-delivery-tube');
+  assert.match(waterDeliveryTube.svg, /stroke="#78b9c8" stroke-width="9" d="M15 35C35 30 34 88 61 89s23-51 44-46"/);
+  assert.doesNotMatch(waterDeliveryTube.svg, /<circle|stroke-dasharray/);
+  assert.deepEqual(waterDeliveryTube.hoseStyle, { color: '#78b9c8', strokeWidth: 8 });
+  assert.equal(waterDeliveryTube.equipmentType, 'hose');
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {

@@ -264,6 +264,7 @@ const equipmentMetadata = (item) => ({
   supportsLiquid: item.supportsLiquid === true,
   liquidVessel: item.liquidVessel,
   snapPoints: item.snapPoints,
+  ...(item.hoseStyle ?? {}),
 });
 
 const userEquipmentCategories = [

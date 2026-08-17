@@ -94,6 +94,9 @@ const definitions = [
 ];
 
 const definitionIds = definitions.map(([id]) => id);
+const hoseStyles = {
+  'water-delivery-tube': { color: '#78b9c8', strokeWidth: 8 },
+};
 const missingModelIds = definitionIds.filter((id) => !apparatusModelIds.includes(id));
 const unusedModelIds = apparatusModelIds.filter((id) => !definitionIds.includes(id));
 
@@ -113,6 +116,7 @@ export const equipmentCatalog = definitions.map(([
   category,
   description,
   equipmentType,
+  hoseStyle: hoseStyles[id],
   ...getEquipmentGeometry(id),
   svg: getApparatusSvg(id),
 }));
