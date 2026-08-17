@@ -55,9 +55,13 @@ const models = {
     <path d="M31 87h14v9H31"/>
   `,
   'iron-ring': `
-    <ellipse cx="56" cy="52" rx="31" ry="18" fill="${metal}" fill-opacity=".12"/>
-    <ellipse cx="56" cy="52" rx="20" ry="10"/>
-    <path d="M87 52h20M96 47v10"/>
+    <ellipse cx="48" cy="54" rx="31" ry="18" stroke-width="7"/>
+    <ellipse cx="48" cy="54" rx="31" ry="18" stroke="${metal}" stroke-width="3"/>
+    <path stroke-width="7" d="M79 54h18"/>
+    <path stroke="${metal}" stroke-width="3" d="M79 54h18"/>
+    <rect x="96" y="47" width="10" height="14" rx="2" fill="${metal}" fill-opacity=".25"/>
+    <path d="M96 47h10v14H96M106 54h8"/>
+    <circle cx="114" cy="54" r="3" fill="${darkMetal}" stroke="none"/>
   `,
   tripod: `
     <ellipse cx="60" cy="34" rx="35" ry="12" fill="${metal}" fill-opacity=".14"/>

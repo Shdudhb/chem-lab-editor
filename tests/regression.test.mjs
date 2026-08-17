@@ -495,6 +495,19 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.ok(retortStandPoints.every((point) => Math.abs(point.x - 37.8) < 0.001));
   assert.ok(Math.abs(retortStandPoints[0].y - 13.8) < 0.001);
   assert.ok(retortStandPoints.slice(1).every((point) => Math.abs(point.y - 54) < 0.001));
+
+  const ironRing = getEquipmentById('iron-ring');
+  assert.match(ironRing.svg, /<ellipse cx="48" cy="54" rx="31" ry="18" stroke-width="7"/);
+  assert.match(ironRing.svg, /<ellipse cx="48" cy="54" rx="31" ry="18" stroke="#667078" stroke-width="3"/);
+  assert.match(ironRing.svg, /M96 47h10v14H96M106 54h8/);
+  assert.doesNotMatch(ironRing.svg, /fill="#667078" fill-opacity="\.12"|cx="56" cy="52" rx="20"/);
+
+  const ironRingPoints = getSnapPoints({
+    sourceId: 'iron-ring', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(ironRingPoints.map((point) => point.role), ['right']);
+  assert.ok(Math.abs(ironRingPoints[0].x - 114) < 0.001);
+  assert.ok(Math.abs(ironRingPoints[0].y - 54) < 0.001);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
