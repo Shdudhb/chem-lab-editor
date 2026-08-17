@@ -43,12 +43,19 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.match(getEquipmentById('test-tube').svg, /M49 5v98a11 11 0 0 0 22 0V5/);
   assert.match(getEquipmentById('funnel').svg, /M15 14 54 57v51M105 14 66 57v51/);
   assert.doesNotMatch(getEquipmentById('funnel').svg, /M15 14h90|M15 14H105/);
+  assert.match(getEquipmentById('graduated-cylinder').svg, /M44 8c4 2 6 5 6 10v78l-12 12h44L70 96V18/);
+  assert.doesNotMatch(getEquipmentById('graduated-cylinder').svg, /M44 8h32|M41 15h38/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
   assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
   assert.ok(Math.abs(filterPoints[1].x - 100.8) < 0.001);
   assert.ok(Math.abs(filterPoints[1].y - 38.4) < 0.001);
+
+  const cylinderPoints = getSnapPoints({ sourceId: 'graduated-cylinder', x: 0, y: 0, width: 120, height: 120 });
+  assert.deepEqual(cylinderPoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(cylinderPoints[0].y - 8.4) < 0.001);
+  assert.ok(Math.abs(cylinderPoints[1].y - 109.2) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -127,6 +134,11 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(funnelFull.middle, 48);
   assert.equal(funnelHalf.leftBottom, 45);
   assert.ok(funnelFull.rightTop - funnelFull.leftTop > 60);
+
+  const cylinderFull = getLiquidBandGeometryForObject({ sourceId: 'graduated-cylinder' }, 0, 100);
+  assert.equal(cylinderFull.bandTop, 7);
+  assert.equal(cylinderFull.bandBottom, 80);
+  assert.equal(cylinderFull.rightTop - cylinderFull.leftTop, 14);
 });
 
 test('hose export keeps Bezier geometry and style', () => {

@@ -44,9 +44,9 @@ const models = {
     <path d="M15 14 54 57v51M105 14 66 57v51"/>
   `,
   'graduated-cylinder': `
-    <path ${glassFill} d="M43 15h34v78a7 7 0 0 1-7 7H50a7 7 0 0 1-7-7z"/>
-    <path d="M41 15h38M45 15v78a5 5 0 0 0 5 5h20a5 5 0 0 0 5-5V15M33 101h54"/>
-    <path ${detailStroke} d="M52 31h15M52 42h10M52 53h15M52 64h10M52 75h15M52 86h10"/>
+    <path ${glassFill} d="M50 8h20v88l12 12H38l12-12z"/>
+    <path d="M44 8c4 2 6 5 6 10v78l-12 12h44L70 96V18c0-5 2-8 6-10"/>
+    <path ${detailStroke} d="M59 22h8M63 30h4M59 38h8M63 46h4M59 54h8M63 62h4M59 70h8M63 78h4M59 86h8M63 94h4"/>
   `,
   'retort-stand': `
     <path fill="${metal}" fill-opacity=".22" d="M18 96h80l-7 10H25z"/>
