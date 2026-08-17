@@ -27,9 +27,9 @@ const models = {
     <path ${detailStroke} d="M78 31h12M82 43h8M78 55h12M82 67h8M78 79h12M82 91h8"/>
   `,
   'erlenmeyer-flask': `
-    <path ${glassFill} d="M48 16h25v35l22 42a9 9 0 0 1-8 13H33a9 9 0 0 1-8-13l22-42z"/>
-    <path d="M48 16c4 2 6 5 6 10v25L25 93a9 9 0 0 0 8 13h54a9 9 0 0 0 8-13L66 51V26c0-5 2-8 7-10"/>
-    <path ${detailStroke} d="M73 58h9M77 70h8M81 82h7"/>
+    <path ${glassFill} d="M49 7h22v40l24 50a10 10 0 0 1-9 16H34a10 10 0 0 1-9-16l24-50z"/>
+    <path d="M42 7c5 2 7 5 7 10v30L25 97a10 10 0 0 0 9 16h52a10 10 0 0 0 9-16L71 47V17c0-5 2-8 7-10"/>
+    <path ${detailStroke} d="M72 59h10M77 71h9M82 83h8M87 95h6"/>
   `,
   'round-bottom-flask': `
     <path ${glassFill} d="M49 15h22v34c0 6 23 15 23 35a34 34 0 1 1-68 0c0-20 23-29 23-35z"/>

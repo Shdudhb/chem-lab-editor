@@ -1,6 +1,6 @@
 const liquidVesselProfiles = {
   beaker: { top: 12, bottom: 89, leftTop: 21, rightTop: 79, leftBottom: 25, rightBottom: 75 },
-  'erlenmeyer-flask': { top: 15, bottom: 87, leftTop: 40, rightTop: 60, leftBottom: 27, rightBottom: 73 },
+  'erlenmeyer-flask': { top: 6, bottom: 94, leftTop: 41, rightTop: 59, leftBottom: 28, rightBottom: 72 },
   'round-bottom-flask': { top: 14, bottom: 93, leftTop: 42, rightTop: 58, leftBottom: 25, rightBottom: 75 },
   'flat-bottom-flask': { top: 13, bottom: 88, leftTop: 40, rightTop: 60, leftBottom: 26, rightBottom: 74 },
   'volumetric-flask': { top: 13, bottom: 90, leftTop: 43, rightTop: 57, leftBottom: 24, rightBottom: 78 },
@@ -27,7 +27,7 @@ const liquidVesselProfiles = {
 
 const snapPointProfiles = {
   beaker: [[0, -0.77, 'top'], [0, 0.78, 'bottom']],
-  'erlenmeyer-flask': [[0, -0.73, 'top'], [0, 0.77, 'bottom']],
+  'erlenmeyer-flask': [[0, -0.88, 'top'], [0, 0.88, 'bottom']],
   'round-bottom-flask': [[0, -0.75, 'top'], [0, 0.82, 'bottom']],
   'flat-bottom-flask': [[0, -0.73, 'top'], [0, 0.78, 'bottom']],
   'volumetric-flask': [[0, -0.77, 'top'], [0, 0.82, 'bottom']],
