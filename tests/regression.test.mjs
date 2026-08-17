@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findPointSnapCandidate, getSnapPoints } from '../src/canvas/snap-system.js';
 import { equipmentCatalog, getEquipmentById } from '../src/equipment/equipment-catalog.js';
+import { apparatusModelIds } from '../src/equipment/equipment-svg-models.js';
 import { getLiquidBandGeometryForObject, getLiquidLayers } from '../src/canvas/scene-store.js';
 import { buildSceneSvg } from '../src/export/exporter.js';
 import { createEquipmentUserStore } from '../src/equipment/equipment-user-store.js';
@@ -31,18 +32,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
 
   assert.notEqual(flat.svg, volumetric.svg);
   assert.notEqual(volumetric.svg, filter.svg);
-  assert.match(filter.svg, /M73 31h28/);
-  assert.match(filter.svg, /M73 39h28/);
+  assert.match(filter.svg, /M70 34h31/);
+  assert.match(filter.svg, /M70 43h31/);
   assert.doesNotMatch(filter.svg, /M44 33h32|M35 75h45|M78 58h31/);
 
   const beaker = getEquipmentById('beaker');
-  assert.match(beaker.svg, /M31 25h58l-5 67/);
+  assert.match(beaker.svg, /M30 24c8 3 15 3 23 0h38/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
   assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
   assert.ok(Math.abs(filterPoints[1].x - 100.8) < 0.001);
-  assert.ok(Math.abs(filterPoints[1].y - 34.8) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].y - 38.4) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -50,9 +51,26 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.equal(new Set(normalizedModels).size, equipmentCatalog.length);
   assert.notEqual(getEquipmentById('wide-mouth-bottle').svg, getEquipmentById('gas-jar').svg);
   assert.notEqual(getEquipmentById('wash-bottle').svg, getEquipmentById('water-tank').svg);
-  assert.match(getEquipmentById('wash-bottle').svg, /M55 28V17h18/);
-  assert.match(getEquipmentById('condenser').svg, /M55 10v100M65 10v100/);
-  assert.match(getEquipmentById('aspirator').svg, /M52 18h16v30/);
+  assert.match(getEquipmentById('wash-bottle').svg, /M54 27V15h18/);
+  assert.match(getEquipmentById('condenser').svg, /M55 9v102M65 9v102/);
+  assert.match(getEquipmentById('aspirator').svg, /M51 14h18v34/);
+});
+
+test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
+  assert.equal(equipmentCatalog.length, 52);
+  assert.equal(apparatusModelIds.length, 52);
+  assert.deepEqual(new Set(apparatusModelIds), new Set(equipmentCatalog.map((item) => item.id)));
+
+  equipmentCatalog.forEach((item) => {
+    assert.match(item.svg, /viewBox="0 0 120 120"/);
+    assert.match(item.svg, /stroke="#3f4143"/);
+    assert.match(item.svg, /stroke-width="4"/);
+    assert.match(item.svg, /stroke-linecap="round"/);
+    assert.match(item.svg, /stroke-linejoin="round"/);
+  });
+
+  assert.doesNotMatch(getEquipmentById('water-tank').svg, /#78b9c8/);
+  assert.doesNotMatch(getEquipmentById('pneumatic-trough').svg, /#78b9c8/);
 });
 
 test('catalog geometry explicitly controls liquid and snap capabilities', () => {
