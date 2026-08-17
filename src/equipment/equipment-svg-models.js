@@ -111,8 +111,8 @@ const models = {
     </g>
   `,
   'u-tube': `
-    <path ${glassFill} d="M31 16h18v61a11 11 0 0 0 22 0V16h18v61a29 29 0 0 1-58 0z"/>
-    <path d="M28 16h24M34 16v61a26 26 0 0 0 52 0V16M68 16h24"/>
+    <path ${glassFill} d="M32 11h18v65a10 10 0 0 0 20 0V11h18v65a28 28 0 0 1-56 0z"/>
+    <path d="M32 11v65a28 28 0 0 0 56 0V11M50 11v65a10 10 0 0 0 20 0V11"/>
   `,
   condenser: `
     <path ${glassFill} d="M42 20h36v80H42z"/>
