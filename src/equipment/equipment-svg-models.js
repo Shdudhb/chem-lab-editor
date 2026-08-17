@@ -145,9 +145,9 @@ const models = {
     <path ${detailStroke} d="M61 43v42"/>
   `,
   pipette: `
-    <path ${glassFill} d="M55 12h10v76l-5 21-5-21z"/>
-    <path d="M53 12h14M56 12v76l4 18 4-18V12"/>
-    <path ${detailStroke} d="M49 31h7M49 42h7M49 53h7M49 64h7M49 75h7"/>
+    <path ${glassFill} d="M56 5h8v40c0 4 7 6 7 13s-4 11-7 13v44h-8V71c-3-2-7-6-7-13s7-9 7-13z"/>
+    <path d="M56 5v40c0 4-7 6-7 13s4 11 7 13v44M64 5v40c0 4 7 6 7 13s-4 11-7 13v44"/>
+    <path stroke="#d36b61" stroke-width="3" d="M55 16h10"/>
   `,
   'volumetric-pipette': `
     <path ${glassFill} d="M56 10h8v39c0 7 10 12 10 24s-7 17-10 20v17h-8V93c-3-3-10-8-10-20s10-17 10-24z"/>
