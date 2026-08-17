@@ -217,10 +217,16 @@ const models = {
     <circle cx="60" cy="60" r="3" fill="${darkMetal}"/>
   `,
   'bunsen-burner': `
-    <path fill="${metal}" fill-opacity=".25" d="M34 91h52l10 13H24z"/>
-    <path d="M24 104h72L86 91H34zM52 91V39h16v52M48 39h24M60 39V29M68 66h19"/>
-    <path fill="${flame}" stroke="none" d="M60 31c-13-10 7-19 1-30 18 13 9 26-1 30z"/>
-    <path fill="${flameCore}" stroke="none" d="M60 27c-6-5 3-10 1-15 8 6 4 12-1 15z"/>
+    <path fill="${flame}" stroke="none" d="M60 34C45 27 49 15 58 2c1 8 7 10 10 16 3 7 0 13-8 16z"/>
+    <path fill="${flameCore}" stroke="none" d="M60 29c-7-4-5-11 1-18 1 5 5 7 6 11 1 4-2 7-7 7z"/>
+    <path fill="${metal}" fill-opacity=".18" d="M50 34h20v50c0 5-4 8-10 8s-10-3-10-8z"/>
+    <path d="M50 34v50c0 5 4 8 10 8s10-3 10-8V34M47 34h26"/>
+    <rect x="45" y="62" width="30" height="18" rx="5" fill="${metal}" fill-opacity=".3"/>
+    <circle cx="54" cy="71" r="4" fill="${glass}"/>
+    <circle cx="66" cy="71" r="4" fill="${glass}"/>
+    <path d="M75 72h14c5 0 8 3 8 8v3h10"/>
+    <path fill="${metal}" fill-opacity=".25" d="M22 101c6-10 19-15 38-15s32 5 38 15v7H22z"/>
+    <path d="M22 101c6-10 19-15 38-15s32 5 38 15v7H22z"/>
   `,
   'asbestos-mesh': `
     <path fill="${metal}" fill-opacity=".1" d="M17 25h86v70H17z"/>
