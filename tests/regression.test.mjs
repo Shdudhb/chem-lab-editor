@@ -102,6 +102,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.ok(Math.abs(condenserPoints[2].y - 39) < 0.001);
   assert.ok(Math.abs(condenserPoints[3].x - 100.2) < 0.001);
   assert.ok(Math.abs(condenserPoints[3].y - 81) < 0.001);
+
+  const longNeckFunnel = getEquipmentById('long-neck-funnel');
+  assert.match(longNeckFunnel.svg, /M45 8c7 3 10 7 10 12-8 2-13 7-13 13/);
+  assert.match(longNeckFunnel.svg, /M75 8c-7 3-10 7-10 12 8 2 13 7 13 13/);
+  assert.doesNotMatch(longNeckFunnel.svg, /M18 22h84|M35 34h50/);
+
+  const longFunnelPoints = getSnapPoints({
+    sourceId: 'long-neck-funnel', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(longFunnelPoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(longFunnelPoints[0].y - 7.8) < 0.001);
+  assert.ok(Math.abs(longFunnelPoints[1].y - 115.2) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {

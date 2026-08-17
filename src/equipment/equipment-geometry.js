@@ -78,7 +78,7 @@ const snapPointProfiles = {
   'test-tube-rack': [[0, -0.48, 'top']],
   'u-tube': [[-0.32, -0.82, 'top'], [0.32, -0.82, 'top']],
   funnel: [[0, -0.78, 'top'], [0, 0.82, 'bottom']],
-  'long-neck-funnel': [[0, -0.63, 'top'], [0, 0.8, 'bottom']],
+  'long-neck-funnel': [[0, -0.87, 'top'], [0, 0.92, 'bottom']],
   'dropping-funnel': [[0, -0.72, 'top'], [0, 0.8, 'bottom']],
   'separatory-funnel': [[0, -0.75, 'top'], [0, 0.82, 'bottom']],
   dropper: [[0, -0.83, 'top'], [0, 0.8, 'bottom']],
