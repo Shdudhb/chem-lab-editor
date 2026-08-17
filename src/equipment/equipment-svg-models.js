@@ -86,9 +86,8 @@ const models = {
     <path stroke="${rubber}" stroke-width="3" d="M39 51h43M41 64h39M43 77h35M44 89h32"/>
   `,
   'flat-bottom-flask': `
-    <path ${glassFill} d="M48 16h25v34l22 40v8a9 9 0 0 1-9 9H34a9 9 0 0 1-9-9v-8l22-40z"/>
-    <path d="M48 16c4 2 6 5 6 10v24L25 90v8a9 9 0 0 0 9 9h52a9 9 0 0 0 9-9v-8L66 50V26c0-5 2-8 7-10"/>
-    <path ${detailStroke} d="M74 58h9M78 70h8M82 82h7"/>
+    <path ${glassFill} d="M49 6h22v33c21 4 36 17 36 37 0 15-10 28-27 36H40c-17-8-27-21-27-36 0-20 15-33 36-37z"/>
+    <path d="M42 6c5 2 7 5 7 10v23C28 43 13 56 13 76c0 15 10 28 27 36h40c17-8 27-21 27-36 0-20-15-33-36-37V16c0-5 2-8 7-10"/>
   `,
   'volumetric-flask': `
     <path ${glassFill} d="M50 14h21v39c0 6 24 16 24 34 0 15-13 22-35 22s-35-7-35-22c0-18 24-28 24-34z"/>
