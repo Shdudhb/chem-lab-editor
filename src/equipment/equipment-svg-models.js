@@ -159,9 +159,9 @@ const models = {
     <path d="M43 8h34M47 14h26l-4 14H51zM48 28v15C36 46 30 51 30 60v45c0 6 5 10 11 10h38c6 0 11-4 11-10V60c0-9-6-14-18-17V28"/>
   `,
   'wide-mouth-bottle': `
-    <path ${glassFill} d="M32 34h56v62a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z"/>
-    <path d="M32 34h56M37 21h46v13H37M32 34v62a10 10 0 0 0 10 10h36a10 10 0 0 0 10-10V34"/>
-    <path ${detailStroke} d="M40 55h40M40 68h40"/>
+    <path fill="${metal}" fill-opacity=".2" d="M37 8h46v24H37z"/>
+    <path ${glassFill} d="M43 32h34v10c10 2 15 7 15 15v48c0 6-5 10-11 10H39c-6 0-11-4-11-10V57c0-8 5-13 15-15z"/>
+    <path d="M37 8h46v24H37zM37 16h46M37 24h46M43 32v10C33 44 28 49 28 57v48c0 6 5 10 11 10h42c6 0 11-4 11-10V57c0-8-5-13-15-15V32"/>
   `,
   'wash-bottle': `
     <path ${glassFill} d="M32 39h56v57a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z"/>
