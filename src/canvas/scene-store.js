@@ -23,13 +23,29 @@ const normalizeLiquidVessel = (vessel = defaultLiquidVessel) => {
   };
   const top = percentOr(vessel.top, defaultLiquidVessel.top);
   const bottom = Math.max(top + 1, percentOr(vessel.bottom, defaultLiquidVessel.bottom));
+  const normalizedBottom = Math.min(100, bottom);
+  const leftTop = percentOr(vessel.leftTop, defaultLiquidVessel.leftTop);
+  const rightTop = percentOr(vessel.rightTop, defaultLiquidVessel.rightTop);
+  const leftBottom = percentOr(vessel.leftBottom, defaultLiquidVessel.leftBottom);
+  const rightBottom = percentOr(vessel.rightBottom, defaultLiquidVessel.rightBottom);
+  const hasMiddle = [vessel.middle, vessel.leftMiddle, vessel.rightMiddle]
+    .some((value) => Number.isFinite(Number(value)));
+  const middle = hasMiddle
+    ? Math.min(normalizedBottom, Math.max(top, percentOr(vessel.middle, (top + normalizedBottom) / 2)))
+    : undefined;
+  const middleRatio = middle === undefined ? 0.5 : (middle - top) / Math.max(1, normalizedBottom - top);
   return {
     top,
-    bottom: Math.min(100, bottom),
-    leftTop: percentOr(vessel.leftTop, defaultLiquidVessel.leftTop),
-    rightTop: percentOr(vessel.rightTop, defaultLiquidVessel.rightTop),
-    leftBottom: percentOr(vessel.leftBottom, defaultLiquidVessel.leftBottom),
-    rightBottom: percentOr(vessel.rightBottom, defaultLiquidVessel.rightBottom),
+    bottom: normalizedBottom,
+    leftTop,
+    rightTop,
+    leftBottom,
+    rightBottom,
+    ...(hasMiddle ? {
+      middle,
+      leftMiddle: percentOr(vessel.leftMiddle, interpolatePercent(leftTop, leftBottom, middleRatio)),
+      rightMiddle: percentOr(vessel.rightMiddle, interpolatePercent(rightTop, rightBottom, middleRatio)),
+    } : {}),
   };
 };
 
@@ -49,9 +65,33 @@ const getLiquidBandGeometry = (vessel, layerOffset, layerLevel) => {
   const bandBottom = normalizedVessel.bottom - (availableHeight * clampPercent(Number(layerOffset))) / 100;
   const bandTop = bandBottom - (availableHeight * layerHeight) / 100;
   const height = Math.max(1, normalizedVessel.bottom - normalizedVessel.top);
-  const ratio = (value) => clampPercent((value - normalizedVessel.top) / height);
-  const leftAt = (value) => interpolatePercent(normalizedVessel.leftTop, normalizedVessel.leftBottom, ratio(value));
-  const rightAt = (value) => interpolatePercent(normalizedVessel.rightTop, normalizedVessel.rightBottom, ratio(value));
+  const ratio = (value) => Math.min(1, Math.max(0, (value - normalizedVessel.top) / height));
+  const sideAt = (value, topSide, middleSide, bottomSide) => {
+    if (normalizedVessel.middle === undefined) return interpolatePercent(topSide, bottomSide, ratio(value));
+    if (value <= normalizedVessel.middle) {
+      const upperRatio = (value - normalizedVessel.top)
+        / Math.max(1, normalizedVessel.middle - normalizedVessel.top);
+      return interpolatePercent(topSide, middleSide, Math.min(1, Math.max(0, upperRatio)));
+    }
+    const lowerRatio = (value - normalizedVessel.middle)
+      / Math.max(1, normalizedVessel.bottom - normalizedVessel.middle);
+    return interpolatePercent(middleSide, bottomSide, Math.min(1, Math.max(0, lowerRatio)));
+  };
+  const leftAt = (value) => sideAt(
+    value,
+    normalizedVessel.leftTop,
+    normalizedVessel.leftMiddle,
+    normalizedVessel.leftBottom,
+  );
+  const rightAt = (value) => sideAt(
+    value,
+    normalizedVessel.rightTop,
+    normalizedVessel.rightMiddle,
+    normalizedVessel.rightBottom,
+  );
+  const crossesMiddle = normalizedVessel.middle !== undefined
+    && normalizedVessel.middle > bandTop
+    && normalizedVessel.middle < bandBottom;
   return {
     layerHeight,
     bandTop,
@@ -60,6 +100,11 @@ const getLiquidBandGeometry = (vessel, layerOffset, layerLevel) => {
     rightTop: rightAt(bandTop),
     leftBottom: leftAt(bandBottom),
     rightBottom: rightAt(bandBottom),
+    ...(crossesMiddle ? {
+      middle: normalizedVessel.middle,
+      leftMiddle: normalizedVessel.leftMiddle,
+      rightMiddle: normalizedVessel.rightMiddle,
+    } : {}),
   };
 };
 
@@ -73,6 +118,11 @@ export const getLiquidBandGeometryForObject = (object, layerOffset, layerLevel) 
 
 const getLiquidBandClipPath = (geometry) => {
   if (!geometry) return '';
+  if (geometry.middle !== undefined) {
+    const middleY = (geometry.middle - geometry.bandTop)
+      / Math.max(1, geometry.bandBottom - geometry.bandTop) * 100;
+    return `polygon(${geometry.leftTop}% 0%, ${geometry.rightTop}% 0%, ${geometry.rightMiddle}% ${middleY}%, ${geometry.rightBottom}% 100%, ${geometry.leftBottom}% 100%, ${geometry.leftMiddle}% ${middleY}%)`;
+  }
   return `polygon(${geometry.leftTop}% 0%, ${geometry.rightTop}% 0%, ${geometry.rightBottom}% 100%, ${geometry.leftBottom}% 100%)`;
 };
 

@@ -32,9 +32,8 @@ const models = {
     <path ${detailStroke} d="M72 59h10M77 71h9M82 83h8M87 95h6"/>
   `,
   'round-bottom-flask': `
-    <path ${glassFill} d="M49 15h22v34c0 6 23 15 23 35a34 34 0 1 1-68 0c0-20 23-29 23-35z"/>
-    <path d="M49 15c4 2 6 5 6 10v24c0 6-23 15-23 35a28 28 0 1 0 56 0c0-20-23-29-23-35V25c0-5 2-8 6-10"/>
-    <path ${detailStroke} d="M77 58h8M81 69h7M83 80h7"/>
+    <path ${glassFill} d="M49 6h22v32c20 4 35 15 35 36 0 27-20 41-46 41S14 101 14 74c0-21 15-32 35-36z"/>
+    <path d="M42 6c5 2 7 5 7 10v22C29 42 14 53 14 74c0 27 20 41 46 41s46-14 46-41c0-21-15-32-35-36V16c0-5 2-8 7-10"/>
   `,
   'test-tube': `
     <path ${glassFill} d="M45 17h30v63a15 15 0 0 1-30 0z"/>

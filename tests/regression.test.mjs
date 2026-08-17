@@ -39,6 +39,7 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   const beaker = getEquipmentById('beaker');
   assert.match(beaker.svg, /M23 14v82a11 11 0 0 0 11 11h52/);
   assert.match(getEquipmentById('erlenmeyer-flask').svg, /M42 7c5 2 7 5 7 10v30L25 97/);
+  assert.match(getEquipmentById('round-bottom-flask').svg, /M42 6c5 2 7 5 7 10v22C29 42/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
@@ -110,6 +111,12 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.ok(first.leftTop > first.leftBottom);
   assert.ok(second.bandTop < first.bandTop);
   assert.ok(second.bandBottom <= first.bandTop);
+
+  const roundFull = getLiquidBandGeometryForObject({ sourceId: 'round-bottom-flask' }, 0, 100);
+  const roundHalf = getLiquidBandGeometryForObject({ sourceId: 'round-bottom-flask' }, 0, 50);
+  assert.equal(roundFull.middle, 62);
+  assert.equal(roundFull.leftMiddle, 12);
+  assert.ok(roundHalf.rightTop - roundHalf.leftTop > 60);
 });
 
 test('hose export keeps Bezier geometry and style', () => {

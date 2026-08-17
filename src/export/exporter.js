@@ -119,7 +119,10 @@ const svgObjectMarkup = (object) => {
     const bandTop = height * geometry.bandTop / 100;
     const bandBottom = height * geometry.bandBottom / 100;
     const clipId = `liquid-${String(object.id ?? 'object').replace(/[^a-z0-9_-]/gi, '-')}-${layerIndex}`;
-    clipPaths.push(`<clipPath id="${escapeXml(clipId)}"><path d="M ${leftTop} ${bandTop} L ${rightTop} ${bandTop} L ${rightBottom} ${bandBottom} L ${leftBottom} ${bandBottom} Z"/></clipPath>`);
+    const clipPath = geometry.middle === undefined
+      ? `M ${leftTop} ${bandTop} L ${rightTop} ${bandTop} L ${rightBottom} ${bandBottom} L ${leftBottom} ${bandBottom} Z`
+      : `M ${leftTop} ${bandTop} L ${rightTop} ${bandTop} L ${width * geometry.rightMiddle / 100} ${height * geometry.middle / 100} L ${rightBottom} ${bandBottom} L ${leftBottom} ${bandBottom} L ${width * geometry.leftMiddle / 100} ${height * geometry.middle / 100} Z`;
+    clipPaths.push(`<clipPath id="${escapeXml(clipId)}"><path d="${clipPath}"/></clipPath>`);
     return `<rect x="0" y="${bandTop}" width="${width}" height="${Math.max(0, bandBottom - bandTop)}" fill="${escapeXml(layer.color)}" opacity="${layer.opacity}" clip-path="url(#${escapeXml(clipId)})"/>`;
   }).join('');
   const rotation = getRotation(object);
