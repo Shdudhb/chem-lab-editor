@@ -160,7 +160,7 @@ const snapPointProfiles = {
   condenser: [[0, -0.92, 'top'], [0, 0.92, 'bottom'], [-0.67, -0.35, 'left'], [0.67, 0.35, 'right']],
   'retort-stand': [[-0.37, -0.77, 'top'], [-0.37, -0.1, 'right'], [-0.37, -0.1, 'left']],
   'iron-ring': [[0.9, -0.1, 'right']],
-  tripod: [[0, -1, 'top']],
+  tripod: [[0, -0.63, 'top']],
   'universal-clamp': [[-0.85, 0, 'left'], [0.85, 0, 'right']],
   'flask-clamp': [[-0.87, 0, 'left'], [0.8, 0, 'right']],
   'test-tube-holder': [[-0.85, 0, 'left'], [0.8, 0, 'right']],

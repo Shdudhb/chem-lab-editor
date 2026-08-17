@@ -64,9 +64,11 @@ const models = {
     <circle cx="114" cy="54" r="3" fill="${darkMetal}" stroke="none"/>
   `,
   tripod: `
-    <ellipse cx="60" cy="34" rx="35" ry="12" fill="${metal}" fill-opacity=".14"/>
-    <ellipse cx="60" cy="34" rx="25" ry="7"/>
-    <path d="M33 42 20 103M87 42l13 61M60 46v57M16 103h10M94 103h10M55 103h10"/>
+    <path stroke-width="6" d="M60 32v71M34 40 18 103M86 40l16 63"/>
+    <path stroke="${metal}" stroke-width="2.5" d="M60 32v71M34 40 18 103M86 40l16 63"/>
+    <ellipse cx="60" cy="34" rx="35" ry="12" stroke-width="7"/>
+    <ellipse cx="60" cy="34" rx="35" ry="12" stroke="${metal}" stroke-width="3"/>
+    <path d="M13 103h10M97 103h10M55 103h10"/>
   `,
   'alcohol-lamp': `
     <path ${glassFill} d="M32 50h56l7 37a13 13 0 0 1-13 16H38a13 13 0 0 1-13-16z"/>
