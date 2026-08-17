@@ -554,6 +554,21 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(getSnapPoints({
     sourceId: 'stirring-rod', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const rubberStopper = getEquipmentById('rubber-stopper');
+  assert.match(rubberStopper.svg, /M33 35c0-7 12-11 27-11s27 4 27 11l-9 59/);
+  assert.match(rubberStopper.svg, /<ellipse cx="60" cy="35" rx="27" ry="11" fill="#76665d" fill-opacity="\.92"/);
+  assert.match(rubberStopper.svg, /M45 33c8-4 22-4 30 0/);
+  assert.doesNotMatch(rubberStopper.svg, /M34 38h52l-8 60H42|M39 51h43|M41 64h39|M43 77h35|M44 89h32/);
+  assert.notEqual(rubberStopper.svg, getEquipmentById('wooden-stopper').svg);
+  assert.equal(rubberStopper.supportsLiquid, false);
+
+  const rubberStopperPoints = getSnapPoints({
+    sourceId: 'rubber-stopper', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(rubberStopperPoints.map((point) => point.role), ['bottom']);
+  assert.ok(Math.abs(rubberStopperPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(rubberStopperPoints[0].y - 103.2) < 0.001);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {

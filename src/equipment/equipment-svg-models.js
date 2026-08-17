@@ -91,9 +91,10 @@ const models = {
     <path stroke="${glass}" stroke-width="4" d="M25 100 95 20"/>
   `,
   'rubber-stopper': `
-    <path fill="${rubber}" fill-opacity=".38" d="M34 38h52l-8 60H42z"/>
-    <path d="M34 38h52M42 98h36"/>
-    <path stroke="${rubber}" stroke-width="3" d="M39 51h43M41 64h39M43 77h35M44 89h32"/>
+    <path fill="${rubber}" fill-opacity=".78" d="M33 35c0-7 12-11 27-11s27 4 27 11l-9 59c-1 6-8 9-18 9s-17-3-18-9z"/>
+    <path d="M33 35 42 94c1 6 8 9 18 9s17-3 18-9l9-59"/>
+    <ellipse cx="60" cy="35" rx="27" ry="11" fill="${rubber}" fill-opacity=".92"/>
+    <path ${detailStroke} d="M45 33c8-4 22-4 30 0"/>
   `,
   'flat-bottom-flask': `
     <path ${glassFill} d="M49 6h22v33c21 4 36 17 36 37 0 15-10 28-27 36H40c-17-8-27-21-27-36 0-20 15-33 36-37z"/>
