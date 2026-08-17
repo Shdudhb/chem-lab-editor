@@ -244,8 +244,9 @@ const models = {
     <circle cx="66" cy="96" r="2" fill="${outline}" fill-opacity=".28" stroke="none"/>
   `,
   'glass-tubing': `
-    <path stroke="${detail}" stroke-width="8" d="m24 99 72-78"/>
-    <path d="m20 103 8-8M92 25l8-8"/>
+    <path stroke="${detail}" stroke-width="13" d="M18 93h47c17 0 30-13 30-30V18"/>
+    <path stroke="${glass}" stroke-width="7" d="M18 93h47c17 0 30-13 30-30V18"/>
+    <path d="M18 86v14M88 18h14"/>
   `,
   'rubber-tubing': `
     <path stroke="${rubber}" stroke-width="9" d="M17 86C30 19 79 108 104 34"/>

@@ -357,6 +357,22 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(woodenStopperPoints.map((point) => point.role), ['bottom']);
   assert.ok(Math.abs(woodenStopperPoints[0].x - 60) < 0.001);
   assert.ok(Math.abs(woodenStopperPoints[0].y - 105) < 0.001);
+
+  const glassTubing = getEquipmentById('glass-tubing');
+  assert.match(glassTubing.svg, /stroke="#aeb4b7" stroke-width="13" d="M18 93h47c17 0 30-13 30-30V18"/);
+  assert.match(glassTubing.svg, /stroke="#f5fafb" stroke-width="7" d="M18 93h47c17 0 30-13 30-30V18"/);
+  assert.match(glassTubing.svg, /M18 86v14M88 18h14/);
+  assert.doesNotMatch(glassTubing.svg, /m24 99 72-78|m20 103 8-8|M92 25l8-8/);
+  assert.notEqual(glassTubing.svg, getEquipmentById('stirring-rod').svg);
+
+  const glassTubingPoints = getSnapPoints({
+    sourceId: 'glass-tubing', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(glassTubingPoints.map((point) => point.role), ['left', 'top']);
+  assert.ok(Math.abs(glassTubingPoints[0].x - 18) < 0.001);
+  assert.ok(Math.abs(glassTubingPoints[0].y - 93) < 0.001);
+  assert.ok(Math.abs(glassTubingPoints[1].x - 94.8) < 0.001);
+  assert.ok(Math.abs(glassTubingPoints[1].y - 18) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
