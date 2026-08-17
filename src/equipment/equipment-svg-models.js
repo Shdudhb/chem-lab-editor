@@ -87,8 +87,8 @@ const models = {
     <path ${detailStroke} d="M82 30l7 6M74 39l5 4M66 48l7 6M58 57l5 4"/>
   `,
   'stirring-rod': `
-    <path stroke="${detail}" stroke-width="7" d="m29 99 63-78"/>
-    <path d="m25 103 8-8M88 25l8-8"/>
+    <path stroke-width="8" d="M25 100 95 20"/>
+    <path stroke="${glass}" stroke-width="4" d="M25 100 95 20"/>
   `,
   'rubber-stopper': `
     <path fill="${rubber}" fill-opacity=".38" d="M34 38h52l-8 60H42z"/>
