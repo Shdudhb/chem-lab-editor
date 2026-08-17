@@ -36,8 +36,8 @@ const models = {
     <path d="M42 6c5 2 7 5 7 10v22C29 42 14 53 14 74c0 27 20 41 46 41s46-14 46-41c0-21-15-32-35-36V16c0-5 2-8 7-10"/>
   `,
   'test-tube': `
-    <path ${glassFill} d="M45 17h30v63a15 15 0 0 1-30 0z"/>
-    <path d="M43 17h34M47 17v63a13 13 0 0 0 26 0V17"/>
+    <path ${glassFill} d="M49 5h22v98a11 11 0 0 1-22 0z"/>
+    <path d="M49 5v98a11 11 0 0 0 22 0V5"/>
   `,
   funnel: `
     <path ${glassFill} d="M18 25h84L69 60v43H52V60z"/>

@@ -40,6 +40,7 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.match(beaker.svg, /M23 14v82a11 11 0 0 0 11 11h52/);
   assert.match(getEquipmentById('erlenmeyer-flask').svg, /M42 7c5 2 7 5 7 10v30L25 97/);
   assert.match(getEquipmentById('round-bottom-flask').svg, /M42 6c5 2 7 5 7 10v22C29 42/);
+  assert.match(getEquipmentById('test-tube').svg, /M49 5v98a11 11 0 0 0 22 0V5/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
