@@ -273,8 +273,8 @@ const models = {
     <path d="M28 20h64M34 20v74a12 12 0 0 0 12 12h28a12 12 0 0 0 12-12V20"/>
   `,
   'pneumatic-trough': `
-    <path ${glassFill} d="M13 38h94L96 101H24z"/>
-    <path d="M10 38h100M17 38l9 63h68l9-63M42 38v34M60 38v34M78 38v34"/>
+    <path ${glassFill} d="M16 40h88v52a12 12 0 0 1-12 12H28a12 12 0 0 1-12-12z"/>
+    <path d="M10 40h100M16 40v52a12 12 0 0 0 12 12h64a12 12 0 0 0 12-12V40"/>
   `,
   'test-tube-brush': `
     <path stroke="${metal}" stroke-width="4" d="m27 105 59-76"/>

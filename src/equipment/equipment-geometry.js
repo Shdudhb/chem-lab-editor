@@ -133,7 +133,7 @@ const liquidVesselProfiles = {
   'crystallizing-dish': { top: 30, bottom: 79, leftTop: 22, rightTop: 78, leftBottom: 25, rightBottom: 75 },
   'water-tank': { top: 22, bottom: 84, leftTop: 16, rightTop: 84, leftBottom: 16, rightBottom: 84 },
   'gas-jar': { top: 22, bottom: 87, leftTop: 30, rightTop: 70, leftBottom: 38, rightBottom: 62 },
-  'pneumatic-trough': { top: 38, bottom: 83, leftTop: 23, rightTop: 77, leftBottom: 29, rightBottom: 71 },
+  'pneumatic-trough': { top: 36, bottom: 84, leftTop: 18, rightTop: 82, leftBottom: 19, rightBottom: 81 },
 };
 
 const snapPointProfiles = {

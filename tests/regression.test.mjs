@@ -441,6 +441,14 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(gasJarPoints.map((point) => point.role), ['top']);
   assert.ok(Math.abs(gasJarPoints[0].x - 60) < 0.001);
   assert.ok(Math.abs(gasJarPoints[0].y - 19.8) < 0.001);
+
+  const pneumaticTrough = getEquipmentById('pneumatic-trough');
+  assert.match(pneumaticTrough.svg, /M16 40h88v52a12 12 0 0 1-12 12H28/);
+  assert.match(pneumaticTrough.svg, /M10 40h100M16 40v52a12 12 0 0 0 12 12h64/);
+  assert.doesNotMatch(pneumaticTrough.svg, /M13 38h94|M42 38v34|M60 38v34|M78 38v34/);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'pneumatic-trough', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
@@ -595,6 +603,15 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(gasJarFull.rightTop - gasJarFull.leftTop, 40);
   assert.equal(gasJarFull.rightBottom - gasJarFull.leftBottom, 24);
   assert.ok(gasJarHalf.rightTop - gasJarHalf.leftTop > 30);
+
+  const troughFull = getLiquidBandGeometryForObject({ sourceId: 'pneumatic-trough' }, 0, 100);
+  const troughHalf = getLiquidBandGeometryForObject({ sourceId: 'pneumatic-trough' }, 0, 50);
+  assert.equal(troughFull.bandTop, 36);
+  assert.equal(troughFull.bandBottom, 84);
+  assert.equal(troughFull.rightTop - troughFull.leftTop, 64);
+  assert.equal(troughFull.rightBottom - troughFull.leftBottom, 62);
+  assert.ok(troughHalf.bandTop > troughFull.bandTop);
+  assert.ok(troughHalf.rightTop - troughHalf.leftTop > 62);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
