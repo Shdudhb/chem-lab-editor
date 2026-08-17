@@ -342,6 +342,21 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(getSnapPoints({
     sourceId: 'asbestos-mesh', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const woodenStopper = getEquipmentById('wooden-stopper');
+  assert.match(woodenStopper.svg, /M31 36c0-7 13-11 29-11s29 4 29 11L79 97/);
+  assert.match(woodenStopper.svg, /<ellipse cx="60" cy="36" rx="29" ry="11"/);
+  assert.match(woodenStopper.svg, /M43 55l8 2M64 49l9 3M48 73l7 2/);
+  assert.equal((woodenStopper.svg.match(/<circle /g) || []).length, 3);
+  assert.doesNotMatch(woodenStopper.svg, /M34 38h52l-8 60H42|m39 50 42 8|M42 98h36/);
+  assert.notEqual(woodenStopper.svg, getEquipmentById('rubber-stopper').svg);
+
+  const woodenStopperPoints = getSnapPoints({
+    sourceId: 'wooden-stopper', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(woodenStopperPoints.map((point) => point.role), ['bottom']);
+  assert.ok(Math.abs(woodenStopperPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(woodenStopperPoints[0].y - 105) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {

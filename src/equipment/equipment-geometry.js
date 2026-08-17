@@ -164,6 +164,7 @@ const snapPointProfiles = {
   'universal-clamp': [[-0.85, 0, 'left'], [0.85, 0, 'right']],
   'flask-clamp': [[-0.87, 0, 'left'], [0.8, 0, 'right']],
   'test-tube-holder': [[-0.85, 0, 'left'], [0.8, 0, 'right']],
+  'wooden-stopper': [[0, 0.75, 'bottom']],
   'alcohol-lamp': [[0, -0.58, 'top']],
   'bunsen-burner': [[0, -0.45, 'top']],
   'glass-tubing': [[-0.55, 0.58, 'left'], [0.58, -0.58, 'right']],

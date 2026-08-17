@@ -235,9 +235,13 @@ const models = {
     <circle cx="60" cy="60" r="24" fill="${glass}" stroke="${detail}" stroke-width="3"/>
   `,
   'wooden-stopper': `
-    <path fill="${wood}" fill-opacity=".55" d="M34 38h52l-8 60H42z"/>
-    <path d="M34 38h52M42 98h36"/>
-    <path stroke="${wood}" stroke-width="3" d="m39 50 42 8M40 63l40 8M42 76l36 7M43 89l33 6"/>
+    <path fill="${wood}" fill-opacity=".52" d="M31 36c0-7 13-11 29-11s29 4 29 11L79 97c-1 5-9 8-19 8s-18-3-19-8z"/>
+    <ellipse cx="60" cy="36" rx="29" ry="11" fill="${wood}" fill-opacity=".68"/>
+    <path d="M31 36 41 97c1 5 9 8 19 8s18-3 19-8l10-61"/>
+    <path stroke="${outline}" stroke-opacity=".3" stroke-width="2" d="M43 55l8 2M64 49l9 3M48 73l7 2M67 80l7-2M53 92l8 1"/>
+    <circle cx="42" cy="68" r="2" fill="${outline}" fill-opacity=".28" stroke="none"/>
+    <circle cx="75" cy="62" r="2" fill="${outline}" fill-opacity=".28" stroke="none"/>
+    <circle cx="66" cy="96" r="2" fill="${outline}" fill-opacity=".28" stroke="none"/>
   `,
   'glass-tubing': `
     <path stroke="${detail}" stroke-width="8" d="m24 99 72-78"/>
