@@ -130,7 +130,7 @@ const liquidVesselProfiles = {
     leftBottom: 42,
     rightBottom: 58,
   },
-  'crystallizing-dish': { top: 38, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'crystallizing-dish': { top: 30, bottom: 79, leftTop: 22, rightTop: 78, leftBottom: 25, rightBottom: 75 },
   'water-tank': { top: 31, bottom: 85, leftTop: 20, rightTop: 80, leftBottom: 24, rightBottom: 76 },
   'gas-jar': { top: 23, bottom: 88, leftTop: 31, rightTop: 69, leftBottom: 31, rightBottom: 69 },
   'pneumatic-trough': { top: 38, bottom: 83, leftTop: 23, rightTop: 77, leftBottom: 29, rightBottom: 71 },

@@ -185,8 +185,8 @@ const models = {
     <ellipse cx="60" cy="60" rx="46" ry="28"/>
   `,
   'crystallizing-dish': `
-    <path ${glassFill} d="M19 39h82l-8 54a10 10 0 0 1-10 9H37a10 10 0 0 1-10-9z"/>
-    <path d="M19 39h82M27 39l8 54a8 8 0 0 0 8 7h34a8 8 0 0 0 8-7l8-54"/>
+    <path ${glassFill} d="M24 36v47c0 8 5 13 13 13h46c8 0 13-5 13-13V36z"/>
+    <path d="M16 36h8v47c0 8 5 13 13 13h46c8 0 13-5 13-13V36h8"/>
   `,
   'universal-clamp': `
     <path d="M17 60h31M72 60h31M72 60l26-25M72 60l26 25"/>

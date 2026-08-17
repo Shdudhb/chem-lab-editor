@@ -250,6 +250,15 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(getSnapPoints({
     sourceId: 'surface-dish', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const crystallizingDish = getEquipmentById('crystallizing-dish');
+  assert.match(crystallizingDish.svg, /M16 36h8v47c0 8 5 13 13 13h46/);
+  assert.match(crystallizingDish.svg, /c8 0 13-5 13-13V36h8/);
+  assert.doesNotMatch(crystallizingDish.svg, /M19 39h82|M27 39l8 54|l8-54/);
+  assert.notEqual(crystallizingDish.svg, petriDish.svg);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'crystallizing-dish', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -393,6 +402,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(surfaceFull.rightMiddle - surfaceFull.leftMiddle, 76);
   assert.equal(surfaceFull.rightBottom - surfaceFull.leftBottom, 16);
   assert.ok(surfaceHalf.rightTop - surfaceHalf.leftTop > 70);
+
+  const crystallizingFull = getLiquidBandGeometryForObject({ sourceId: 'crystallizing-dish' }, 0, 100);
+  const crystallizingHalf = getLiquidBandGeometryForObject({ sourceId: 'crystallizing-dish' }, 0, 50);
+  assert.equal(crystallizingFull.bandTop, 30);
+  assert.equal(crystallizingFull.bandBottom, 79);
+  assert.equal(crystallizingFull.rightTop - crystallizingFull.leftTop, 56);
+  assert.equal(crystallizingFull.rightBottom - crystallizingFull.leftBottom, 50);
+  assert.ok(crystallizingHalf.bandTop > crystallizingFull.bandTop);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
