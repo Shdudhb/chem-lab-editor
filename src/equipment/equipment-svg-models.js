@@ -177,8 +177,8 @@ const models = {
     <path d="M17 38c2 24 7 38 18 45 6 4 15 6 25 6s19-2 25-6c10-7 15-21 17-39l7-5"/>
   `,
   'watch-glass': `
-    <path ${glassFill} d="M15 59q45-25 90 0-45 27-90 0z"/>
-    <path d="M15 59q45-25 90 0M15 59q45 27 90 0"/>
+    <path ${glassFill} d="M14 52c12 12 28 17 46 17s34-5 46-17z"/>
+    <path d="M14 52c12 12 28 17 46 17s34-5 46-17"/>
   `,
   'surface-dish': `
     <path ${glassFill} d="M13 53q47-20 94 0-9 29-47 29S22 67 13 53z"/>

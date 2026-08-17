@@ -118,7 +118,7 @@ const liquidVesselProfiles = {
     leftBottom: 35,
     rightBottom: 65,
   },
-  'watch-glass': { top: 34, bottom: 69, leftTop: 15, rightTop: 85, leftBottom: 15, rightBottom: 85 },
+  'watch-glass': { top: 44, bottom: 57, leftTop: 13, rightTop: 87, leftBottom: 40, rightBottom: 60 },
   'surface-dish': { top: 32, bottom: 67, leftTop: 14, rightTop: 86, leftBottom: 14, rightBottom: 86 },
   'crystallizing-dish': { top: 38, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
   'water-tank': { top: 31, bottom: 85, leftTop: 20, rightTop: 80, leftBottom: 24, rightBottom: 76 },

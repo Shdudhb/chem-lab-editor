@@ -234,6 +234,14 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(getSnapPoints({
     sourceId: 'evaporating-dish', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const watchGlass = getEquipmentById('watch-glass');
+  assert.match(watchGlass.svg, /M14 52c12 12 28 17 46 17s34-5 46-17/);
+  assert.doesNotMatch(watchGlass.svg, /q45-25 90 0|q45 27 90 0/);
+  assert.notEqual(watchGlass.svg, petriDish.svg);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'watch-glass', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -359,6 +367,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(evaporatingFull.rightTop - evaporatingFull.leftTop, 66);
   assert.equal(evaporatingFull.rightBottom - evaporatingFull.leftBottom, 30);
   assert.ok(evaporatingHalf.rightTop - evaporatingHalf.leftTop > 45);
+
+  const watchFull = getLiquidBandGeometryForObject({ sourceId: 'watch-glass' }, 0, 100);
+  const watchHalf = getLiquidBandGeometryForObject({ sourceId: 'watch-glass' }, 0, 50);
+  assert.equal(watchFull.bandTop, 44);
+  assert.equal(watchFull.bandBottom, 57);
+  assert.equal(watchFull.rightTop - watchFull.leftTop, 74);
+  assert.equal(watchFull.rightBottom - watchFull.leftBottom, 20);
+  assert.ok(watchHalf.bandTop > watchFull.bandTop);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
