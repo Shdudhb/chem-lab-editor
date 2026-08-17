@@ -169,7 +169,7 @@ const snapPointProfiles = {
   'bunsen-burner': [[0, -0.45, 'top']],
   'glass-tubing': [[-0.7, 0.55, 'left'], [0.58, -0.7, 'top']],
   'water-tank': [[0, -0.58, 'top']],
-  aspirator: [[0, -0.77, 'top'], [0.75, -0.02, 'right'], [0, 0.78, 'bottom']],
+  aspirator: [[0, -0.82, 'top'], [0.78, -0.07, 'right'], [0, 0.82, 'bottom']],
   'gas-jar': [[0, -0.65, 'top']],
 };
 

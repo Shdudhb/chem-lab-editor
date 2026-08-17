@@ -256,9 +256,11 @@ const models = {
     <path d="M16 24v78h88V24"/>
   `,
   aspirator: `
-    <path ${glassFill} d="M51 14h18v34l12 11v13H69v35H51V72H39V59l12-11z"/>
-    <path d="M51 14h18v34l12 11h24M81 72H69v35H51V72H39V59l12-11V14M43 59h34M43 72h34"/>
-    <path stroke="${water}" stroke-width="3" d="M60 20v79"/>
+    <path ${glassFill} d="M50 11h20v29c0 7 3 12 8 17v15c-5 5-8 10-8 17v20H50V89c0-7-3-12-8-17V57c5-5 8-10 8-17z"/>
+    <path d="M46 11h28M50 11v29c0 7-3 12-8 17v15c5 5 8 10 8 17v20M70 109V89c0-7 3-12 8-17V57c-5-5-8-10-8-17V11"/>
+    <path ${glassFill} d="M78 56h9l8-7h12v14h-8l-8 7H78z"/>
+    <path d="M78 56h9l8-7h12M107 63h-8l-8 7H78"/>
+    <path ${detailStroke} d="M55 24v28l5 12 5-12V24"/>
   `,
   'water-delivery-tube': `
     <path stroke="${water}" stroke-width="9" d="M16 86C35 26 76 103 104 32"/>

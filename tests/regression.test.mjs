@@ -402,7 +402,20 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.match(condenser.svg, /M56 17c-7 0-12 4-12 10v7/);
   assert.match(condenser.svg, /M44 34H20M44 44H20M76 76h24M76 86h24/);
   assert.doesNotMatch(condenser.svg, /fill="#78b9c8"|M42 38H27v-10|M78 82h15v10/);
-  assert.match(getEquipmentById('aspirator').svg, /M51 14h18v34/);
+  const aspirator = getEquipmentById('aspirator');
+  assert.match(aspirator.svg, /M50 11h20v29c0 7 3 12 8 17v15/);
+  assert.match(aspirator.svg, /M78 56h9l8-7h12v14h-8l-8 7H78z/);
+  assert.match(aspirator.svg, /stroke="#aeb4b7" stroke-width="2\.5" d="M55 24v28l5 12 5-12V24"/);
+  assert.doesNotMatch(aspirator.svg, /stroke="#78b9c8"|M43 59h34|M43 72h34/);
+
+  const aspiratorPoints = getSnapPoints({
+    sourceId: 'aspirator', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(aspiratorPoints.map((point) => point.role), ['top', 'right', 'bottom']);
+  assert.ok(Math.abs(aspiratorPoints[0].y - 10.8) < 0.001);
+  assert.ok(Math.abs(aspiratorPoints[1].x - 106.8) < 0.001);
+  assert.ok(Math.abs(aspiratorPoints[1].y - 55.8) < 0.001);
+  assert.ok(Math.abs(aspiratorPoints[2].y - 109.2) < 0.001);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
