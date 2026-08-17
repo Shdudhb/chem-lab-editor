@@ -34,6 +34,9 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.notEqual(volumetric.svg, filter.svg);
   assert.match(flat.svg, /M42 6c5 2 7 5 7 10v23C28 43 13 56 13 76c0 15 10 28 27 36h40/);
   assert.doesNotMatch(flat.svg, /M48 16c4 2 6 5 6 10v24L25 90/);
+  assert.match(volumetric.svg, /M43 5c5 2 7 5 7 10v44C44 68 36 81 34 94/);
+  assert.match(volumetric.svg, /M51 38h18/);
+  assert.doesNotMatch(volumetric.svg, /M50 14c4 2 6 5 6 10v29/);
   assert.match(filter.svg, /M70 34h31/);
   assert.match(filter.svg, /M70 43h31/);
   assert.doesNotMatch(filter.svg, /M44 33h32|M35 75h45|M78 58h31/);
@@ -63,6 +66,11 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(flatPoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(flatPoints[0].y - 7.2) < 0.001);
   assert.ok(Math.abs(flatPoints[1].y - 112.2) < 0.001);
+
+  const volumetricPoints = getSnapPoints({ sourceId: 'volumetric-flask', x: 0, y: 0, width: 120, height: 120 });
+  assert.deepEqual(volumetricPoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(volumetricPoints[0].y - 6) < 0.001);
+  assert.ok(Math.abs(volumetricPoints[1].y - 115.2) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -153,6 +161,13 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(flatFull.middle, 64);
   assert.equal(flatFull.bandBottom, 94);
   assert.ok(flatHalf.rightTop - flatHalf.leftTop > 70);
+
+  const volumetricFull = getLiquidBandGeometryForObject({ sourceId: 'volumetric-flask' }, 0, 100);
+  const volumetricHalf = getLiquidBandGeometryForObject({ sourceId: 'volumetric-flask' }, 0, 50);
+  assert.equal(volumetricFull.bandTop, 49);
+  assert.equal(volumetricFull.middle, 78);
+  assert.equal(volumetricFull.bandBottom, 96);
+  assert.ok(volumetricHalf.rightTop - volumetricHalf.leftTop > 35);
 });
 
 test('hose export keeps Bezier geometry and style', () => {
