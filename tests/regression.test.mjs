@@ -534,6 +534,17 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(alcoholLampPoints.map((point) => point.role), ['top']);
   assert.ok(Math.abs(alcoholLampPoints[0].x - 60) < 0.001);
   assert.ok(Math.abs(alcoholLampPoints[0].y - 7.8) < 0.001);
+
+  const thermometer = getEquipmentById('thermometer');
+  assert.match(thermometer.svg, /stroke-width="9" d="M27 95 92 22"/);
+  assert.match(thermometer.svg, /stroke="#f5fafb" stroke-width="5" d="M27 95 92 22"/);
+  assert.match(thermometer.svg, /stroke="#d36b61" stroke-width="3" d="M27 95 72 45"/);
+  assert.match(thermometer.svg, /M82 30l7 6M74 39l5 4M66 48l7 6M58 57l5 4/);
+  assert.doesNotMatch(thermometer.svg, /M53 18a9 9|M62 38v49|cx="62" cy="92"/);
+  assert.equal(thermometer.supportsLiquid, false);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'thermometer', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {

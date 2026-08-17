@@ -79,11 +79,12 @@ const models = {
     <path fill="${flameCore}" stroke="none" d="M60 25c-4-4-3-8 1-12 5 4 5 9-1 12z"/>
   `,
   thermometer: `
-    <path ${glassFill} d="M53 18a9 9 0 0 1 18 0v54a20 20 0 1 1-18 0z"/>
-    <path d="M53 72V18a9 9 0 0 1 18 0v54a20 20 0 1 1-18 0"/>
-    <path stroke="#d36b61" stroke-width="5" d="M62 38v49"/>
-    <circle cx="62" cy="92" r="11" fill="#d36b61" stroke="none"/>
-    <path ${detailStroke} d="M76 31h10M76 43h7M76 55h10M76 67h7"/>
+    <path stroke-width="9" d="M27 95 92 22"/>
+    <path stroke="${glass}" stroke-width="5" d="M27 95 92 22"/>
+    <path stroke="#d36b61" stroke-width="3" d="M27 95 72 45"/>
+    <circle cx="27" cy="95" r="10" fill="${glass}"/>
+    <circle cx="27" cy="95" r="6" fill="#d36b61" stroke="none"/>
+    <path ${detailStroke} d="M82 30l7 6M74 39l5 4M66 48l7 6M58 57l5 4"/>
   `,
   'stirring-rod': `
     <path stroke="${detail}" stroke-width="7" d="m29 99 63-78"/>
