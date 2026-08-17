@@ -127,6 +127,20 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(droppingPoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(droppingPoints[0].y - 4.8) < 0.001);
   assert.ok(Math.abs(droppingPoints[1].y - 115.8) < 0.001);
+
+  const separatoryFunnel = getEquipmentById('separatory-funnel');
+  assert.match(separatoryFunnel.svg, /M45 6c5 2 7 5 7 10v12C37 32 27 38 27 47/);
+  assert.match(separatoryFunnel.svg, /M75 6c-5 2-7 5-7 10v12c15 4 25 10 25 19/);
+  assert.match(separatoryFunnel.svg, /M43 96h34M56 101v15M64 101v15/);
+  assert.match(separatoryFunnel.svg, /<circle cx="60" cy="96" r="5"/);
+  assert.doesNotMatch(separatoryFunnel.svg, /M44 15h32|M45 92h30/);
+
+  const separatoryPoints = getSnapPoints({
+    sourceId: 'separatory-funnel', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(separatoryPoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(separatoryPoints[0].y - 4.8) < 0.001);
+  assert.ok(Math.abs(separatoryPoints[1].y - 115.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -236,6 +250,15 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(droppingFull.bandBottom, 63);
   assert.equal(droppingFull.rightTop - droppingFull.leftTop, 14);
   assert.ok(droppingHalf.rightTop - droppingHalf.leftTop > 20);
+
+  const separatoryFull = getLiquidBandGeometryForObject({ sourceId: 'separatory-funnel' }, 0, 100);
+  const separatoryHalf = getLiquidBandGeometryForObject({ sourceId: 'separatory-funnel' }, 0, 50);
+  assert.equal(separatoryFull.bandTop, 22);
+  assert.equal(separatoryFull.middle, 39);
+  assert.equal(separatoryFull.bandBottom, 78);
+  assert.equal(separatoryFull.rightTop - separatoryFull.leftTop, 14);
+  assert.ok(separatoryHalf.rightTop - separatoryHalf.leftTop > 25);
+  assert.equal(separatoryFull.rightBottom - separatoryFull.leftBottom, 6);
 
   const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
   assert.equal(filterFull.bandTop, 39);

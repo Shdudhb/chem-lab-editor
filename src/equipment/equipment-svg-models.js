@@ -132,9 +132,11 @@ const models = {
     <path ${detailStroke} d="M69 34h8M71 44h6M69 54h8M71 64h6"/>
   `,
   'separatory-funnel': `
-    <path ${glassFill} d="M44 15h32v20c0 7 20 19 20 39 0 14-16 24-29 27v8H53v-8C40 98 24 88 24 74c0-20 20-32 20-39z"/>
-    <path d="M44 15h32M49 15v20c0 7-20 19-20 39 0 14 14 22 31 27 17-5 31-13 31-27 0-20-20-32-20-39V15M53 101h14M53 109h14"/>
-    <path d="M45 92h30M60 92v17"/>
+    <path ${glassFill} d="M52 6h16v22c15 4 25 10 25 19 0 12-16 37-29 47h-8C43 84 27 59 27 47c0-9 10-15 25-19z"/>
+    <path d="M45 6c5 2 7 5 7 10v12C37 32 27 38 27 47c0 12 16 37 29 47M75 6c-5 2-7 5-7 10v12c15 4 25 10 25 19 0 12-16 37-29 47"/>
+    <path d="M43 96h34M56 101v15M64 101v15"/>
+    <circle cx="60" cy="96" r="5" fill="${metal}"/>
+    <path ${detailStroke} d="M75 43h9M77 54h8M74 65h8"/>
   `,
   dropper: `
     <path fill="${rubber}" fill-opacity=".35" d="M50 10q10-9 20 0l-3 13H53z"/>
