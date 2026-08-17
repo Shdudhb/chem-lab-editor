@@ -203,8 +203,10 @@ const models = {
     <path stroke="#5f8fb8" stroke-width="8" d="M88 38c7-4 13-5 20-4M88 82c7 4 13 5 20 4"/>
   `,
   'test-tube-holder': `
-    <path fill="${wood}" fill-opacity=".35" d="M19 53h47v14H19z"/>
-    <path d="M19 53h47v14H19M66 60l34-22M66 60l34 22M88 42l8 10M88 78l8-10"/>
+    <path fill="${wood}" fill-opacity=".45" d="M11 42c4-6 10-9 17-8l80 15-3 14-79-14c-6-1-10 1-13 7-4-4-5-9-2-14z"/>
+    <path fill="${wood}" fill-opacity=".45" d="M11 78c4 6 10 9 17 8l80-15-3-14-79 14c-6 1-10-1-13-7-4 4-5 9-2 14z"/>
+    <circle cx="67" cy="60" r="9" fill="${metal}" fill-opacity=".25"/>
+    <circle cx="67" cy="60" r="3" fill="${darkMetal}"/>
   `,
   'crucible-tongs': `
     <path d="M24 101 58 60 33 22M96 101 62 60 87 22M58 60h4"/>

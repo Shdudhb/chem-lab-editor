@@ -163,7 +163,7 @@ const snapPointProfiles = {
   tripod: [[0, -1, 'top']],
   'universal-clamp': [[-0.85, 0, 'left'], [0.85, 0, 'right']],
   'flask-clamp': [[-0.87, 0, 'left'], [0.8, 0, 'right']],
-  'test-tube-holder': [[1, 0, 'right'], [-1, 0, 'left']],
+  'test-tube-holder': [[-0.85, 0, 'left'], [0.8, 0, 'right']],
   'alcohol-lamp': [[0, -0.58, 'top']],
   'bunsen-burner': [[0, -0.6, 'top']],
   'glass-tubing': [[-0.55, 0.58, 'left'], [0.58, -0.58, 'right']],

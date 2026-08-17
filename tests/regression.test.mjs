@@ -288,6 +288,22 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.ok(Math.abs(flaskClampPoints[0].x - 7.8) < 0.001);
   assert.ok(Math.abs(flaskClampPoints[1].x - 108) < 0.001);
   assert.ok(flaskClampPoints.every((point) => Math.abs(point.y - 60) < 0.001));
+
+  const testTubeHolder = getEquipmentById('test-tube-holder');
+  assert.match(testTubeHolder.svg, /M11 42c4-6 10-9 17-8l80 15-3 14/);
+  assert.match(testTubeHolder.svg, /M11 78c4 6 10 9 17 8l80-15-3-14/);
+  assert.match(testTubeHolder.svg, /<circle cx="67" cy="60" r="9"/);
+  assert.doesNotMatch(testTubeHolder.svg, /M19 53h47v14H19|M66 60l34-22|M88 42l8 10/);
+  assert.notEqual(testTubeHolder.svg, flaskClamp.svg);
+  assert.notEqual(testTubeHolder.svg, universalClamp.svg);
+
+  const testTubeHolderPoints = getSnapPoints({
+    sourceId: 'test-tube-holder', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(testTubeHolderPoints.map((point) => point.role), ['left', 'right']);
+  assert.ok(Math.abs(testTubeHolderPoints[0].x - 9) < 0.001);
+  assert.ok(Math.abs(testTubeHolderPoints[1].x - 108) < 0.001);
+  assert.ok(testTubeHolderPoints.every((point) => Math.abs(point.y - 60) < 0.001));
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
