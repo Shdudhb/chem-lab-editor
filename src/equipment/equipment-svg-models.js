@@ -252,8 +252,8 @@ const models = {
     <path stroke="${rubber}" stroke-width="10" d="M16 35C23 96 78 103 104 39"/>
   `,
   'water-tank': `
-    <path ${glassFill} d="M16 34h88L94 101H26z"/>
-    <path d="M13 34h94M19 34l9 67h64l9-67"/>
+    <path ${glassFill} d="M16 24v78h88V24z"/>
+    <path d="M16 24v78h88V24"/>
   `,
   aspirator: `
     <path ${glassFill} d="M51 14h18v34l12 11v13H69v35H51V72H39V59l12-11z"/>

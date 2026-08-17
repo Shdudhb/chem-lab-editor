@@ -378,6 +378,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.match(rubberTubing.svg, /stroke="#76665d" stroke-width="10" d="M16 35C23 96 78 103 104 39"/);
   assert.doesNotMatch(rubberTubing.svg, /<circle/);
   assert.equal(rubberTubing.equipmentType, 'hose');
+
+  const waterTank = getEquipmentById('water-tank');
+  assert.match(waterTank.svg, /fill="#f5fafb" fill-opacity="\.5" stroke="none" d="M16 24v78h88V24z"/);
+  assert.match(waterTank.svg, /<path d="M16 24v78h88V24"/);
+  assert.doesNotMatch(waterTank.svg, /M13 34h94|M19 34l9 67/);
+
+  const waterTankPoints = getSnapPoints({
+    sourceId: 'water-tank', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(waterTankPoints.map((point) => point.role), ['top']);
+  assert.ok(Math.abs(waterTankPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(waterTankPoints[0].y - 25.2) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -529,6 +541,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(crystallizingFull.rightTop - crystallizingFull.leftTop, 56);
   assert.equal(crystallizingFull.rightBottom - crystallizingFull.leftBottom, 50);
   assert.ok(crystallizingHalf.bandTop > crystallizingFull.bandTop);
+
+  const waterTankFull = getLiquidBandGeometryForObject({ sourceId: 'water-tank' }, 0, 100);
+  const waterTankHalf = getLiquidBandGeometryForObject({ sourceId: 'water-tank' }, 0, 50);
+  assert.equal(waterTankFull.bandTop, 22);
+  assert.equal(waterTankFull.bandBottom, 84);
+  assert.equal(waterTankFull.rightTop - waterTankFull.leftTop, 68);
+  assert.equal(waterTankFull.rightBottom - waterTankFull.leftBottom, 68);
+  assert.equal(waterTankHalf.rightTop - waterTankHalf.leftTop, 68);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);

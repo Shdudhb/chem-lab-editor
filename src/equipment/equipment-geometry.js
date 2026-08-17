@@ -131,7 +131,7 @@ const liquidVesselProfiles = {
     rightBottom: 58,
   },
   'crystallizing-dish': { top: 30, bottom: 79, leftTop: 22, rightTop: 78, leftBottom: 25, rightBottom: 75 },
-  'water-tank': { top: 31, bottom: 85, leftTop: 20, rightTop: 80, leftBottom: 24, rightBottom: 76 },
+  'water-tank': { top: 22, bottom: 84, leftTop: 16, rightTop: 84, leftBottom: 16, rightBottom: 84 },
   'gas-jar': { top: 23, bottom: 88, leftTop: 31, rightTop: 69, leftBottom: 31, rightBottom: 69 },
   'pneumatic-trough': { top: 38, bottom: 83, leftTop: 23, rightTop: 77, leftBottom: 29, rightBottom: 71 },
 };
@@ -168,7 +168,7 @@ const snapPointProfiles = {
   'alcohol-lamp': [[0, -0.58, 'top']],
   'bunsen-burner': [[0, -0.45, 'top']],
   'glass-tubing': [[-0.7, 0.55, 'left'], [0.58, -0.7, 'top']],
-  'water-tank': [[0, -0.43, 'top']],
+  'water-tank': [[0, -0.58, 'top']],
   aspirator: [[0, -0.77, 'top'], [0.75, -0.02, 'right'], [0, 0.78, 'bottom']],
   'gas-jar': [[0, -0.65, 'top']],
 };
