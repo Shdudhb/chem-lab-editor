@@ -269,8 +269,8 @@ const models = {
     <path stroke="${metal}" stroke-width="8" d="M16 75C31 34 55 35 62 68s27 25 42-29"/>
   `,
   'gas-jar': `
-    <path ${glassFill} d="M35 21h50v73a12 12 0 0 1-12 12H47a12 12 0 0 1-12-12z"/>
-    <path d="M31 21h58M37 21v73a10 10 0 0 0 10 10h26a10 10 0 0 0 10-10V21"/>
+    <path ${glassFill} d="M34 20h52v74a12 12 0 0 1-12 12H46a12 12 0 0 1-12-12z"/>
+    <path d="M28 20h64M34 20v74a12 12 0 0 0 12 12h28a12 12 0 0 0 12-12V20"/>
   `,
   'pneumatic-trough': `
     <path ${glassFill} d="M13 38h94L96 101H24z"/>

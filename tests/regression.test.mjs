@@ -429,6 +429,18 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(gasDeliveryTube.hoseStyle, { color: '#667078', strokeWidth: 7 });
   assert.equal(gasDeliveryTube.equipmentType, 'hose');
   assert.notEqual(gasDeliveryTube.svg, waterDeliveryTube.svg);
+
+  const gasJar = getEquipmentById('gas-jar');
+  assert.match(gasJar.svg, /M34 20h52v74a12 12 0 0 1-12 12H46/);
+  assert.match(gasJar.svg, /M28 20h64M34 20v74a12 12 0 0 0 12 12h28/);
+  assert.doesNotMatch(gasJar.svg, /M35 21h50|M31 21h58|M37 21v73/);
+
+  const gasJarPoints = getSnapPoints({
+    sourceId: 'gas-jar', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(gasJarPoints.map((point) => point.role), ['top']);
+  assert.ok(Math.abs(gasJarPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(gasJarPoints[0].y - 19.8) < 0.001);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
@@ -575,6 +587,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(waterTankFull.rightTop - waterTankFull.leftTop, 68);
   assert.equal(waterTankFull.rightBottom - waterTankFull.leftBottom, 68);
   assert.equal(waterTankHalf.rightTop - waterTankHalf.leftTop, 68);
+
+  const gasJarFull = getLiquidBandGeometryForObject({ sourceId: 'gas-jar' }, 0, 100);
+  const gasJarHalf = getLiquidBandGeometryForObject({ sourceId: 'gas-jar' }, 0, 50);
+  assert.equal(gasJarFull.bandTop, 22);
+  assert.equal(gasJarFull.bandBottom, 87);
+  assert.equal(gasJarFull.rightTop - gasJarFull.leftTop, 40);
+  assert.equal(gasJarFull.rightBottom - gasJarFull.leftBottom, 24);
+  assert.ok(gasJarHalf.rightTop - gasJarHalf.leftTop > 30);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);

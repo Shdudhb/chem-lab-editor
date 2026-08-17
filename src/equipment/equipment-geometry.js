@@ -132,7 +132,7 @@ const liquidVesselProfiles = {
   },
   'crystallizing-dish': { top: 30, bottom: 79, leftTop: 22, rightTop: 78, leftBottom: 25, rightBottom: 75 },
   'water-tank': { top: 22, bottom: 84, leftTop: 16, rightTop: 84, leftBottom: 16, rightBottom: 84 },
-  'gas-jar': { top: 23, bottom: 88, leftTop: 31, rightTop: 69, leftBottom: 31, rightBottom: 69 },
+  'gas-jar': { top: 22, bottom: 87, leftTop: 30, rightTop: 70, leftBottom: 38, rightBottom: 62 },
   'pneumatic-trough': { top: 38, bottom: 83, leftTop: 23, rightTop: 77, leftBottom: 29, rightBottom: 71 },
 };
 
@@ -170,7 +170,7 @@ const snapPointProfiles = {
   'glass-tubing': [[-0.7, 0.55, 'left'], [0.58, -0.7, 'top']],
   'water-tank': [[0, -0.58, 'top']],
   aspirator: [[0, -0.82, 'top'], [0.78, -0.07, 'right'], [0, 0.82, 'bottom']],
-  'gas-jar': [[0, -0.65, 'top']],
+  'gas-jar': [[0, -0.67, 'top']],
 };
 
 const cloneVessel = (vessel) => (vessel ? { ...vessel } : undefined);
