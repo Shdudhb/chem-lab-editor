@@ -95,9 +95,9 @@ const models = {
     <path ${detailStroke} d="M51 38h18"/>
   `,
   'filter-flask': `
-    <path ${glassFill} d="M47 15h26v34l22 42v7a9 9 0 0 1-9 9H34a9 9 0 0 1-9-9v-7l22-42z"/>
-    <path d="M47 15c4 2 6 5 6 10v24L25 91v7a9 9 0 0 0 9 9h52a9 9 0 0 0 9-9v-7L67 49V25c0-5 2-8 6-10M70 34h31M70 43h31"/>
-    <path ${detailStroke} d="M74 59h9M78 71h8M82 83h7"/>
+    <path ${glassFill} d="M49 7h22v40l24 50a10 10 0 0 1-9 16H34a10 10 0 0 1-9-16l24-50z"/>
+    <path d="M42 7c5 2 7 5 7 10v30L25 97a10 10 0 0 0 9 16h52a10 10 0 0 0 9-16L71 47V17c0-5 2-8 7-10M71 29h32M71 41h32"/>
+    <path ${detailStroke} d="M64 59h10M69 70h10M74 81h10M79 92h10M82 103h9"/>
   `,
   'test-tube-rack': `
     <path fill="${wood}" fill-opacity=".28" d="M15 38h90v17H15zM20 82h80v15H20z"/>

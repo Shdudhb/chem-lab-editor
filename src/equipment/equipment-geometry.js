@@ -34,7 +34,7 @@ const liquidVesselProfiles = {
     leftBottom: 38,
     rightBottom: 62,
   },
-  'filter-flask': { top: 13, bottom: 88, leftTop: 39, rightTop: 61, leftBottom: 26, rightBottom: 74 },
+  'filter-flask': { top: 39, bottom: 94, leftTop: 41, rightTop: 59, leftBottom: 28, rightBottom: 72 },
   'test-tube': { top: 4, bottom: 96, leftTop: 42.5, rightTop: 57.5, leftBottom: 46, rightBottom: 54 },
   funnel: {
     top: 12,
@@ -72,7 +72,7 @@ const snapPointProfiles = {
   'round-bottom-flask': [[0, -0.9, 'top'], [0, 0.92, 'bottom']],
   'flat-bottom-flask': [[0, -0.88, 'top'], [0, 0.87, 'bottom']],
   'volumetric-flask': [[0, -0.9, 'top'], [0, 0.92, 'bottom']],
-  'filter-flask': [[0, -0.75, 'top'], [0.68, -0.36, 'right'], [0, 0.78, 'bottom']],
+  'filter-flask': [[0, -0.88, 'top'], [0.72, -0.42, 'right'], [0, 0.88, 'bottom']],
   'test-tube': [[0, -0.92, 'top']],
   'graduated-cylinder': [[0, -0.86, 'top'], [0, 0.82, 'bottom']],
   'test-tube-rack': [[0, -0.4, 'top']],

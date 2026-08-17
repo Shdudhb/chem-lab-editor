@@ -37,8 +37,9 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.match(volumetric.svg, /M43 5c5 2 7 5 7 10v44C44 68 36 81 34 94/);
   assert.match(volumetric.svg, /M51 38h18/);
   assert.doesNotMatch(volumetric.svg, /M50 14c4 2 6 5 6 10v29/);
-  assert.match(filter.svg, /M70 34h31/);
-  assert.match(filter.svg, /M70 43h31/);
+  assert.match(filter.svg, /M42 7c5 2 7 5 7 10v30L25 97/);
+  assert.match(filter.svg, /M71 29h32/);
+  assert.match(filter.svg, /M71 41h32/);
   assert.doesNotMatch(filter.svg, /M44 33h32|M35 75h45|M78 58h31/);
 
   const beaker = getEquipmentById('beaker');
@@ -54,8 +55,10 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
   assert.deepEqual(filterPoints.map((point) => point.role), ['top', 'right', 'bottom']);
-  assert.ok(Math.abs(filterPoints[1].x - 100.8) < 0.001);
-  assert.ok(Math.abs(filterPoints[1].y - 38.4) < 0.001);
+  assert.ok(Math.abs(filterPoints[0].y - 7.2) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].x - 103.2) < 0.001);
+  assert.ok(Math.abs(filterPoints[1].y - 34.8) < 0.001);
+  assert.ok(Math.abs(filterPoints[2].y - 112.8) < 0.001);
 
   const cylinderPoints = getSnapPoints({ sourceId: 'graduated-cylinder', x: 0, y: 0, width: 120, height: 120 });
   assert.deepEqual(cylinderPoints.map((point) => point.role), ['top', 'bottom']);
@@ -168,6 +171,11 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(volumetricFull.middle, 78);
   assert.equal(volumetricFull.bandBottom, 96);
   assert.ok(volumetricHalf.rightTop - volumetricHalf.leftTop > 35);
+
+  const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
+  assert.equal(filterFull.bandTop, 39);
+  assert.equal(filterFull.bandBottom, 94);
+  assert.equal(filterFull.rightTop - filterFull.leftTop, 18);
 });
 
 test('hose export keeps Bezier geometry and style', () => {
