@@ -139,9 +139,10 @@ const models = {
     <path ${detailStroke} d="M75 43h9M77 54h8M74 65h8"/>
   `,
   dropper: `
-    <path fill="${rubber}" fill-opacity=".35" d="M50 10q10-9 20 0l-3 13H53z"/>
-    <path ${glassFill} d="M52 23h16v60l-8 25-8-25z"/>
-    <path d="M50 23h20M54 23v59l6 21 6-21V23M50 10q10-9 20 0l-3 13H53z"/>
+    <path fill="${rubber}" fill-opacity=".5" d="M60 5c-6 0-9 4-9 10v10l-4 7h26l-4-7V15c0-6-3-10-9-10z"/>
+    <path ${glassFill} d="M54 32h12v62c0 7-3 14-6 21-3-7-6-14-6-21z"/>
+    <path d="M60 5c-6 0-9 4-9 10v10l-4 7h26l-4-7V15c0-6-3-10-9-10M47 32h26M54 32v62c0 7 3 14 6 21 3-7 6-14 6-21V32"/>
+    <path ${detailStroke} d="M61 43v42"/>
   `,
   pipette: `
     <path ${glassFill} d="M55 12h10v76l-5 21-5-21z"/>

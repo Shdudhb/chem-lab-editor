@@ -141,6 +141,19 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(separatoryPoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(separatoryPoints[0].y - 4.8) < 0.001);
   assert.ok(Math.abs(separatoryPoints[1].y - 115.8) < 0.001);
+
+  const dropper = getEquipmentById('dropper');
+  assert.match(dropper.svg, /M60 5c-6 0-9 4-9 10v10l-4 7h26l-4-7V15/);
+  assert.match(dropper.svg, /M54 32v62c0 7 3 14 6 21 3-7 6-14 6-21V32/);
+  assert.match(dropper.svg, /M61 43v42/);
+  assert.doesNotMatch(dropper.svg, /M50 10q10-9 20 0|M52 23h16v60/);
+
+  const dropperPoints = getSnapPoints({
+    sourceId: 'dropper', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(dropperPoints.map((point) => point.role), ['bottom']);
+  assert.ok(Math.abs(dropperPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(dropperPoints[0].y - 115.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -259,6 +272,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(separatoryFull.rightTop - separatoryFull.leftTop, 14);
   assert.ok(separatoryHalf.rightTop - separatoryHalf.leftTop > 25);
   assert.equal(separatoryFull.rightBottom - separatoryFull.leftBottom, 6);
+
+  const dropperFull = getLiquidBandGeometryForObject({ sourceId: 'dropper' }, 0, 100);
+  const dropperHalf = getLiquidBandGeometryForObject({ sourceId: 'dropper' }, 0, 50);
+  assert.equal(dropperFull.bandTop, 28);
+  assert.equal(dropperFull.bandBottom, 90);
+  assert.equal(dropperFull.rightTop - dropperFull.leftTop, 6);
+  assert.equal(dropperFull.rightBottom - dropperFull.leftBottom, 2);
+  assert.ok(dropperHalf.leftTop > dropperFull.leftTop);
 
   const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
   assert.equal(filterFull.bandTop, 39);
