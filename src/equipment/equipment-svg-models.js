@@ -100,10 +100,15 @@ const models = {
     <path ${detailStroke} d="M64 59h10M69 70h10M74 81h10M79 92h10M82 103h9"/>
   `,
   'test-tube-rack': `
-    <path fill="${wood}" fill-opacity=".28" d="M15 38h90v17H15zM20 82h80v15H20z"/>
-    <path d="M15 38h90v17H15zM20 82h80v15H20zM24 55v27M96 55v27"/>
-    <path ${detailStroke} d="M30 46h10M47 46h10M64 46h10M81 46h10"/>
-    <path d="M32 55v22a5 5 0 0 0 10 0V55M49 55v22a5 5 0 0 0 10 0V55M66 55v22a5 5 0 0 0 10 0V55M83 55v22a5 5 0 0 0 10 0V55"/>
+    <path fill="${metal}" fill-opacity=".16" d="M13 29h94v17H13zM19 87h82v14H19z"/>
+    <path d="M13 29h94v17H13zM19 87h82v14H19zM22 46v41M98 46v41"/>
+    <g fill="${glass}" stroke-width="3">
+      <ellipse cx="27" cy="37.5" rx="6" ry="3.5"/>
+      <ellipse cx="43.5" cy="37.5" rx="6" ry="3.5"/>
+      <ellipse cx="60" cy="37.5" rx="6" ry="3.5"/>
+      <ellipse cx="76.5" cy="37.5" rx="6" ry="3.5"/>
+      <ellipse cx="93" cy="37.5" rx="6" ry="3.5"/>
+    </g>
   `,
   'u-tube': `
     <path ${glassFill} d="M31 16h18v61a11 11 0 0 0 22 0V16h18v61a29 29 0 0 1-58 0z"/>

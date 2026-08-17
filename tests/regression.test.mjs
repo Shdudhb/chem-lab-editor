@@ -51,6 +51,10 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.doesNotMatch(getEquipmentById('funnel').svg, /M15 14h90|M15 14H105/);
   assert.match(getEquipmentById('graduated-cylinder').svg, /M44 8c4 2 6 5 6 10v78l-12 12h44L70 96V18/);
   assert.doesNotMatch(getEquipmentById('graduated-cylinder').svg, /M44 8h32|M41 15h38/);
+  const testTubeRack = getEquipmentById('test-tube-rack');
+  assert.match(testTubeRack.svg, /M13 29h94v17H13zM19 87h82v14H19z/);
+  assert.equal((testTubeRack.svg.match(/<ellipse /g) || []).length, 5);
+  assert.doesNotMatch(testTubeRack.svg, /M32 55v22|M49 55v22|M66 55v22|M83 55v22/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
@@ -74,6 +78,10 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(volumetricPoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(volumetricPoints[0].y - 6) < 0.001);
   assert.ok(Math.abs(volumetricPoints[1].y - 115.2) < 0.001);
+
+  const rackPoints = getSnapPoints({ sourceId: 'test-tube-rack', x: 0, y: 0, width: 120, height: 120 });
+  assert.deepEqual(rackPoints.map((point) => point.role), ['top']);
+  assert.ok(Math.abs(rackPoints[0].y - 31.2) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
