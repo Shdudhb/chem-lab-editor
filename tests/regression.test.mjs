@@ -37,7 +37,7 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.doesNotMatch(filter.svg, /M44 33h32|M35 75h45|M78 58h31/);
 
   const beaker = getEquipmentById('beaker');
-  assert.match(beaker.svg, /M30 24c8 3 15 3 23 0h38/);
+  assert.match(beaker.svg, /M23 14v82a11 11 0 0 0 11 11h52/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });

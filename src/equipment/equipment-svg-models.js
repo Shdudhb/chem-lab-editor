@@ -22,9 +22,9 @@ const detailStroke = `stroke="${detail}" stroke-width="2.5"`;
 
 const models = {
   beaker: `
-    <path ${glassFill} d="M30 24h61l-6 68a10 10 0 0 1-10 9H44a10 10 0 0 1-10-9z"/>
-    <path d="M30 24c8 3 15 3 23 0h38l-6 68a10 10 0 0 1-10 9H44a10 10 0 0 1-10-9L34 31"/>
-    <path ${detailStroke} d="M75 42h10M76 54h8M77 66h7M78 78h6"/>
+    <path ${glassFill} d="M23 14h74v82a11 11 0 0 1-11 11H34a11 11 0 0 1-11-11z"/>
+    <path d="M23 14v82a11 11 0 0 0 11 11h52a11 11 0 0 0 11-11V14"/>
+    <path ${detailStroke} d="M78 31h12M82 43h8M78 55h12M82 67h8M78 79h12M82 91h8"/>
   `,
   'erlenmeyer-flask': `
     <path ${glassFill} d="M48 16h25v35l22 42a9 9 0 0 1-8 13H33a9 9 0 0 1-8-13l22-42z"/>
