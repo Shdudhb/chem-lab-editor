@@ -281,9 +281,9 @@ const models = {
     <path stroke="${metal}" stroke-width="3" d="M28 103 87 25M29 99c-5-4-11-5-14 0-4 7 6 14 13 4"/>
   `,
   spatula: `
-    <path stroke="${metal}" stroke-width="6" d="m28 101 52-67"/>
-    <path fill="${metal}" fill-opacity=".25" d="m76 29 15-11 10 8-13 16z"/>
-    <path d="m23 105 10-8M76 29l15-11 10 8-13 16z"/>
+    <path stroke="${metal}" stroke-width="4" d="M30 96 86 34"/>
+    <path fill="${metal}" fill-opacity=".18" d="M82 38c4-10 13-20 21-20 5 7-5 18-15 24zM30 94 16 104l7 7 12-13z"/>
+    <path d="M82 38c4-10 13-20 21-20 5 7-5 18-15 24zM30 94 16 104l7 7 12-13z"/>
   `,
   tweezers: `
     <path d="M27 20 58 88v15M93 20 62 88v15M27 20h12M81 20h12M40 38h40"/>
