@@ -266,10 +266,7 @@ const models = {
     <path stroke="${water}" stroke-width="9" d="M15 35C35 30 34 88 61 89s23-51 44-46"/>
   `,
   'gas-delivery-tube': `
-    <path stroke="${rubber}" stroke-width="8" d="M16 86C31 27 77 102 104 32"/>
-    <circle cx="16" cy="86" r="6" fill="${glass}"/>
-    <circle cx="104" cy="32" r="6" fill="${glass}"/>
-    <path stroke="#fff" stroke-width="2" stroke-dasharray="2 8" d="M19 81C34 33 77 96 100 38"/>
+    <path stroke="${metal}" stroke-width="8" d="M16 75C31 34 55 35 62 68s27 25 42-29"/>
   `,
   'gas-jar': `
     <path ${glassFill} d="M35 21h50v73a12 12 0 0 1-12 12H47a12 12 0 0 1-12-12z"/>
