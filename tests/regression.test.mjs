@@ -373,6 +373,11 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.ok(Math.abs(glassTubingPoints[0].y - 93) < 0.001);
   assert.ok(Math.abs(glassTubingPoints[1].x - 94.8) < 0.001);
   assert.ok(Math.abs(glassTubingPoints[1].y - 18) < 0.001);
+
+  const rubberTubing = getEquipmentById('rubber-tubing');
+  assert.match(rubberTubing.svg, /stroke="#76665d" stroke-width="10" d="M16 35C23 96 78 103 104 39"/);
+  assert.doesNotMatch(rubberTubing.svg, /<circle/);
+  assert.equal(rubberTubing.equipmentType, 'hose');
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {

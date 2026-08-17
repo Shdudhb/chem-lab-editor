@@ -249,9 +249,7 @@ const models = {
     <path d="M18 86v14M88 18h14"/>
   `,
   'rubber-tubing': `
-    <path stroke="${rubber}" stroke-width="9" d="M17 86C30 19 79 108 104 34"/>
-    <circle cx="17" cy="86" r="6" fill="${glass}"/>
-    <circle cx="104" cy="34" r="6" fill="${glass}"/>
+    <path stroke="${rubber}" stroke-width="10" d="M16 35C23 96 78 103 104 39"/>
   `,
   'water-tank': `
     <path ${glassFill} d="M16 34h88L94 101H26z"/>
