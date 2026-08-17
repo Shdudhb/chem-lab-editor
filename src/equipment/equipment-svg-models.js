@@ -277,8 +277,8 @@ const models = {
     <path d="M10 40h100M16 40v52a12 12 0 0 0 12 12h64a12 12 0 0 0 12-12V40"/>
   `,
   'test-tube-brush': `
-    <path stroke="${metal}" stroke-width="4" d="m27 105 59-76"/>
-    <path d="M22 108l10-7M78 28l14-14M72 36l17 5M66 44l17 7M60 52l17 9M54 60l16 10M48 68l15 11"/>
+    <path stroke-width="3" d="m75 21 20 16M65 26l28 23M58 34l30 24M52 43l29 23M47 53l27 21M45 64l20 16"/>
+    <path stroke="${metal}" stroke-width="3" d="M28 103 87 25M29 99c-5-4-11-5-14 0-4 7 6 14 13 4"/>
   `,
   spatula: `
     <path stroke="${metal}" stroke-width="6" d="m28 101 52-67"/>

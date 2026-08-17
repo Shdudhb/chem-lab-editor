@@ -449,6 +449,14 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(getSnapPoints({
     sourceId: 'pneumatic-trough', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const testTubeBrush = getEquipmentById('test-tube-brush');
+  assert.match(testTubeBrush.svg, /m75 21 20 16M65 26l28 23M58 34l30 24/);
+  assert.match(testTubeBrush.svg, /M28 103 87 25M29 99c-5-4-11-5-14 0-4 7 6 14 13 4/);
+  assert.doesNotMatch(testTubeBrush.svg, /m27 105 59-76|M78 28l14-14|M72 36l17 5/);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'test-tube-brush', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
