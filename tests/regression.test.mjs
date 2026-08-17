@@ -474,6 +474,13 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(getSnapPoints({
     sourceId: 'tweezers', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const electronicBalance = getEquipmentById('electronic-balance');
+  assert.match(electronicBalance.svg, /<ellipse cx="60" cy="26" rx="30" ry="8"/);
+  assert.match(electronicBalance.svg, /M43 33v10M77 33v10M23 43h74l10 55H13z/);
+  assert.match(electronicBalance.svg, /M39 69h9v8h-9zM53 75h2M60 69h9v8h-9z/);
+  assert.match(electronicBalance.svg, /<circle cx="87" cy="74" r="4".*<circle cx="98" cy="74" r="4"/s);
+  assert.doesNotMatch(electronicBalance.svg, /M24 45h72l9 53H15z|M40 29h40|M48 73h24/);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {

@@ -290,11 +290,13 @@ const models = {
     <path stroke="${metal}" stroke-width="3" d="M91 19 26 91c-10 11 4 24 15 14l63-64"/>
   `,
   'electronic-balance': `
-    <path fill="${metal}" fill-opacity=".16" d="M24 45h72l9 53H15z"/>
-    <path d="M24 45h72l9 53H15zM33 45v-9h54v9M40 29h40"/>
-    <rect x="42" y="65" width="36" height="16" rx="3" fill="#dcebea"/>
-    <path stroke="${darkMetal}" stroke-width="2.5" d="M48 73h24"/>
-    <circle cx="88" cy="73" r="4" fill="${metal}"/>
+    <ellipse cx="60" cy="26" rx="30" ry="8" fill="${metal}" fill-opacity=".18"/>
+    <path fill="${metal}" fill-opacity=".14" d="M23 43h74l10 55H13z"/>
+    <path d="M43 33v10M77 33v10M23 43h74l10 55H13zM23 98v5M97 98v5"/>
+    <rect x="31" y="63" width="46" height="20" rx="3" fill="#dcebea"/>
+    <path stroke="${darkMetal}" stroke-width="2.5" d="M39 69h9v8h-9zM53 75h2M60 69h9v8h-9z"/>
+    <circle cx="87" cy="74" r="4" fill="${metal}"/>
+    <circle cx="98" cy="74" r="4" fill="${metal}"/>
   `,
 };
 
