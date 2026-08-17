@@ -196,10 +196,11 @@ const models = {
     <path stroke="#5f8fb8" stroke-width="8" d="M99 37h12M99 60h12M99 83h12"/>
   `,
   'flask-clamp': `
-    <path d="M15 60h33M73 60l30-27M73 60l30 27"/>
-    <path fill="${metal}" fill-opacity=".2" d="M47 43h27v34H47z"/>
-    <circle cx="60" cy="60" r="10" fill="${glass}"/>
-    <path d="M47 43c-10 9-10 25 0 34M74 43c10 9 10 25 0 34M92 39l7 8M92 81l7-8"/>
+    <rect x="8" y="54" width="56" height="12" rx="5" fill="${metal}" fill-opacity=".25"/>
+    <path d="M8 54h56v12H8M62 48h12v24H62zM70 56C78 38 92 30 108 34l-4 12M70 64c8 18 22 26 38 22l-4-12"/>
+    <circle cx="27" cy="60" r="7" fill="${darkMetal}" fill-opacity=".35"/>
+    <path d="M27 49v22M20 60h14"/>
+    <path stroke="#5f8fb8" stroke-width="8" d="M88 38c7-4 13-5 20-4M88 82c7 4 13 5 20 4"/>
   `,
   'test-tube-holder': `
     <path fill="${wood}" fill-opacity=".35" d="M19 53h47v14H19z"/>

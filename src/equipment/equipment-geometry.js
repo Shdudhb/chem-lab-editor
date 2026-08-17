@@ -162,7 +162,7 @@ const snapPointProfiles = {
   'iron-ring': [[0, -1, 'top']],
   tripod: [[0, -1, 'top']],
   'universal-clamp': [[-0.85, 0, 'left'], [0.85, 0, 'right']],
-  'flask-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
+  'flask-clamp': [[-0.87, 0, 'left'], [0.8, 0, 'right']],
   'test-tube-holder': [[1, 0, 'right'], [-1, 0, 'left']],
   'alcohol-lamp': [[0, -0.58, 'top']],
   'bunsen-burner': [[0, -0.6, 'top']],
