@@ -114,6 +114,19 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(longFunnelPoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(longFunnelPoints[0].y - 7.8) < 0.001);
   assert.ok(Math.abs(longFunnelPoints[1].y - 115.2) < 0.001);
+
+  const droppingFunnel = getEquipmentById('dropping-funnel');
+  assert.match(droppingFunnel.svg, /M45 5c5 2 7 5 7 10v5C43 23 38 28 38 36/);
+  assert.match(droppingFunnel.svg, /M43 82h34M56 87v29M64 87v29/);
+  assert.match(droppingFunnel.svg, /<circle cx="60" cy="82" r="5"/);
+  assert.doesNotMatch(droppingFunnel.svg, /M39 17h42|M46 92h28/);
+
+  const droppingPoints = getSnapPoints({
+    sourceId: 'dropping-funnel', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(droppingPoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(droppingPoints[0].y - 4.8) < 0.001);
+  assert.ok(Math.abs(droppingPoints[1].y - 115.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -215,6 +228,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(volumetricFull.middle, 78);
   assert.equal(volumetricFull.bandBottom, 96);
   assert.ok(volumetricHalf.rightTop - volumetricHalf.leftTop > 35);
+
+  const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
+  const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);
+  assert.equal(droppingFull.bandTop, 18);
+  assert.equal(droppingFull.middle, 34);
+  assert.equal(droppingFull.bandBottom, 63);
+  assert.equal(droppingFull.rightTop - droppingFull.leftTop, 14);
+  assert.ok(droppingHalf.rightTop - droppingHalf.leftTop > 20);
 
   const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
   assert.equal(filterFull.bandTop, 39);
