@@ -106,7 +106,7 @@ const liquidVesselProfiles = {
     leftBottom: 28,
     rightBottom: 72,
   },
-  'petri-dish': { top: 39, bottom: 79, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'petri-dish': { top: 36, bottom: 62, leftTop: 16, rightTop: 84, leftBottom: 23, rightBottom: 77 },
   'evaporating-dish': { top: 39, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
   'watch-glass': { top: 34, bottom: 69, leftTop: 15, rightTop: 85, leftBottom: 15, rightBottom: 85 },
   'surface-dish': { top: 32, bottom: 67, leftTop: 14, rightTop: 86, leftBottom: 14, rightBottom: 86 },

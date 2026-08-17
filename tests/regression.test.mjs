@@ -219,6 +219,13 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(washBottlePoints.map((point) => point.role), ['left']);
   assert.ok(Math.abs(washBottlePoints[0].x - 16.2) < 0.001);
   assert.ok(Math.abs(washBottlePoints[0].y - 28.8) < 0.001);
+
+  const petriDish = getEquipmentById('petri-dish');
+  assert.match(petriDish.svg, /M18 42v22c0 8 6 13 14 13h56c8 0 14-5 14-13V42/);
+  assert.doesNotMatch(petriDish.svg, /<ellipse|M17 49v18|M17 49c0 8/);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'petri-dish', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -327,6 +334,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(washBottleFull.bandBottom, 92);
   assert.equal(washBottleFull.rightTop - washBottleFull.leftTop, 20);
   assert.ok(washBottleHalf.rightTop - washBottleHalf.leftTop > 40);
+
+  const petriFull = getLiquidBandGeometryForObject({ sourceId: 'petri-dish' }, 0, 100);
+  const petriHalf = getLiquidBandGeometryForObject({ sourceId: 'petri-dish' }, 0, 50);
+  assert.equal(petriFull.bandTop, 36);
+  assert.equal(petriFull.bandBottom, 62);
+  assert.equal(petriFull.rightTop - petriFull.leftTop, 68);
+  assert.equal(petriFull.rightBottom - petriFull.leftBottom, 54);
+  assert.ok(petriHalf.bandTop > petriFull.bandTop);
 
   const droppingFull = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 100);
   const droppingHalf = getLiquidBandGeometryForObject({ sourceId: 'dropping-funnel' }, 0, 50);

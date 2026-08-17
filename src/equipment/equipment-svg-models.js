@@ -169,8 +169,8 @@ const models = {
     <path d="M47 25h26v13H47zM47 31h26M58 25v-7c0-5-3-8-8-8h-7L16 33M65 25v-7c0-9-6-15-15-15H41L13 29M58 38v64M65 38v64"/>
   `,
   'petri-dish': `
-    <ellipse cx="60" cy="49" rx="43" ry="14" fill="${glass}" fill-opacity=".4"/>
-    <path d="M17 49v18c0 9 19 16 43 16s43-7 43-16V49M17 49c0 8 19 14 43 14s43-6 43-14"/>
+    <path ${glassFill} d="M18 42v22c0 8 6 13 14 13h56c8 0 14-5 14-13V42z"/>
+    <path d="M18 42v22c0 8 6 13 14 13h56c8 0 14-5 14-13V42"/>
   `,
   'evaporating-dish': `
     <path ${glassFill} d="M17 48q43 24 86 0-5 42-43 42S22 72 17 48z"/>
