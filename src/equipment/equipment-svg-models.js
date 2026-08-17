@@ -71,10 +71,12 @@ const models = {
     <path d="M13 103h10M97 103h10M55 103h10"/>
   `,
   'alcohol-lamp': `
-    <path ${glassFill} d="M32 50h56l7 37a13 13 0 0 1-13 16H38a13 13 0 0 1-13-16z"/>
-    <path d="M32 50h56l7 37a13 13 0 0 1-13 16H38a13 13 0 0 1-13-16zM45 50v-9h30v9M60 41V29"/>
-    <path fill="${flame}" stroke="none" d="M60 31c-12-9 7-18 1-29 17 12 8 25-1 29z"/>
-    <path fill="${flameCore}" stroke="none" d="M60 27c-5-5 3-10 1-15 7 6 4 12-1 15z"/>
+    <path ${glassFill} d="M44 49h32c1 10 12 18 17 31 6 16-5 27-23 27H50c-18 0-29-11-23-27 5-13 16-21 17-31z"/>
+    <path d="M44 49h32c1 10 12 18 17 31 6 16-5 27-23 27H50c-18 0-29-11-23-27 5-13 16-21 17-31zM35 107h50"/>
+    <path fill="${metal}" fill-opacity=".22" d="M40 41h40v9H40z"/>
+    <path d="M40 41h40v9H40M52 41V32h16v9M60 32V27"/>
+    <path fill="${flame}" stroke="none" d="M60 29c-9-6-8-13-2-19 3-3 4-6 3-9 13 9 14 21-1 28z"/>
+    <path fill="${flameCore}" stroke="none" d="M60 25c-4-4-3-8 1-12 5 4 5 9-1 12z"/>
   `,
   thermometer: `
     <path ${glassFill} d="M53 18a9 9 0 0 1 18 0v54a20 20 0 1 1-18 0z"/>

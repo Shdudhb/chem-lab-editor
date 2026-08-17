@@ -521,6 +521,19 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(tripodPoints.map((point) => point.role), ['top']);
   assert.ok(Math.abs(tripodPoints[0].x - 60) < 0.001);
   assert.ok(Math.abs(tripodPoints[0].y - 22.2) < 0.001);
+
+  const alcoholLamp = getEquipmentById('alcohol-lamp');
+  assert.match(alcoholLamp.svg, /M44 49h32c1 10 12 18 17 31 6 16-5 27-23 27H50/);
+  assert.match(alcoholLamp.svg, /M40 41h40v9H40M52 41V32h16v9M60 32V27/);
+  assert.match(alcoholLamp.svg, /M60 29c-9-6-8-13-2-19 3-3 4-6 3-9 13 9 14 21-1 28z/);
+  assert.doesNotMatch(alcoholLamp.svg, /M32 50h56l7 37|M45 50v-9h30v9|M60 31c-12-9/);
+
+  const alcoholLampPoints = getSnapPoints({
+    sourceId: 'alcohol-lamp', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(alcoholLampPoints.map((point) => point.role), ['top']);
+  assert.ok(Math.abs(alcoholLampPoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(alcoholLampPoints[0].y - 7.8) < 0.001);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
