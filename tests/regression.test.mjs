@@ -481,6 +481,20 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.match(electronicBalance.svg, /M39 69h9v8h-9zM53 75h2M60 69h9v8h-9z/);
   assert.match(electronicBalance.svg, /<circle cx="87" cy="74" r="4".*<circle cx="98" cy="74" r="4"/s);
   assert.doesNotMatch(electronicBalance.svg, /M24 45h72l9 53H15z|M40 29h40|M48 73h24/);
+
+  const retortStand = getEquipmentById('retort-stand');
+  assert.match(retortStand.svg, /M14 96h92l-8 12H22z/);
+  assert.match(retortStand.svg, /M14 96h92M22 108h76M38 96V14M31 14h14/);
+  assert.match(retortStand.svg, /M31 87h14v9H31z/);
+  assert.doesNotMatch(retortStand.svg, /M46 32h43|M88 32v17|<circle cx="46" cy="32"/);
+
+  const retortStandPoints = getSnapPoints({
+    sourceId: 'retort-stand', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(retortStandPoints.map((point) => point.role), ['top', 'right', 'left']);
+  assert.ok(retortStandPoints.every((point) => Math.abs(point.x - 37.8) < 0.001));
+  assert.ok(Math.abs(retortStandPoints[0].y - 13.8) < 0.001);
+  assert.ok(retortStandPoints.slice(1).every((point) => Math.abs(point.y - 54) < 0.001));
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {

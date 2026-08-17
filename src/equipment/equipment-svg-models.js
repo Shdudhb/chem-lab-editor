@@ -49,9 +49,10 @@ const models = {
     <path ${detailStroke} d="M59 22h8M63 30h4M59 38h8M63 46h4M59 54h8M63 62h4M59 70h8M63 78h4M59 86h8M63 94h4"/>
   `,
   'retort-stand': `
-    <path fill="${metal}" fill-opacity=".22" d="M18 96h80l-7 10H25z"/>
-    <path d="M21 96h74M31 106h59M46 96V15M39 15h14M46 32h43M88 32v17"/>
-    <circle cx="46" cy="32" r="5" fill="${darkMetal}" stroke="none"/>
+    <path fill="${metal}" fill-opacity=".22" d="M14 96h92l-8 12H22z"/>
+    <path d="M14 96h92M22 108h76M38 96V14M31 14h14"/>
+    <path fill="${metal}" fill-opacity=".3" d="M31 87h14v9H31z"/>
+    <path d="M31 87h14v9H31"/>
   `,
   'iron-ring': `
     <ellipse cx="56" cy="52" rx="31" ry="18" fill="${metal}" fill-opacity=".12"/>

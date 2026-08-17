@@ -158,7 +158,7 @@ const snapPointProfiles = {
   'wide-mouth-bottle': [[0, -0.87, 'top']],
   'wash-bottle': [[-0.73, -0.52, 'left']],
   condenser: [[0, -0.92, 'top'], [0, 0.92, 'bottom'], [-0.67, -0.35, 'left'], [0.67, 0.35, 'right']],
-  'retort-stand': [[0, -1, 'top'], [1, 0, 'right'], [-1, 0, 'left']],
+  'retort-stand': [[-0.37, -0.77, 'top'], [-0.37, -0.1, 'right'], [-0.37, -0.1, 'left']],
   'iron-ring': [[0, -1, 'top']],
   tripod: [[0, -1, 'top']],
   'universal-clamp': [[-0.85, 0, 'left'], [0.85, 0, 'right']],
