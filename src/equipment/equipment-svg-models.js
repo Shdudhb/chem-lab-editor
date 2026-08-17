@@ -181,9 +181,8 @@ const models = {
     <path d="M14 52c12 12 28 17 46 17s34-5 46-17"/>
   `,
   'surface-dish': `
-    <path ${glassFill} d="M13 53q47-20 94 0-9 29-47 29S22 67 13 53z"/>
-    <path d="M13 53q47-20 94 0M13 53c9 20 25 29 47 29s38-9 47-29"/>
-    <path ${detailStroke} d="M32 59q28 10 56 0"/>
+    <ellipse ${glassFill} cx="60" cy="60" rx="46" ry="28"/>
+    <ellipse cx="60" cy="60" rx="46" ry="28"/>
   `,
   'crystallizing-dish': `
     <path ${glassFill} d="M19 39h82l-8 54a10 10 0 0 1-10 9H37a10 10 0 0 1-10-9z"/>
