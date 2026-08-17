@@ -41,6 +41,8 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.match(getEquipmentById('erlenmeyer-flask').svg, /M42 7c5 2 7 5 7 10v30L25 97/);
   assert.match(getEquipmentById('round-bottom-flask').svg, /M42 6c5 2 7 5 7 10v22C29 42/);
   assert.match(getEquipmentById('test-tube').svg, /M49 5v98a11 11 0 0 0 22 0V5/);
+  assert.match(getEquipmentById('funnel').svg, /M15 14 54 57v51M105 14 66 57v51/);
+  assert.doesNotMatch(getEquipmentById('funnel').svg, /M15 14h90|M15 14H105/);
   assert.equal(hose.equipmentType, 'hose');
 
   const filterPoints = getSnapPoints({ sourceId: 'filter-flask', x: 0, y: 0, width: 120, height: 120 });
@@ -82,6 +84,7 @@ test('catalog geometry explicitly controls liquid and snap capabilities', () => 
     assert.equal(item.supportsLiquid, Boolean(item.liquidVessel));
   });
   assert.equal(getEquipmentById('beaker').supportsLiquid, true);
+  assert.equal(getEquipmentById('funnel').supportsLiquid, true);
   assert.equal(getEquipmentById('retort-stand').supportsLiquid, false);
   assert.deepEqual(getSnapPoints({
     sourceId: 'electronic-balance', x: 0, y: 0, width: 120, height: 120,
@@ -118,6 +121,12 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(roundFull.middle, 62);
   assert.equal(roundFull.leftMiddle, 12);
   assert.ok(roundHalf.rightTop - roundHalf.leftTop > 60);
+
+  const funnelFull = getLiquidBandGeometryForObject({ sourceId: 'funnel' }, 0, 100);
+  const funnelHalf = getLiquidBandGeometryForObject({ sourceId: 'funnel' }, 0, 50);
+  assert.equal(funnelFull.middle, 48);
+  assert.equal(funnelHalf.leftBottom, 45);
+  assert.ok(funnelFull.rightTop - funnelFull.leftTop > 60);
 });
 
 test('hose export keeps Bezier geometry and style', () => {
@@ -145,6 +154,14 @@ test('layered liquid export preserves each layer', () => {
   assert.equal((svg.match(/fill="#ff0000"/g) ?? []).length, 1);
   assert.match(svg, /clipPath id="liquid-object-1"/);
   assert.match(svg, /clip-path="url\(#liquid-object-1\)"/);
+
+  const funnelSvg = buildSceneSvg([{
+    id: 'funnel-1', type: 'svg', visible: true, x: 0, y: 0, width: 120, height: 120, rotation: 0,
+    supportsLiquid: true, sourceId: 'funnel',
+    svgMarkup: '<svg width="100%" height="100%"></svg>',
+    liquid: { layers: [{ level: 100, color: '#67aee8', opacity: 0.72 }] },
+  }]);
+  assert.match(funnelSvg, /M 16\.8 14\.4 L 103\.2 14\.4 L 66 57\.6 L 66 108 L 54 108 L 54 57\.6 Z/);
 });
 
 test('scene JSON round-trip preserves layers and groups', () => {

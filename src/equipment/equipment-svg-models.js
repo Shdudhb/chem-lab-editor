@@ -40,8 +40,8 @@ const models = {
     <path d="M49 5v98a11 11 0 0 0 22 0V5"/>
   `,
   funnel: `
-    <path ${glassFill} d="M18 25h84L69 60v43H52V60z"/>
-    <path d="M18 25h84L69 60v43M52 103V60z"/>
+    <path ${glassFill} d="M15 14l39 43v51h12V57l39-43z"/>
+    <path d="M15 14 54 57v51M105 14 66 57v51"/>
   `,
   'graduated-cylinder': `
     <path ${glassFill} d="M43 15h34v78a7 7 0 0 1-7 7H50a7 7 0 0 1-7-7z"/>
