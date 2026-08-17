@@ -150,9 +150,9 @@ const models = {
     <path stroke="#d36b61" stroke-width="3" d="M55 16h10"/>
   `,
   'volumetric-pipette': `
-    <path ${glassFill} d="M56 10h8v39c0 7 10 12 10 24s-7 17-10 20v17h-8V93c-3-3-10-8-10-20s10-17 10-24z"/>
-    <path d="M54 10h12M58 10v39c0 7-8 12-8 24s7 17 10 20c3-3 10-8 10-20s-8-17-8-24V10M58 93v17M62 93v17"/>
-    <path stroke="${detail}" stroke-width="3" d="M50 46h20"/>
+    <path ${glassFill} d="M57 5h6v34c9 5 15 12 15 22s-6 18-15 23v20c0 4-1 8-3 11-2-3-3-7-3-11V84c-9-5-15-13-15-23s6-17 15-22z"/>
+    <path d="M57 5v34c-9 5-15 12-15 22s6 18 15 23v20c0 4 1 8 3 11M63 5v34c9 5 15 12 15 22s-6 18-15 23v20c0 4-1 8-3 11"/>
+    <path stroke="#d36b61" stroke-width="3" d="M56 20h8"/>
   `,
   'reagent-bottle': `
     <path ${glassFill} d="M39 31h42v12l10 11v42a10 10 0 0 1-10 10H39a10 10 0 0 1-10-10V54l10-11z"/>

@@ -167,6 +167,20 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(pipettePoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(pipettePoints[0].y - 4.8) < 0.001);
   assert.ok(Math.abs(pipettePoints[1].y - 115.8) < 0.001);
+
+  const volumetricPipette = getEquipmentById('volumetric-pipette');
+  assert.match(volumetricPipette.svg, /M57 5v34c-9 5-15 12-15 22s6 18 15 23v20/);
+  assert.match(volumetricPipette.svg, /M63 5v34c9 5 15 12 15 22s-6 18-15 23v20/);
+  assert.match(volumetricPipette.svg, /stroke="#d36b61" stroke-width="3" d="M56 20h8"/);
+  assert.doesNotMatch(volumetricPipette.svg, /M54 10h12|M50 46h20/);
+  assert.notEqual(volumetricPipette.svg, pipette.svg);
+
+  const volumetricPipettePoints = getSnapPoints({
+    sourceId: 'volumetric-pipette', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(volumetricPipettePoints.map((point) => point.role), ['top', 'bottom']);
+  assert.ok(Math.abs(volumetricPipettePoints[0].y - 4.8) < 0.001);
+  assert.ok(Math.abs(volumetricPipettePoints[1].y - 115.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -302,6 +316,18 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(pipetteFull.rightTop - pipetteFull.leftTop, 6);
   assert.equal(pipetteFull.rightMiddle - pipetteFull.leftMiddle, 16);
   assert.ok(pipetteHalf.rightTop - pipetteHalf.leftTop > 8);
+
+  const volumetricPipetteFull = getLiquidBandGeometryForObject(
+    { sourceId: 'volumetric-pipette' }, 0, 100,
+  );
+  const volumetricPipetteHalf = getLiquidBandGeometryForObject(
+    { sourceId: 'volumetric-pipette' }, 0, 50,
+  );
+  assert.equal(volumetricPipetteFull.bandTop, 34);
+  assert.equal(volumetricPipetteFull.middle, 52);
+  assert.equal(volumetricPipetteFull.bandBottom, 70);
+  assert.equal(volumetricPipetteFull.rightMiddle - volumetricPipetteFull.leftMiddle, 28);
+  assert.ok(volumetricPipetteHalf.rightTop - volumetricPipetteHalf.leftTop > 20);
 
   const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
   assert.equal(filterFull.bandTop, 39);
