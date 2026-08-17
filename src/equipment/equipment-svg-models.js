@@ -155,9 +155,8 @@ const models = {
     <path stroke="#d36b61" stroke-width="3" d="M56 20h8"/>
   `,
   'reagent-bottle': `
-    <path ${glassFill} d="M39 31h42v12l10 11v42a10 10 0 0 1-10 10H39a10 10 0 0 1-10-10V54l10-11z"/>
-    <path d="M39 31h42M41 20h38v11H41M39 43 29 54v42a10 10 0 0 0 10 10h42a10 10 0 0 0 10-10V54L81 43"/>
-    <path ${detailStroke} d="M39 65h42M39 78h42"/>
+    <path ${glassFill} d="M43 8h34l-5 20v15c12 3 18 8 18 17v45c0 6-5 10-11 10H41c-6 0-11-4-11-10V60c0-9 6-14 18-17V28z"/>
+    <path d="M43 8h34M47 14h26l-4 14H51zM48 28v15C36 46 30 51 30 60v45c0 6 5 10 11 10h38c6 0 11-4 11-10V60c0-9-6-14-18-17V28"/>
   `,
   'wide-mouth-bottle': `
     <path ${glassFill} d="M32 34h56v62a10 10 0 0 1-10 10H42a10 10 0 0 1-10-10z"/>

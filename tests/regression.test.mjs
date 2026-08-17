@@ -181,6 +181,18 @@ test('flask catalog models are distinct and filter flask exposes a side port', (
   assert.deepEqual(volumetricPipettePoints.map((point) => point.role), ['top', 'bottom']);
   assert.ok(Math.abs(volumetricPipettePoints[0].y - 4.8) < 0.001);
   assert.ok(Math.abs(volumetricPipettePoints[1].y - 115.8) < 0.001);
+
+  const reagentBottle = getEquipmentById('reagent-bottle');
+  assert.match(reagentBottle.svg, /M43 8h34M47 14h26l-4 14H51z/);
+  assert.match(reagentBottle.svg, /M48 28v15C36 46 30 51 30 60v45/);
+  assert.doesNotMatch(reagentBottle.svg, /M41 20h38v11|M39 65h42M39 78h42|M37 105h46/);
+
+  const reagentBottlePoints = getSnapPoints({
+    sourceId: 'reagent-bottle', x: 0, y: 0, width: 120, height: 120,
+  });
+  assert.deepEqual(reagentBottlePoints.map((point) => point.role), ['top']);
+  assert.ok(Math.abs(reagentBottlePoints[0].x - 60) < 0.001);
+  assert.ok(Math.abs(reagentBottlePoints[0].y - 7.8) < 0.001);
 });
 
 test('catalog equipment has unique models for visually different apparatus', () => {
@@ -328,6 +340,14 @@ test('liquid geometry follows each vessel profile and preserves hidden layer spa
   assert.equal(volumetricPipetteFull.bandBottom, 70);
   assert.equal(volumetricPipetteFull.rightMiddle - volumetricPipetteFull.leftMiddle, 28);
   assert.ok(volumetricPipetteHalf.rightTop - volumetricPipetteHalf.leftTop > 20);
+
+  const reagentFull = getLiquidBandGeometryForObject({ sourceId: 'reagent-bottle' }, 0, 100);
+  const reagentHalf = getLiquidBandGeometryForObject({ sourceId: 'reagent-bottle' }, 0, 50);
+  assert.equal(reagentFull.bandTop, 46);
+  assert.equal(reagentFull.bandBottom, 92);
+  assert.equal(reagentFull.rightTop - reagentFull.leftTop, 44);
+  assert.equal(reagentFull.rightBottom - reagentFull.leftBottom, 44);
+  assert.equal(reagentHalf.rightTop - reagentHalf.leftTop, 44);
 
   const filterFull = getLiquidBandGeometryForObject({ sourceId: 'filter-flask' }, 0, 100);
   assert.equal(filterFull.bandTop, 39);
