@@ -1,6 +1,6 @@
 import './styles.css';
 import { CanvasController } from './canvas/canvas-controller.js';
-import { getLiquidLayers as getSceneLiquidLayers, SceneStore } from './canvas/scene-store.js';
+import { getLiquidLayers as getSceneLiquidLayers, parseSvgAsset, SceneStore } from './canvas/scene-store.js';
 import { exportScene } from './export/exporter.js';
 import { createSceneStorage, parseScene, serializeScene } from './storage/scene-storage.js';
 import { createEquipmentUserStore } from './equipment/equipment-user-store.js';
@@ -30,6 +30,7 @@ const hoseWidthValue = document.querySelector('#hoseWidthValue');
 const liquidControls = document.querySelector('#liquidControls');
 const liquidLayers = document.querySelector('#liquidLayers');
 const addLiquidLayerButton = document.querySelector('#addLiquidLayer');
+const resetLiquidButton = document.querySelector('#resetLiquidLayers');
 const annotationControls = document.querySelector('#annotationControls');
 const annotationText = document.querySelector('#annotationText');
 const annotationColor = document.querySelector('#annotationColor');
@@ -96,8 +97,10 @@ const toggleMobilePanel = (panel) => {
 const sceneStore = new SceneStore(scene);
 const canvasController = new CanvasController(viewport, sceneStore);
 const sceneStorage = createSceneStorage({ endpoint: import.meta.env.VITE_SCENE_STORAGE_URL });
-const equipmentUserStore = createEquipmentUserStore();
+let equipmentUserStore = null;
 let autoSaveTimer = null;
+let editorRevision = 0;
+let isApplyingStoredScene = false;
 
 const getLiquidLayers = (object) => getSceneLiquidLayers(object?.liquid);
 
@@ -107,7 +110,10 @@ const createLiquidLayerCard = (index) => {
   card.dataset.liquidIndex = String(index);
   card.innerHTML = `
     <div class="liquid-layer-heading">
-      <strong>液層 ${index + 1}</strong>
+      <label class="liquid-layer-visibility">
+        <input data-liquid-visibility type="checkbox" checked />
+        <strong>液層 ${index + 1}</strong>
+      </label>
       <button class="layer-action" type="button" data-action="remove-liquid-layer" aria-label="移除液層">×</button>
     </div>
     <label class="property-control">
@@ -135,6 +141,10 @@ const createLiquidLayerCard = (index) => {
     card.querySelector('[data-liquid-opacity-value]').textContent = `${event.target.value}%`;
     updateSelectedLiquidLayer(index, { opacity: Number(event.target.value) / 100 });
   });
+  card.querySelector('[data-liquid-visibility]').addEventListener('change', (event) => {
+    card.classList.toggle('is-hidden', !event.target.checked);
+    updateSelectedLiquidLayer(index, { visible: event.target.checked });
+  });
   card.querySelector('[data-action="remove-liquid-layer"]').addEventListener('click', () => {
     const object = sceneStore.selectedObjects[0];
     if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
@@ -146,7 +156,7 @@ const createLiquidLayerCard = (index) => {
 };
 
 const renderLiquidLayerControls = (object) => {
-  if (object?.type !== 'svg') {
+  if (object?.type !== 'svg' || object.supportsLiquid !== true) {
     liquidLayers.replaceChildren();
     return;
   }
@@ -165,6 +175,8 @@ const renderLiquidLayerControls = (object) => {
     card.querySelector('[data-liquid-color]').value = layer.color;
     card.querySelector('[data-liquid-opacity]').value = String(Math.round(layer.opacity * 100));
     card.querySelector('[data-liquid-opacity-value]').textContent = `${Math.round(layer.opacity * 100)}%`;
+    card.querySelector('[data-liquid-visibility]').checked = layer.visible;
+    card.classList.toggle('is-hidden', !layer.visible);
     card.querySelector('[data-action="remove-liquid-layer"]').disabled = layers.length <= 1;
   });
 };
@@ -191,7 +203,11 @@ const updateSelectionPanel = ({ selectedObjects }) => {
   propertySelectionState.hidden = !hasSelection;
   hoseControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
   hoseStyleControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'hose');
-  liquidControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'svg');
+  liquidControls.hidden = !(
+    selectedCount === 1
+    && selectedObjects[0]?.type === 'svg'
+    && selectedObjects[0]?.supportsLiquid === true
+  );
   annotationControls.hidden = !(selectedCount === 1 && selectedObjects[0]?.type === 'annotation');
   objectLayerCount.textContent = `${sceneStore.objects.length} 個物件`;
   renderLiquidLayerControls(selectedObjects[0]);
@@ -245,6 +261,9 @@ const equipmentMetadata = (item) => ({
   name: item.name,
   category: item.category,
   equipmentType: item.equipmentType,
+  supportsLiquid: item.supportsLiquid === true,
+  liquidVessel: item.liquidVessel,
+  snapPoints: item.snapPoints,
 });
 
 const userEquipmentCategories = [
@@ -262,24 +281,11 @@ const escapeHtml = (value) => String(value)
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#39;');
 
-const sanitizeEquipmentSvg = (svgText) => {
-  const parser = new DOMParser();
-  const document = parser.parseFromString(svgText, 'image/svg+xml');
-  const root = document.documentElement;
-  if (!root || root.nodeName.toLowerCase() !== 'svg' || document.querySelector('parsererror')) {
-    throw new Error('請提供有效的 SVG 圖形。');
-  }
-  document.querySelectorAll('script, foreignObject').forEach((node) => node.remove());
-  document.querySelectorAll('*').forEach((element) => {
-    [...element.attributes].forEach((attribute) => {
-      const name = attribute.name.toLowerCase();
-      const value = attribute.value.trim().toLowerCase();
-      const isUnsafeUrl = ['href', 'xlink:href', 'src'].includes(name) && value.startsWith('javascript:');
-      if (name.startsWith('on') || isUnsafeUrl) element.removeAttribute(attribute.name);
-    });
-  });
-  return new XMLSerializer().serializeToString(root);
-};
+const sanitizeEquipmentSvg = (svgText) => parseSvgAsset(svgText).markup;
+
+equipmentUserStore = createEquipmentUserStore(globalThis.localStorage, {
+  sanitizeSvg: sanitizeEquipmentSvg,
+});
 
 const addEquipmentToScene = (item, screenPoint = null) => {
   const metadata = equipmentMetadata(item);
@@ -559,6 +565,7 @@ const renderEquipmentList = () => {
 };
 
 canvasController.addEventListener('viewchange', (event) => {
+  if (!isApplyingStoredScene) editorRevision += 1;
   updateViewReadouts(event.detail);
 });
 
@@ -569,13 +576,14 @@ canvasController.addEventListener('snapchange', ({ detail }) => {
 });
 
 sceneStore.addEventListener('change', (event) => {
+  if (!isApplyingStoredScene) editorRevision += 1;
   updateSelectionPanel(event.detail);
   renderLayers();
   if (event.detail.performance) {
     const { lastDuration, objectCount, mode } = event.detail.performance;
     renderReadout.textContent = `渲染 ${lastDuration.toFixed(1)} ms · ${objectCount} 物件 · ${mode === 'partial' ? '局部' : '完整'}`;
   }
-  scheduleLocalAutosave();
+  if (!isApplyingStoredScene) scheduleLocalAutosave();
 });
 
 canvasController.addEventListener('historychange', (event) => {
@@ -732,7 +740,41 @@ const saveScene = async () => {
 };
 
 const loadSceneDocument = (sceneDocument) => {
-  canvasController.loadScene(sceneDocument, sceneDocument.view);
+  // Equipment SVGs are versioned by their catalog id. Refresh known catalog
+  // objects when opening an older scene so visual fixes apply without making
+  // users delete and re-add every apparatus.
+  const migratedScene = {
+    ...sceneDocument,
+    objects: sceneDocument.objects.flatMap((object) => {
+      if (object.type !== 'svg') return [object];
+      const equipment = object.sourceId
+        ? getAllEquipment().find((item) => item.id === object.sourceId)
+        : null;
+      if (equipment) {
+        return [{
+          ...object,
+          svgMarkup: equipment.svg,
+          name: equipment.name,
+          category: equipment.category,
+          equipmentType: equipment.equipmentType,
+          supportsLiquid: equipment.supportsLiquid === true,
+          liquidVessel: equipment.liquidVessel,
+          snapPoints: equipment.snapPoints,
+        }];
+      }
+      try {
+        return [{
+          ...object,
+          svgMarkup: parseSvgAsset(object.svgMarkup).markup,
+          supportsLiquid: object.supportsLiquid === true && Boolean(object.liquidVessel),
+          snapPoints: Array.isArray(object.snapPoints) ? object.snapPoints : [],
+        }];
+      } catch {
+        return [];
+      }
+    }),
+  };
+  canvasController.loadScene(migratedScene, migratedScene.view);
   canvasHint.textContent = '場景已開啟。';
 };
 
@@ -776,7 +818,7 @@ customEquipmentForm.addEventListener('submit', (event) => {
     const item = equipmentUserStore.addCustom({
       name: customEquipmentName.value.trim(),
       description: customEquipmentDescription.value.trim() || '自訂實驗器材',
-      svg: sanitizeEquipmentSvg(customEquipmentSvg.value),
+      svg: customEquipmentSvg.value,
     });
     customEquipmentDialog.close();
     activeEquipmentCategory = 'custom';
@@ -795,6 +837,14 @@ const updateSelectedLiquidLayer = (layerIndex, patch) => {
   sceneStore.updateLiquid(object.id, patch, layerIndex);
   canvasController.recordHistory(before);
 };
+
+resetLiquidButton.addEventListener('click', () => {
+  const object = sceneStore.selectedObjects[0];
+  if (sceneStore.selectedObjects.length !== 1 || object?.type !== 'svg') return;
+  const before = sceneStore.snapshot();
+  sceneStore.resetLiquid(object.id);
+  canvasController.recordHistory(before);
+});
 
 addLiquidLayerButton.addEventListener('click', () => {
   const object = sceneStore.selectedObjects[0];
@@ -958,8 +1008,15 @@ renderEquipmentCategories();
 renderEquipmentList();
 renderLayers();
 
+const initialLoadRevision = editorRevision;
 sceneStorage.load().then((savedScene) => {
-  if (savedScene) loadSceneDocument(savedScene);
+  if (!savedScene || editorRevision !== initialLoadRevision) return;
+  isApplyingStoredScene = true;
+  try {
+    loadSceneDocument(savedScene);
+  } finally {
+    isApplyingStoredScene = false;
+  }
 }).catch(() => {
   // A missing or unavailable autosave should not prevent the editor from opening.
 });

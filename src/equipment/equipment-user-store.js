@@ -11,15 +11,49 @@ const safeStorage = (storage) => ({
 
 const makeId = () => `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export const createEquipmentUserStore = (storage = globalThis.localStorage) => {
+const normalizeIdList = (value) => (
+  Array.isArray(value) ? [...new Set(value.filter((id) => typeof id === 'string' && id.length <= 200))] : []
+);
+
+const normalizeCustomEquipment = (item, sanitizeSvg) => {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+  const id = typeof item.id === 'string' && item.id ? item.id.slice(0, 200) : makeId();
+  const name = typeof item.name === 'string' ? item.name.trim().slice(0, 80) : '';
+  const description = typeof item.description === 'string'
+    ? item.description.trim().slice(0, 240)
+    : '自訂實驗器材';
+  if (!name || typeof item.svg !== 'string' || !item.svg.trim() || item.svg.length > 2_000_000) return null;
+
+  try {
+    return {
+      id,
+      name,
+      description: description || '自訂實驗器材',
+      svg: sanitizeSvg(item.svg),
+      category: 'custom',
+      equipmentType: typeof item.equipmentType === 'string' ? item.equipmentType.slice(0, 80) : undefined,
+      supportsLiquid: false,
+      snapPoints: [],
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const createEquipmentUserStore = (
+  storage = globalThis.localStorage,
+  { sanitizeSvg = (svg) => svg } = {},
+) => {
   const api = safeStorage(storage);
   let state = { favorites: [], recent: [], custom: [] };
   try {
     const parsed = JSON.parse(api.getItem(STORAGE_KEY) ?? '{}');
     state = {
-      favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
-      recent: Array.isArray(parsed.recent) ? parsed.recent : [],
-      custom: Array.isArray(parsed.custom) ? parsed.custom : [],
+      favorites: normalizeIdList(parsed.favorites),
+      recent: normalizeIdList(parsed.recent).slice(0, 12),
+      custom: Array.isArray(parsed.custom)
+        ? parsed.custom.map((item) => normalizeCustomEquipment(item, sanitizeSvg)).filter(Boolean)
+        : [],
     };
   } catch {
     // Ignore malformed user preferences and use an empty state.
@@ -43,7 +77,8 @@ export const createEquipmentUserStore = (storage = globalThis.localStorage) => {
       persist();
     },
     addCustom(item) {
-      const custom = { ...item, id: item.id ?? makeId(), category: 'custom' };
+      const custom = normalizeCustomEquipment(item, sanitizeSvg);
+      if (!custom) throw new Error('自訂器材資料不完整。');
       state.custom = [custom, ...state.custom];
       persist();
       return custom;
@@ -56,4 +91,3 @@ export const createEquipmentUserStore = (storage = globalThis.localStorage) => {
     },
   };
 };
-

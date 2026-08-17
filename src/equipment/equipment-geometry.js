@@ -1,0 +1,80 @@
+const liquidVesselProfiles = {
+  beaker: { top: 21, bottom: 82, leftTop: 26, rightTop: 74, leftBottom: 36, rightBottom: 70 },
+  'erlenmeyer-flask': { top: 15, bottom: 87, leftTop: 40, rightTop: 60, leftBottom: 27, rightBottom: 73 },
+  'round-bottom-flask': { top: 14, bottom: 93, leftTop: 42, rightTop: 58, leftBottom: 25, rightBottom: 75 },
+  'flat-bottom-flask': { top: 13, bottom: 88, leftTop: 40, rightTop: 60, leftBottom: 26, rightBottom: 74 },
+  'volumetric-flask': { top: 13, bottom: 90, leftTop: 43, rightTop: 57, leftBottom: 24, rightBottom: 78 },
+  'filter-flask': { top: 13, bottom: 88, leftTop: 39, rightTop: 61, leftBottom: 26, rightBottom: 74 },
+  'test-tube': { top: 15, bottom: 79, leftTop: 38, rightTop: 62, leftBottom: 38, rightBottom: 62 },
+  'graduated-cylinder': { top: 13, bottom: 82, leftTop: 36, rightTop: 64, leftBottom: 36, rightBottom: 64 },
+  'dropping-funnel': { top: 18, bottom: 66, leftTop: 36, rightTop: 64, leftBottom: 43, rightBottom: 57 },
+  'separatory-funnel': { top: 18, bottom: 79, leftTop: 42, rightTop: 58, leftBottom: 34, rightBottom: 66 },
+  dropper: { top: 22, bottom: 74, leftTop: 43, rightTop: 57, leftBottom: 43, rightBottom: 57 },
+  pipette: { top: 14, bottom: 82, leftTop: 46, rightTop: 54, leftBottom: 46, rightBottom: 54 },
+  'volumetric-pipette': { top: 14, bottom: 79, leftTop: 46, rightTop: 54, leftBottom: 41, rightBottom: 59 },
+  'reagent-bottle': { top: 31, bottom: 88, leftTop: 31, rightTop: 69, leftBottom: 31, rightBottom: 69 },
+  'wide-mouth-bottle': { top: 35, bottom: 86, leftTop: 29, rightTop: 71, leftBottom: 29, rightBottom: 71 },
+  'wash-bottle': { top: 37, bottom: 89, leftTop: 29, rightTop: 71, leftBottom: 29, rightBottom: 71 },
+  'petri-dish': { top: 39, bottom: 79, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'evaporating-dish': { top: 39, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'watch-glass': { top: 34, bottom: 69, leftTop: 15, rightTop: 85, leftBottom: 15, rightBottom: 85 },
+  'surface-dish': { top: 32, bottom: 67, leftTop: 14, rightTop: 86, leftBottom: 14, rightBottom: 86 },
+  'crystallizing-dish': { top: 38, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
+  'water-tank': { top: 31, bottom: 85, leftTop: 20, rightTop: 80, leftBottom: 24, rightBottom: 76 },
+  'gas-jar': { top: 23, bottom: 88, leftTop: 31, rightTop: 69, leftBottom: 31, rightBottom: 69 },
+  'pneumatic-trough': { top: 38, bottom: 83, leftTop: 23, rightTop: 77, leftBottom: 29, rightBottom: 71 },
+};
+
+const snapPointProfiles = {
+  beaker: [[0, -0.58, 'top'], [0, 0.63, 'bottom']],
+  'erlenmeyer-flask': [[0, -0.7, 'top'], [0, 0.73, 'bottom']],
+  'round-bottom-flask': [[0, -0.72, 'top'], [0, 0.84, 'bottom']],
+  'flat-bottom-flask': [[0, -0.72, 'top'], [0, 0.73, 'bottom']],
+  'volumetric-flask': [[0, -0.73, 'top'], [0, 0.77, 'bottom']],
+  'filter-flask': [[0, -0.73, 'top'], [0.68, -0.42, 'right'], [0, 0.73, 'bottom']],
+  'test-tube': [[0, -0.7, 'top']],
+  'graduated-cylinder': [[0, -0.73, 'top']],
+  'test-tube-rack': [[0, -0.4, 'top']],
+  'u-tube': [[-0.42, -0.67, 'top'], [0.42, -0.67, 'top']],
+  funnel: [[0, -0.6, 'top'], [0, 0.58, 'bottom']],
+  'long-neck-funnel': [[0, -0.63, 'top'], [0, 0.72, 'bottom']],
+  'dropping-funnel': [[0, -0.62, 'top'], [0, 0.72, 'bottom']],
+  'separatory-funnel': [[0, -0.65, 'top'], [0, 0.75, 'bottom']],
+  dropper: [[0, -0.78, 'top'], [0, 0.67, 'bottom']],
+  pipette: [[0, -0.78, 'top'], [0, 0.72, 'bottom']],
+  'volumetric-pipette': [[0, -0.78, 'top'], [0, 0.7, 'bottom']],
+  'reagent-bottle': [[0, -0.67, 'top']],
+  'wide-mouth-bottle': [[0, -0.62, 'top']],
+  'wash-bottle': [[0.72, -0.62, 'right']],
+  condenser: [[0, -0.83, 'top'], [0, 0.83, 'bottom'], [-0.72, -0.38, 'left'], [0.72, 0.38, 'right']],
+  'retort-stand': [[0, -1, 'top'], [1, 0, 'right'], [-1, 0, 'left']],
+  'iron-ring': [[0, -1, 'top']],
+  tripod: [[0, -1, 'top']],
+  'universal-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
+  'flask-clamp': [[1, 0, 'right'], [-1, 0, 'left']],
+  'test-tube-holder': [[1, 0, 'right'], [-1, 0, 'left']],
+  'alcohol-lamp': [[0, -0.58, 'top']],
+  'bunsen-burner': [[0, -0.6, 'top']],
+  'glass-tubing': [[-0.55, 0.58, 'left'], [0.58, -0.58, 'right']],
+  'water-tank': [[0, -0.48, 'top']],
+  aspirator: [[0, -0.72, 'top'], [0.72, -0.12, 'right'], [0, 0.72, 'bottom']],
+  'gas-jar': [[0, -0.62, 'top']],
+};
+
+const cloneVessel = (vessel) => (vessel ? { ...vessel } : undefined);
+const cloneSnapPoints = (points) => (points ? points.map((point) => [...point]) : []);
+
+export const getLiquidVesselProfile = (equipmentId) => cloneVessel(liquidVesselProfiles[equipmentId]);
+
+export const getEquipmentSnapPointProfile = (equipmentId) => (
+  equipmentId ? cloneSnapPoints(snapPointProfiles[equipmentId]) : undefined
+);
+
+export const getEquipmentGeometry = (equipmentId) => {
+  const liquidVessel = getLiquidVesselProfile(equipmentId);
+  return {
+    supportsLiquid: Boolean(liquidVessel),
+    liquidVessel,
+    snapPoints: getEquipmentSnapPointProfile(equipmentId),
+  };
+};

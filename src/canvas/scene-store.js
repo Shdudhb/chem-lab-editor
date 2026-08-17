@@ -1,24 +1,9 @@
 import { getSnapPoints } from './snap-system.js';
+import { getLiquidVesselProfile } from '../equipment/equipment-geometry.js';
 
 const DEFAULT_WIDTH = 180;
 const DEFAULT_HEIGHT = 140;
 const MAX_IMPORT_SIZE = 220;
-const liquidVessels = {
-  beaker: { top: 21, bottom: 82, leftTop: 26, rightTop: 74, leftBottom: 36, rightBottom: 70 },
-  'erlenmeyer-flask': { top: 15, bottom: 87, leftTop: 40, rightTop: 60, leftBottom: 27, rightBottom: 73 },
-  'round-bottom-flask': { top: 14, bottom: 93, leftTop: 42, rightTop: 58, leftBottom: 25, rightBottom: 75 },
-  'flat-bottom-flask': { top: 13, bottom: 88, leftTop: 40, rightTop: 60, leftBottom: 26, rightBottom: 74 },
-  'volumetric-flask': { top: 13, bottom: 90, leftTop: 43, rightTop: 57, leftBottom: 24, rightBottom: 78 },
-  'filter-flask': { top: 13, bottom: 88, leftTop: 39, rightTop: 61, leftBottom: 26, rightBottom: 74 },
-  'test-tube': { top: 15, bottom: 79, leftTop: 38, rightTop: 62, leftBottom: 38, rightBottom: 62 },
-  'graduated-cylinder': { top: 13, bottom: 82, leftTop: 36, rightTop: 64, leftBottom: 36, rightBottom: 64 },
-  'petri-dish': { top: 39, bottom: 79, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
-  'evaporating-dish': { top: 39, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
-  'watch-glass': { top: 34, bottom: 69, leftTop: 15, rightTop: 85, leftBottom: 15, rightBottom: 85 },
-  'surface-dish': { top: 32, bottom: 67, leftTop: 14, rightTop: 86, leftBottom: 14, rightBottom: 86 },
-  'crystallizing-dish': { top: 38, bottom: 78, leftTop: 18, rightTop: 82, leftBottom: 18, rightBottom: 82 },
-};
-
 const defaultLiquidVessel = {
   top: 12,
   bottom: 88,
@@ -31,24 +16,80 @@ const defaultLiquidVessel = {
 const clampPercent = (value) => Math.min(100, Math.max(0, value));
 const interpolatePercent = (start, end, ratio) => start + (end - start) * ratio;
 
-const getLiquidBandClipPath = (vessel, bandTop, bandBottom) => {
-  const height = Math.max(1, vessel.bottom - vessel.top);
-  const ratio = (value) => clampPercent((value - vessel.top) / height);
-  const leftAt = (value) => interpolatePercent(vessel.leftTop, vessel.leftBottom, ratio(value));
-  const rightAt = (value) => interpolatePercent(vessel.rightTop, vessel.rightBottom, ratio(value));
-  return `polygon(${leftAt(bandTop)}% 0%, ${rightAt(bandTop)}% 0%, ${rightAt(bandBottom)}% 100%, ${leftAt(bandBottom)}% 100%)`;
+const normalizeLiquidVessel = (vessel = defaultLiquidVessel) => {
+  const percentOr = (value, fallback) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? clampPercent(number) : fallback;
+  };
+  const top = percentOr(vessel.top, defaultLiquidVessel.top);
+  const bottom = Math.max(top + 1, percentOr(vessel.bottom, defaultLiquidVessel.bottom));
+  return {
+    top,
+    bottom: Math.min(100, bottom),
+    leftTop: percentOr(vessel.leftTop, defaultLiquidVessel.leftTop),
+    rightTop: percentOr(vessel.rightTop, defaultLiquidVessel.rightTop),
+    leftBottom: percentOr(vessel.leftBottom, defaultLiquidVessel.leftBottom),
+    rightBottom: percentOr(vessel.rightBottom, defaultLiquidVessel.rightBottom),
+  };
 };
 
-const DEFAULT_LIQUID_LAYER = {
+export const getLiquidVessel = (sourceId, customVessel) => normalizeLiquidVessel(
+  customVessel ?? getLiquidVesselProfile(sourceId) ?? defaultLiquidVessel,
+);
+
+const getLiquidBandGeometry = (vessel, layerOffset, layerLevel) => {
+  const normalizedVessel = normalizeLiquidVessel(vessel);
+  const availableHeight = Math.max(1, normalizedVessel.bottom - normalizedVessel.top);
+  const layerHeight = Math.min(
+    clampPercent(Number(layerLevel)),
+    Math.max(0, 100 - clampPercent(Number(layerOffset))),
+  );
+  if (layerHeight <= 0) return null;
+
+  const bandBottom = normalizedVessel.bottom - (availableHeight * clampPercent(Number(layerOffset))) / 100;
+  const bandTop = bandBottom - (availableHeight * layerHeight) / 100;
+  const height = Math.max(1, normalizedVessel.bottom - normalizedVessel.top);
+  const ratio = (value) => clampPercent((value - normalizedVessel.top) / height);
+  const leftAt = (value) => interpolatePercent(normalizedVessel.leftTop, normalizedVessel.leftBottom, ratio(value));
+  const rightAt = (value) => interpolatePercent(normalizedVessel.rightTop, normalizedVessel.rightBottom, ratio(value));
+  return {
+    layerHeight,
+    bandTop,
+    bandBottom,
+    leftTop: leftAt(bandTop),
+    rightTop: rightAt(bandTop),
+    leftBottom: leftAt(bandBottom),
+    rightBottom: rightAt(bandBottom),
+  };
+};
+
+export const getLiquidBandGeometryForObject = (object, layerOffset, layerLevel) => (
+  getLiquidBandGeometry(
+    getLiquidVessel(object?.sourceId, object?.liquidVessel),
+    layerOffset,
+    layerLevel,
+  )
+);
+
+const getLiquidBandClipPath = (geometry) => {
+  if (!geometry) return '';
+  return `polygon(${geometry.leftTop}% 0%, ${geometry.rightTop}% 0%, ${geometry.rightBottom}% 100%, ${geometry.leftBottom}% 100%)`;
+};
+
+export const DEFAULT_LIQUID_LAYER = Object.freeze({
   level: 0,
   color: '#67aee8',
   opacity: 0.72,
-};
+  visible: true,
+});
 
 const normalizeLiquidLayer = (layer = {}) => ({
   level: Math.min(100, Math.max(0, Number(layer.level) || 0)),
   color: /^#[0-9a-f]{6}$/i.test(layer.color ?? '') ? layer.color : DEFAULT_LIQUID_LAYER.color,
-  opacity: Math.min(1, Math.max(0, Number(layer.opacity) || 0)),
+  opacity: layer.opacity === undefined || !Number.isFinite(Number(layer.opacity))
+    ? DEFAULT_LIQUID_LAYER.opacity
+    : Math.min(1, Math.max(0, Number(layer.opacity))),
+  visible: layer.visible !== false,
 });
 
 const normalizeLiquidLayers = (layers) => {
@@ -280,19 +321,22 @@ const rotatePoint = (point, degrees) => {
 };
 
 const sanitizeSvgDocument = (document) => {
-  document.querySelectorAll('script, foreignObject').forEach((node) => node.remove());
+  document.querySelectorAll('script, style, foreignObject, iframe, object, embed, audio, video').forEach((node) => node.remove());
 
   document.querySelectorAll('*').forEach((element) => {
     [...element.attributes].forEach((attribute) => {
       const attributeName = attribute.name.toLowerCase();
       const attributeValue = attribute.value.trim().toLowerCase();
       const isEventHandler = attributeName.startsWith('on');
-      const isJavascriptUrl = (
-        ['href', 'xlink:href', 'src'].includes(attributeName)
-        && attributeValue.startsWith('javascript:')
-      );
+      const isExternalUrl = ['href', 'xlink:href', 'src'].includes(attributeName)
+        && !attributeValue.startsWith('#');
+      const isExternalPaint = ['fill', 'stroke', 'filter', 'clip-path', 'mask', 'marker-start', 'marker-mid', 'marker-end']
+        .includes(attributeName)
+        && attributeValue.includes('url(')
+        && !/^url\(\s*['"]?#[-\w:.]+['"]?\s*\)$/i.test(attributeValue);
+      const isInlineStyle = attributeName === 'style';
 
-      if (isEventHandler || isJavascriptUrl) {
+      if (isEventHandler || isExternalUrl || isExternalPaint || isInlineStyle) {
         element.removeAttribute(attribute.name);
       }
     });
@@ -612,7 +656,7 @@ export class SceneStore extends EventTarget {
 
   updateLiquid(id, liquid, layerIndex = 0) {
     const object = this.getObject(id);
-    if (!object || object.type !== 'svg') return;
+    if (!object || object.type !== 'svg' || object.supportsLiquid !== true) return;
     const layers = getLiquidLayers(object.liquid);
     const index = Math.min(layers.length - 1, Math.max(0, Number(layerIndex) || 0));
     layers[index] = normalizeLiquidLayer({ ...layers[index], ...liquid });
@@ -621,9 +665,21 @@ export class SceneStore extends EventTarget {
     this.notify();
   }
 
+  setLiquidVisibility(id, visible, layerIndex = 0) {
+    this.updateLiquid(id, { visible: Boolean(visible) }, layerIndex);
+  }
+
+  resetLiquid(id) {
+    const object = this.getObject(id);
+    if (!object || object.type !== 'svg' || object.supportsLiquid !== true) return;
+    object.liquid = { layers: [{ ...DEFAULT_LIQUID_LAYER }] };
+    this.render();
+    this.notify();
+  }
+
   addLiquidLayer(id, layer = {}) {
     const object = this.getObject(id);
-    if (!object || object.type !== 'svg') return;
+    if (!object || object.type !== 'svg' || object.supportsLiquid !== true) return;
     const layers = getLiquidLayers(object.liquid);
     layers.push(normalizeLiquidLayer({
       level: 20,
@@ -638,7 +694,7 @@ export class SceneStore extends EventTarget {
 
   removeLiquidLayer(id, layerIndex) {
     const object = this.getObject(id);
-    if (!object || object.type !== 'svg') return;
+    if (!object || object.type !== 'svg' || object.supportsLiquid !== true) return;
     const layers = getLiquidLayers(object.liquid);
     if (layers.length <= 1) return;
     const index = Number(layerIndex);
@@ -906,27 +962,28 @@ export class SceneStore extends EventTarget {
         if (svg?.nodeName.toLowerCase() === 'svg') {
           wrapper.appendChild(document.importNode(svg, true));
         }
-        const vessel = liquidVessels[object.sourceId] ?? defaultLiquidVessel;
-        const availableHeight = Math.max(1, vessel.bottom - vessel.top);
-        let liquidOffset = 0;
-        getLiquidLayers(object.liquid).forEach((layer, layerIndex) => {
-          const layerHeight = Math.min(layer.level, 100 - liquidOffset);
-          if (layerHeight <= 0) return;
-          const bandBottom = vessel.bottom - (availableHeight * liquidOffset) / 100;
-          const bandTop = bandBottom - (availableHeight * layerHeight) / 100;
-          const liquid = document.createElement('span');
-          liquid.className = 'liquid-overlay';
-          liquid.style.height = `${Math.max(0, bandBottom - bandTop)}%`;
-          liquid.style.bottom = `${Math.max(0, 100 - bandBottom)}%`;
-          liquid.style.background = layer.color;
-          liquid.style.opacity = String(layer.opacity);
-          liquid.style.zIndex = String(layerIndex + 1);
-          const clipPath = getLiquidBandClipPath(vessel, bandTop, bandBottom);
-          liquid.style.clipPath = clipPath;
-          liquid.style.webkitClipPath = clipPath;
-          wrapper.appendChild(liquid);
-          liquidOffset += layerHeight;
-        });
+        if (object.supportsLiquid === true) {
+          const vessel = getLiquidVessel(object.sourceId, object.liquidVessel);
+          let liquidOffset = 0;
+          getLiquidLayers(object.liquid).forEach((layer, layerIndex) => {
+            const geometry = getLiquidBandGeometry(vessel, liquidOffset, layer.level);
+            if (!geometry) return;
+            liquidOffset += geometry.layerHeight;
+            if (!layer.visible) return;
+            const liquid = document.createElement('span');
+            liquid.className = 'liquid-overlay';
+            liquid.dataset.liquidLayer = String(layerIndex);
+            liquid.style.height = `${geometry.bandBottom - geometry.bandTop}%`;
+            liquid.style.bottom = `${Math.max(0, 100 - geometry.bandBottom)}%`;
+            liquid.style.background = layer.color;
+            liquid.style.opacity = String(layer.opacity);
+            liquid.style.zIndex = String(layerIndex + 1);
+            const clipPath = getLiquidBandClipPath(geometry);
+            liquid.style.clipPath = clipPath;
+            liquid.style.webkitClipPath = clipPath;
+            wrapper.appendChild(liquid);
+          });
+        }
       }
 
       this.scene.appendChild(wrapper);
