@@ -286,8 +286,8 @@ const models = {
     <path d="M82 38c4-10 13-20 21-20 5 7-5 18-15 24zM30 94 16 104l7 7 12-13z"/>
   `,
   tweezers: `
-    <path d="M27 20 58 88v15M93 20 62 88v15M27 20h12M81 20h12M40 38h40"/>
-    <path stroke="${metal}" stroke-width="3" d="M34 27 60 86 86 27"/>
+    <path stroke-width="7" d="M91 19 26 91c-10 11 4 24 15 14l63-64"/>
+    <path stroke="${metal}" stroke-width="3" d="M91 19 26 91c-10 11 4 24 15 14l63-64"/>
   `,
   'electronic-balance': `
     <path fill="${metal}" fill-opacity=".16" d="M24 45h72l9 53H15z"/>

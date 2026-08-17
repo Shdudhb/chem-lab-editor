@@ -466,6 +466,14 @@ test('catalog equipment has unique models for visually different apparatus', () 
   assert.deepEqual(getSnapPoints({
     sourceId: 'spatula', x: 0, y: 0, width: 120, height: 120,
   }), []);
+
+  const tweezers = getEquipmentById('tweezers');
+  assert.match(tweezers.svg, /stroke-width="7" d="M91 19 26 91c-10 11 4 24 15 14l63-64"/);
+  assert.match(tweezers.svg, /stroke="#667078" stroke-width="3" d="M91 19 26 91/);
+  assert.doesNotMatch(tweezers.svg, /M27 20 58 88v15|M40 38h40|M34 27 60 86 86 27/);
+  assert.deepEqual(getSnapPoints({
+    sourceId: 'tweezers', x: 0, y: 0, width: 120, height: 120,
+  }), []);
 });
 
 test('all 52 catalog apparatus use the shared Chemix-style SVG convention', () => {
